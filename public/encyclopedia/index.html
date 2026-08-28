@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enemy Encyclopedia — Stickman Action</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b1016;
+      --surface: rgba(16,20,26,0.92);
+      --surface2: #1c2128;
+      --border: rgba(255,255,255,0.12);
+      --accent: #4fc3f7;
+      --text: #f0f0f0;
+      --muted: #8a94a0;
+    }
+    body { font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif; background: radial-gradient(ellipse at 50% 0%, #14202b 0%, var(--bg) 55%, #06090c 100%); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Header */
+    header { padding: 12px 24px; background: linear-gradient(160deg, rgba(16,20,26,0.9), rgba(8,10,14,0.85)); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-shrink: 0; box-shadow: 0 4px 18px rgba(0,0,0,0.35); }
+    header h1 { font-size: 21px; color: var(--accent); letter-spacing: 3px; text-shadow: 0 0 16px rgba(79,195,247,0.45); }
+    header .subtitle { font-size: 12px; color: var(--muted); margin-top: 1px; letter-spacing: 1.5px; }
+    .header-btn { padding: 7px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 1px; cursor: pointer; text-decoration: none; transition: filter 0.15s, transform 0.1s, box-shadow 0.15s; }
+    .header-btn:hover { filter: brightness(1.35); box-shadow: 0 0 14px rgba(79,195,247,0.25); }
+    .header-btn:active { transform: scale(0.96); }
+    .search-box { margin-left: auto; padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; width: 210px; transition: border-color 0.15s, box-shadow 0.15s; }
+    .search-box:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(79,195,247,0.25); }
+
+    /* Layout — every container is overflow:hidden so heights propagate down
+       the flex chain. Only .info-panel scrolls (the text side), never any
+       ancestor, so the viewer panel always has a measurable clientHeight. */
+    .layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; background: rgba(10,13,18,0.75); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; padding: 8px 0; backdrop-filter: blur(4px); }
+    .sidebar-section { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; padding: 14px 14px 6px; font-weight: 700; }
+    .sidebar-section .count { opacity: 0.55; font-weight: 600; }
+    .enemy-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 14px; background: none; border: none; color: var(--text); cursor: pointer; text-align: left; font-family: inherit; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; transition: background 0.12s, padding-left 0.12s; }
+    .enemy-btn:hover { background: rgba(255,255,255,0.05); padding-left: 17px; }
+    .enemy-btn.active { background: rgba(79,195,247,0.1); border-left-color: var(--accent); color: var(--accent); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
+
+    /* Main content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .content { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+    .viewer-panel { width: 340px; flex-shrink: 0; background: radial-gradient(ellipse at 50% 35%, #17222d 0%, #0b1016 75%); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+    #viewer-canvas { width: 100%; flex: 1; display: block; min-height: 0; }
+    .viewer-controls-hint { flex-shrink: 0; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); background: rgba(8,10,14,0.6); }
+    .viewer-controls-hint label { display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--muted); white-space: nowrap; }
+    .info-panel { flex: 1; padding: 28px 32px; overflow-y: auto; }
+    .info-panel.fade-in { animation: fade-in 0.3s ease-out; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .enemy-name { font-size: 30px; font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; text-shadow: 0 0 22px currentColor; }
+    .enemy-type-badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 6px 18px 0; }
+    .badge-basic { background: rgba(139,195,74,0.16); color: #aed581; border: 1px solid rgba(139,195,74,0.35); }
+    .badge-special { background: rgba(239,83,80,0.16); color: #ef9a9a; border: 1px solid rgba(239,83,80,0.35); }
+    .badge-rare { background: rgba(255,167,38,0.16); color: #ffcc80; border: 1px solid rgba(255,167,38,0.35); }
+    .badge-clear { background: rgba(208,238,255,0.1); color: #d0eeff; border: 1px solid rgba(208,238,255,0.3); }
+    .badge-arena { background: rgba(255,138,101,0.14); color: #ff8a65; border: 1px solid rgba(255,138,101,0.35); }
+    .badge-neutral { background: rgba(197,225,165,0.12); color: #c5e1a5; border: 1px solid rgba(197,225,165,0.3); }
+    .badge-spawn { background: rgba(79,195,247,0.12); color: #90d8fa; border: 1px solid rgba(79,195,247,0.3); }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+    .stat-card { background: linear-gradient(165deg, var(--surface2), #14181e); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+    .stat-card:hover { transform: translateY(-2px); border-color: rgba(79,195,247,0.4); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; font-weight: 700; }
+    .stat-value { font-size: 22px; font-weight: 700; }
+    .stat-bar { height: 5px; border-radius: 3px; margin-top: 7px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
+    .stat-fill { height: 100%; border-radius: 2px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
+
+    /* Abilities */
+    h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; font-weight: 700; }
+    .abilities { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+    .ability-tag { padding: 5px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; border: 1px solid; }
+    .description { font-size: 15px; line-height: 1.7; color: #ccc; margin-bottom: 22px; }
+    .tips-list { list-style: none; }
+    .tips-list li { font-size: 14px; color: #bbb; padding: 7px 0 7px 20px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .tips-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .tips-list li:last-child { border-bottom: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); }
+    ::-webkit-scrollbar-thumb { background: rgba(79,195,247,0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(79,195,247,0.5); }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>ENEMY ENCYCLOPEDIA</h1>
+      <div class="subtitle" id="header-subtitle">Stickman Action — All Enemies</div>
+    </div>
+    <button class="header-btn" id="random-btn" title="Jump to a random enemy">🎲 Random</button>
+    <input class="search-box" type="text" placeholder="Search enemies… ( / )" id="search" />
+  </header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <!-- .content is the horizontal split the CSS expects: without it the
+           viewer and info panel stack vertically and the canvas collapses. -->
+      <div class="content">
+        <div class="viewer-panel">
+          <canvas id="viewer-canvas"></canvas>
+          <div class="viewer-controls-hint">
+            <span>Drag rotate · Scroll zoom · Right-drag pan</span>
+            <label><input type="checkbox" id="auto-rotate" checked /> Auto-spin</label>
+          </div>
+        </div>
+        <div class="info-panel" id="info-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- importmap lets the jsm files resolve bare 'three' to our local copy -->
+  <script type="importmap">
+  { "imports": { "three": "./three.module.min.js" } }
+  </script>
+  <script type="module">
+import * as THREE from './three.module.min.js';
+import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+import { clone as skeletonClone } from './jsm/utils/SkeletonUtils.js';
+// ── Enemy data (derived from enemyConfig.ts) ──────────────────────────────
+const ENEMIES = [
+  // --- Dummies -------------------------------------------------------------
+  {
+    id: 'normalDummy', label: 'Normal Dummy', color: '#c2b280', tier: 'basic',
+    hp: 10, speed: 'None (stationary)', punchDmg: 0, kickDmg: 0, specials: [],
+    description: 'A passive practice target — it just stands there and takes hits. Killing one permanently grants +1 max HP, making it well worth hunting down every time you see one.',
+    traits: ['Stationary', 'No attacks', '+1 max HP on kill'],
+    tips: ['Hit it with kicks for fast clears — 2 damage per kick means 5 kicks finishes it.', 'They respawn elsewhere when killed; check the minimap for a new dot.', 'Priority farming target early game: free health with zero risk.'],
+    bodyScale: 1
+  },
+  {
+    id: 'punchDummy', label: 'Punch Dummy', color: '#c2b280', tier: 'basic',
+    hp: 10, speed: 'None (stationary)', punchDmg: 1, kickDmg: 0, specials: ['Punch only', '+1 DMG on kill'],
+    description: 'An attack dummy that throws punches. Stationary but will hit back if you stand in melee range. Killing one permanently increases your punch and kick damage by +1.',
+    traits: ['Stationary', 'Punch only', '+1 DMG on kill'],
+    tips: ['Approach from a kick range — it can\'t punch that far.', 'Strafe sideways after baiting its punch to avoid the hit.', 'Worth killing even if you take a hit; the +1 DMG pays off quickly.'],
+    bodyScale: 1
+  },
+  {
+    id: 'kickDummy', label: 'Kick Dummy', color: '#c2b280', tier: 'basic',
+    hp: 10, speed: 'None (stationary)', punchDmg: 0, kickDmg: 2, specials: ['Kick only (AOE)', '+1 DMG on kill'],
+    description: 'An attack dummy that sweeps with a kick, hitting any player in its AOE radius. Stationary but dangerous up close. Killing one permanently increases your punch and kick damage by +1.',
+    traits: ['Stationary', 'Kick only (AOE sweep)', '+1 DMG on kill'],
+    tips: ['Its kick has AOE; don\'t approach if other enemies are nearby.', 'Punching it from outside kick range is completely safe.', 'Same reward as the Punch Dummy: always worth the fight for the +1 DMG.'],
+    bodyScale: 1
+  },
+  {
+    id: 'runningMan', label: 'Running Man', color: '#6d4c41', tier: 'basic',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: [],
+    description: 'Your standard melee opponent. Closes the distance and throws both punches and kicks. No special abilities — just persistence.',
+    traits: ['Punch + Kick', 'Chases player'],
+    tips: ['Roll through their attack window, counter immediately.', 'They respawn elsewhere when killed — clear camps fast.', 'Groups are more dangerous than individuals; thin the herd with kicks.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'punchMan', label: 'Punch Man', color: '#546e7a', tier: 'basic',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 0, specials: ['Punch only (no kick)'],
+    description: 'Exclusively a puncher — tight footwork and repetitive jabs. Because it skips the kick animation you get fewer openings, but its punch is no stronger than a regular grunt.',
+    traits: ['Punch only', 'No kick'],
+    tips: ['Kick range is longer than punch range — use it.', 'Easier to bait because it only has one attack type.', 'Its punch deals 1 DMG; a single kick counter deals 2 DMG — trade is always in your favour.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'kickMan', label: 'Kick Man', color: '#8d6e63', tier: 'basic',
+    hp: 10, speed: 'Normal', punchDmg: 0, kickDmg: 2, specials: ['Kick only (no punch)', 'AOE sweep'],
+    description: 'Relies entirely on kicks, which have a wide sweep and deal area-of-effect damage. More dangerous in groups than the standard melee grunt.',
+    traits: ['Kick only', 'AOE sweep radius'],
+    tips: ['If multiple Kick Men are nearby, do not let them cluster — their sweeps can hit you simultaneously.', 'Punch them from range before closing — they can\'t punch back.', 'Dodge sideways rather than backing up; kicks track forward movement well.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'greyMan', label: 'Grey Man', color: '#9e9e9e', tier: 'basic',
+    hp: 10, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Ranged projectile (grey)', 'Flees at 30% HP'],
+    description: 'The only common enemy that never comes to you. It keeps its distance, kites backward when you close, and fires grey projectiles every 3 seconds. Retreats when badly hurt.',
+    traits: ['No melee', 'Ranged kite', 'Flees below 30% HP'],
+    tips: ['Sprint directly at it in a curved path to avoid the projectile arcs.', 'After it starts fleeing, it\'s nearly harmless — prioritize actual threats first.', 'Cornering it against a wall stops the kiting; walls are your biggest advantage.'],
+    bodyScale: 1, weightMod: 0
+  },
+  // ─── Rare naturally-spawning variants ────────────────────────────────
+  {
+    id: 'giantMan', label: 'Giant Man', color: '#3e2723', tier: 'rare',
+    hp: 20, speed: '60% normal', punchDmg: 2, kickDmg: 4, specials: ['2× damage', '1.8× collision radius'],
+    description: 'A towering version of the standard melee stickman — 1.8× the normal scale. Slower and clumsier, but each hit hurts twice as much and its collision radius means you can\'t squeeze past it easily.',
+    traits: ['1.8× size', '2× HP & DMG', '60% speed', 'Large collision'],
+    tips: ['Stay diagonal — its size makes it easy to hit but also easy to misjudge the melee radius.', 'Kick spam works well; the AOE sweep can stagger it repeatedly.', 'Its slow speed makes it easy to kite; just don\'t let it corner you.'],
+    bodyScale: 1.8
+  },
+  {
+    id: 'babyMan', label: 'Baby Man', color: '#80deea', tier: 'rare',
+    hp: 6.5, speed: '180% normal (very fast)', punchDmg: 0.65, kickDmg: 1.3, specials: ['Tiny hitbox', '1.8× attack speed'],
+    description: 'A pint-sized, hyperactive variant that moves and attacks nearly twice as fast as normal. Low health and damage, but its speed makes it easy to whiff attacks and get poked repeatedly.',
+    traits: ['0.6× size', '65% HP & DMG', '1.8× speed', 'Small hitbox'],
+    tips: ['Lead your attacks — because it moves so fast it often runs into your swing.', 'A single well-timed kick is usually enough to kill it.', 'Do not try to chase it; hold position and let it come to you.'],
+    bodyScale: 0.6,
+    bodySliders: {
+      headSize: 1.5,
+      boneOverrides: {
+        'mixamorigLeftUpLeg':  [1, 0.65, 1], 'mixamorigRightUpLeg': [1, 0.65, 1],
+        'mixamorigLeftLeg':    [1, 0.65, 1], 'mixamorigRightLeg':   [1, 0.65, 1],
+        'mixamorigLeftArm':    [1, 0.60, 1], 'mixamorigRightArm':   [1, 0.60, 1],
+        'mixamorigLeftForeArm':[1, 0.60, 1], 'mixamorigRightForeArm':[1, 0.60, 1]
+      }
+    }
+  },
+  {
+    id: 'tallMan', label: 'Tall Man', color: '#455a64', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 3, specials: ['1.5× kick damage'],
+    description: 'Bone-morphed to be significantly taller than a normal enemy — elongated legs give it a devastating 1.5× kick damage. Punch is standard.',
+    traits: ['Tall body shape', '1.5× kick DMG', 'Normal HP & speed'],
+    tips: ['Block the kick range by staying at punch-only distance.', 'Punching it is safer than trading kicks.', 'It still has the same HP as a common enemy — a few clean hits end the fight.'],
+    bodyScale: 1,
+    bodySliders: { height: 1.3, headSize: 0.82 }
+  },
+  {
+    id: 'fatMan', label: 'Fat Man', color: '#a1887f', tier: 'rare',
+    hp: 20, speed: '25% normal (very slow)', punchDmg: 1, kickDmg: 2, specials: ['2× HP', 'Very slow movement & attacks'],
+    description: 'Wide-bodied and extremely slow — it takes twice as many hits to put down, but its sluggishness means it rarely connects. High threat in corridors, harmless in open ground.',
+    traits: ['Wide body', '2× HP', '25% movement speed', '40% attack speed'],
+    tips: ['Circle it constantly; it can barely turn fast enough to track you.', 'Do not get cornered — its width fills corridors completely.', 'Prioritise faster enemies first; come back for the Fat Man when the crowd is thinned.'],
+    bodyScale: 1,
+    bodySliders: {
+      boneOverrides: {
+        // Slightly wider hips; compensate legs + spine so ONLY the belly shows the bulk.
+        'mixamorigHips':       [1.1,     1, 1.1    ],
+        'mixamorigLeftUpLeg':  [1/1.1,   1, 1/1.1  ],
+        'mixamorigRightUpLeg': [1/1.1,   1, 1/1.1  ],
+        'mixamorigSpine':      [1/1.1,   1, 1/1.1  ],
+        // Spine1 is the belly — scale it wide for the spherical gut.
+        'mixamorigSpine1':     [1.85,    1, 1.85   ],
+        // Compensate spine2 so arms and head stay normal.
+        'mixamorigSpine2':     [1/1.85,  1, 1/1.85 ]
+      }
+    }
+  },
+  {
+    id: 'skinnyMan', label: 'Skinny Man', color: '#b0bec5', tier: 'rare',
+    hp: 5, speed: 'Normal', punchDmg: 0.5, kickDmg: 1, specials: ['50% HP & DMG', 'Thin hitbox'],
+    description: 'An emaciated, fragile variant — half the health and half the damage of a standard enemy, with a noticeably thin collision silhouette.',
+    traits: ['Thin body', '50% HP & DMG', 'Small hitbox'],
+    tips: ['One kick kills it outright — don\'t waste more than a single swing.', 'Its narrow hitbox can be briefly disorienting; aim slightly centre.', 'They can appear in groups; each one is trivial but the pressure adds up.'],
+    bodyScale: 1,
+    bodySliders: {
+      boneOverrides: {
+        // Hips scaled more aggressively than torso (hips mesh is naturally
+        // wider), then torso/legs compensated back to the same thin width so
+        // hip visually matches chest — the compensation formula from prompt.json:
+        //   child_scale = 1/parent_scale  gives the child its own width.
+        'mixamorigHips':       [0.50,        1, 0.50       ],
+        'mixamorigSpine':      [0.65/0.50,   1, 0.65/0.50  ],  // effective 0.65
+        'mixamorigLeftUpLeg':  [0.65/0.50,   1, 0.65/0.50  ],  // effective 0.65
+        'mixamorigRightUpLeg': [0.65/0.50,   1, 0.65/0.50  ],
+        // Children of spine now all inherit 0.65 — thin body, matching hip width
+        'mixamorigLeftLeg':    [0.85, 1, 0.85],
+        'mixamorigRightLeg':   [0.85, 1, 0.85]
+      }
+    }
+  },
+  {
+    id: 'brainMan', label: 'Brain Man', color: '#ffab91', tier: 'rare',
+    hp: 8, speed: 'Normal', punchDmg: 0, kickDmg: 0, specials: ['Spawns melee enemy when player is close', 'Spawns ranged (grey) enemy when player is far', '8s spawn cooldown'],
+    description: 'Never attacks directly — instead it stands slightly apart from the fight and periodically spawns ordinary enemies near itself. Kill it fast or the reinforcements will overwhelm you.',
+    traits: ['No melee attacks', 'Spawner (8s cooldown)', 'Enlarged head', 'Stationary behaviour'],
+    tips: ['This is always your highest priority target. Ignoring it doubles the enemy count.', 'It spawns melee enemies when you\'re close and ranged enemies when you\'re far — close the gap immediately.', 'It has no attacks of its own; you can safely stand on top of it and punch freely.'],
+    bodyScale: 1,
+    bodySliders: { headSize: 1.4, height: 1.06 }
+  },
+  // "Normal feature" strong variants
+  {
+    id: 'strongRangedMan', label: 'Strong Ranged Man', color: '#37474f', tier: 'rare',
+    hp: 10, speed: 'Normal (kites)', punchDmg: 0, kickDmg: 0, specials: ['Fast projectile (1.25× DMG, 1.5× speed)', 'Ranged kite only'],
+    description: 'An upgraded Grey Man — same kiting behaviour but with noticeably faster, harder-hitting projectiles. More dangerous at range and harder to close on.',
+    traits: ['Ranged only', '1.25× projectile DMG', '1.5× projectile speed', 'Kites at range'],
+    tips: ['The faster projectiles are harder to sidestep — sprint at it immediately.', 'Behaves identically to Grey Man once cornered — same retreat at low HP.', 'Treat it as "Grey Man that punishes you harder for standing still."'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'strongKickMan', label: 'Strong Kick Man', color: '#795548', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 0, kickDmg: 3, specials: ['1.5× kick damage'],
+    description: 'An enhanced Kick Man with 1.5× kick damage. Same wide AOE sweep, same lack of a punch — but each sweep now hurts significantly more.',
+    traits: ['Kick only', '1.5× kick DMG', 'AOE sweep'],
+    tips: ['Punching from outside kick range is completely safe — it cannot answer.', 'Do not let it kick you twice in a fight; disengage immediately after eating a hit.', 'It\'s the same size as a normal Kick Man; use the same sidestep pattern.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'strongPunchMan', label: 'Strong Punch Man', color: '#78909c', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1.5, kickDmg: 0, specials: ['1.5× punch damage'],
+    description: 'An enhanced Punch Man. Same punch-only pattern as its common counterpart, but each jab deals 1.5× the normal damage.',
+    traits: ['Punch only', '1.5× punch DMG', 'No kick'],
+    tips: ['Kick it — it can\'t counter with its own kick.', 'Its punches are more dangerous now; do not trade hits.', 'Standard Punch Man strategy works; just respect the extra hurt.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'comboMan', label: 'Combo Man', color: '#bcaaa4', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Punch + Kick (same as running man)'],
+    description: 'Roster variety — functionally a standard all-rounder like the Running Man. No stat boost, no special ability; just another body in the rare spawn pool.',
+    traits: ['Punch + Kick', 'No special attacks'],
+    tips: ['Treat it exactly like a Running Man — there is no gimmick.', 'Because it\'s a "rare" slot, dealing with it quickly keeps the rare cap open for something more dangerous.', 'Bread-and-butter combat: strafe, bait, counter.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'strongComboMan', label: 'Strong Combo Man', color: '#5d4037', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1.5, kickDmg: 3, specials: ['1.5× punch & kick damage'],
+    description: 'A 1.5× damage upgrade to Combo Man — punches and kicks both hurt significantly more. No special abilities, but the raw damage output is notable.',
+    traits: ['Punch + Kick', '1.5× both damage types'],
+    tips: ['Its punches are now more threatening than a basic kick; respect both attacks.', 'Use blocking walls and roll-timing rather than straight trades.', 'Still dies to the same number of hits as any basic enemy — finish it fast.'],
+    bodyScale: 1, weightMod: 0
+  },
+  // ─── New special enemies (naturally spawning but special behaviour) ─────
+  {
+    id: 'medicMan', label: 'Medic', color: '#4caf50', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Heals nearby enemies every 5s (+2 HP each)', 'AoE heal radius 6m'],
+    description: 'A green field medic that periodically heals all nearby living enemies. Never a heavy threat in melee, but leaving it alive makes every surrounding enemy unkillable. Your highest priority kill in any mixed group.',
+    traits: ['AoE heal pulse (every 5s)', '+2 HP per nearby ally', '6m heal radius', 'Standard melee'],
+    tips: ['Sprint to it and kill it first before engaging any other enemy.', 'Standing in its heal radius works against you — its melee will push you into the healed pack.', 'Its own HP is normal; two kicks finish it even with a single trade.'],
+    bodyScale: 1
+  },
+  {
+    id: 'rageMan', label: 'Rage Enemy', color: '#ff5722', tier: 'rare',
+    hp: 10, speed: 'Normal (2× below 20% HP)', punchDmg: 1, kickDmg: 2, specials: ['Rage Mode below 20% HP: 2× speed, 2× damage'],
+    description: 'Appears unremarkable at full health, but crossing below 20% HP triggers a sudden rage: movement and damage both double. A near-death Rage Enemy is dramatically more dangerous than a healthy one.',
+    traits: ['Standard stats above 20% HP', '2× speed + 2× DMG below 20% HP', 'Orange/red rage aura'],
+    tips: ['Do not let it land hits at low HP — one enraged kick can end a fight.', 'Commit to the kill once it crosses the threshold; backing off just keeps it enraged longer.', 'Kite it during rage mode if you need space — its speed increase is real but it still has standard collision.'],
+    bodyScale: 1
+  },
+  {
+    id: 'shieldBearer', label: 'Shield Bearer', color: '#607d8b', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Blocks frontal punches (80% reduction)', 'Vulnerable to kicks'],
+    description: 'Carries a shield that dramatically reduces frontal punch damage. The shield does nothing against kicks — its entire defence is bypassed by a single sweep.',
+    traits: ['80% frontal punch resistance', 'Full kick damage taken', 'Standard melee'],
+    tips: ['Always kick, never punch.', 'Circling to its side or behind removes the shield bonus entirely.', 'Useful to know: its shield only works against punches — status-effect attacks (burns, ragdolls) are not blocked.'],
+    bodyScale: 1
+  },
+  {
+    id: 'bountyHunter', label: 'Bounty Hunter', color: '#7b1fa2', tier: 'rare',
+    hp: 15, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Spawns after 3 min survival', 'Copies player colour and stats', 'Only one per session'],
+    description: 'Appears after 3 continuous minutes of survival — it mirrors the player\'s colour and has stats that scale with the player\'s current power. A direct and personal challenge.',
+    traits: ['Spawns at 3 min mark', 'Mirrors player colour', 'Player-scaled stats', 'One per session'],
+    tips: ['It has your current power level; don\'t underestimate it if you\'ve been upgrading heavily.', 'Kill it before engaging large groups — it is intelligent enough to exploit chaos.', 'It scales with your strength, so killing it earlier (closer to the 3-min mark) is easier than later.'],
+    bodyScale: 1
+  },
+  {
+    id: 'sniperMan', label: 'Sniper Man', color: '#4e342e', tier: 'rare',
+    hp: 8, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Laser-telegraphed shot: 3 DMG, very fast projectile', 'Appears from level 3'],
+    description: 'A long-range specialist that paints you with a red laser line for a full second before firing a very fast, hard-hitting projectile. The telegraph IS the counterplay — break line of sight or sidestep while the laser is on you.',
+    traits: ['Ranged only', '1s laser telegraph', '3 DMG fast shot', 'Kites at range'],
+    tips: ['The moment you see the red line, move sideways or duck behind a crate.', 'The projectile is much faster than a Grey Man\'s — dodge during the aim, not after the shot.', 'Low HP (8) — a single committed rush usually ends it.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'copycatMan', label: 'Copycat Man', color: '#d4af37', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Mirrors your last-used attack (punch/kick)', 'Appears from level 4'],
+    description: 'A gold-tinted mimic that watches how you fight and answers in kind — whatever you last threw (punch or kick), it throws back at you. Fight it with punches and it jabs; finish an enemy with a kick and expect a sweep coming.',
+    traits: ['Mimics your last attack type', 'Standard stats otherwise'],
+    tips: ['Its kick has AOE like yours — after you kick, keep your distance from it.', 'Deliberately "training" it onto punches makes it easier to trade against.', 'No stat gimmick — the mimicry is pure mind-games; play your normal counters.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'vampireMan', label: 'Vampire Man', color: '#7f0000', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Heals 50% of damage dealt', 'FULL heal on killing a target', 'Appears from level 4'],
+    description: 'A blood-red drainer that heals for half of every hit it lands — and if it actually kills you or a helper, it restores itself to full health on the spot. Trading hits with it is a losing proposition.',
+    traits: ['50% lifesteal on every hit', 'Full heal on kill', 'Standard melee'],
+    tips: ['Do not trade — every hit you eat un-does your damage on it.', 'Protect low-HP helpers near it; a helper kill resets the whole fight.', 'Burst it down in one committed engagement rather than chip damage over time.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'phaseMan', label: 'Phase Man', color: '#7e57c2', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Periodically intangible for 2.5s (can\'t be hit, walks through walls)', 'Appears from level 5'],
+    description: 'Every seven seconds this violet stickman flickers translucent and becomes completely intangible for 2.5 seconds — attacks pass straight through it, and it walks through walls and crates to reach you. It can\'t attack while phased.',
+    traits: ['Intangible on a cycle (2.5s per 7s)', 'Walks through obstacles while phased', 'Can\'t attack while phased', 'Translucent = untouchable'],
+    tips: ['Stop attacking the moment it turns translucent — every swing is wasted.', 'It can\'t hurt you while phased either; use the window to reposition or hit something else.', 'Count the rhythm: ~2.5s ghost, ~7s solid. Land your damage in the solid window.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'splitMan', label: 'Split Man', color: '#00acc1', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Splits into 2 smaller copies at half health', 'Copies never split again', 'Appears from level 6'],
+    description: 'A teal enemy that divides like a cell: the first time its health drops below half, it splits into two smaller copies that share the remaining health. The copies fight independently but never split again.',
+    traits: ['Splits once at 50% HP', '2 copies at 0.8× size', 'Copies don\'t re-split'],
+    tips: ['A single huge hit that kills it outright skips the split entirely — save your crit/slam for it.', 'After the split, kite the pair apart and kill them one at a time.', 'The copies inherit the surviving health — a nearly-dead Split Man makes two nearly-dead copies.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'armourMan', label: 'Armour Man', color: '#78909c', tier: 'rare',
+    hp: 20, speed: '80% normal', punchDmg: 1, kickDmg: 2, specials: ['11 armor plates covering head, chest, hips, arms and legs', 'A random plate breaks off and falls to the ground per chunk of damage', 'Appears from level 6'],
+    description: 'A walking tank plated head to toe — helmet, chest plate, hip guard, and guards along every arm and leg segment that bend with his limbs. He has double health, and every chunk of damage knocks a random plate clattering to the ground, so you can read exactly how close he is to going down.',
+    traits: ['2× HP (20)', '11 visible armor plates', 'Plates physically drop off as damage markers', 'Slightly slow'],
+    tips: ['The plates are a health bar you can see — count what\'s left before committing.', 'He hits like a normal enemy; the danger is how long he stays standing in a crowd.', 'Kite him while clearing faster threats, then finish the de-plated tank last.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'bombMan', label: 'Bomb Man', color: '#3e3e3e', tier: 'rare',
+    hp: 10, speed: '90% normal', punchDmg: 1, kickDmg: 0, specials: ['Lobs a sticky bomb at your feet (6s cooldown)', '1.6s blinking fuse + orange blast-radius ring', '3 DMG + ragdoll launch on detonation', 'Appears from level 5'],
+    description: 'A soot-grey demolitionist that lobs sticky bombs at wherever you\'re standing. Each bomb blinks faster and faster over a 1.6-second fuse while an orange ring marks the exact blast radius — everything inside when it goes off eats 3 damage and gets ragdoll-launched.',
+    traits: ['Sticky bomb lob (6s cooldown)', 'Accelerating blink telegraph', 'Blast ring shows exact radius', 'AOE ragdoll launch'],
+    tips: ['The orange ring IS the danger zone — step out of it and the bomb wastes itself.', 'Don\'t dodge INTO another bomb; he can have several live at once.', 'His only melee is a weak punch — inside bomb range but outside punch range is the worst place to stand.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'cloakedAssassin', label: 'Cloaked Assassin', color: '#263238', tier: 'rare',
+    hp: 8, speed: '120% normal', punchDmg: 2, kickDmg: 0, specials: ['Teleports behind you every ~7s', 'Backstab punch: 2× damage', 'Appears from level 7'],
+    description: 'A near-black, semi-translucent killer that blinks straight behind you in a puff of grey particles and lands an immediate double-damage backstab. Fast, fragile, and deeply unfair if you lose track of it.',
+    traits: ['Blink teleport (7s cooldown)', '2× backstab punch', 'Fast, low HP (8)', 'Slightly translucent'],
+    tips: ['When it vanishes, turn around IMMEDIATELY — the backstab comes from behind.', 'The grey particle burst marks both ends of the blink; watch for the second puff.', 'It\'s fragile — one clean kick after the blink usually kills it before the next teleport.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'engineerMan', label: 'Engineer Man', color: '#ff8f00', tier: 'rare',
+    hp: 10, speed: '60% normal', punchDmg: 1, kickDmg: 0, specials: ['Deploys sentry turrets (every 12s, max 3 active)', 'Turrets: 3 HP, shoot you, expire after 20s', 'Appears from level 8'],
+    description: 'An amber builder that lumbers toward you while dropping killable sentry turrets. Each turret pelts you with fast projectiles until you smash it (3 HP) or it expires. The Engineer himself is slow and weak — his turrets are the real threat.',
+    traits: ['Deploys turrets (12s cooldown)', 'Turrets killable (3 HP, 20s lifetime)', 'Slow mover, punch only'],
+    tips: ['Kill the Engineer first if you can reach him — the turrets expire on their own.', 'If pinned by turret fire, one kick per turret clears them fast.', 'Never fight a group inside an active turret nest; drag the fight out of range.'],
+    bodyScale: 1, weightMod: 0
+  },
+  // ─── Summoned specials ────────────────────────────────────────────────
+  {
+    id: 'lavaMan', label: 'Lava Man', color: '#b71c1c', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 1, kickDmg: 2,
+    specials: ['Lava projectile: burns player for 5s (1 DPS)', 'Glowing red aura when active'],
+    description: 'A fire-themed special that uses a burning ranged projectile as its main threat. Melee attacks are standard but the burn DoT makes lingering around it dangerous.',
+    traits: ['Burn DoT (5s, 1 DPS)', 'Ranged lava ball', 'Trailing fire effect', 'Standard melee too'],
+    tips: ['Dodge the projectile — once the burn lands, the damage is already done.', 'Close the gap fast; it can\'t kite like the Grey Man so the projectile is harder to use in melee.', 'The burn DPS is low but it stacks up over a long fight; kill it quickly.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'waterMan', label: 'Water Man', color: '#2196f3', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 2,
+    specials: ['Water punch: ranged 3 DMG + knockback', 'Kick: ragdoll stuns player for 2s'],
+    description: 'A mobile special with a long-range punch that deals knockback AND a melee kick that knocks you into a full ragdoll stun. The stun is its most dangerous tool — getting kicked leaves you completely helpless.',
+    traits: ['Ranged knockback punch (3 DMG)', 'Ragdoll stun kick (2s)', 'Blue projectile'],
+    tips: ['Never let it get to kicking range — its punch is already powerful at range.', 'If stunned, watch your health bar; other enemies will pile on during the stun.', 'Sprint its ranged punch sideways; the projectile is fast but predictable.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'invisibleMan', label: 'Invisible Man', color: '#c8e8ff', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 1, kickDmg: 2,
+    specials: ['Self-invisibility (0.08 opacity)', 'Standard melee while invisible'],
+    description: 'Appears as a glossy, semi-transparent glass figure in its default state. Periodically turns almost entirely invisible and continues attacking. Track the faint shimmer and react to the attack radius rather than the body.',
+    traits: ['Glass-like appearance (35% opacity)', 'Periodic full invisibility (0.08 opacity)', 'Standard punch + kick while hidden'],
+    tips: ['Focus on the outline when it\'s visible — deal maximum damage in that window.', 'Its collision radius is unchanged while invisible — if you walk into empty air, swing.', 'Sprint in a fixed direction: it will track you but you can predict where it is.'],
+    bodyScale: 1, weightMod: 0,
+    isGlass: true
+  },
+  {
+    id: 'fireMan', label: 'Fire Man', color: '#fd971f', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 0, kickDmg: 2,
+    specials: ['Fire punch: 0 DMG but burns for 3s (1 DPS)', 'Orange glow aura', 'Standard kick'],
+    description: 'A burn-specialist. Its punch deals zero direct damage but immediately applies a 3-second burn DoT. Its kick is standard. The burn can be hard to notice in the heat of a fight.',
+    traits: ['Burn punch (0 direct DMG, 3s burn)', 'Standard kick (2 DMG)', 'Orange aura on burn'],
+    tips: ['You are burning whether or not the punch "felt" like it hurt — move away and regen.', 'Its kick is the bigger immediate threat; sidestep that first.', 'The burn is short but can tip fights if your health is already low.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'weaponMan', label: 'Weapon Man', color: '#1a237e', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 2, kickDmg: 3,
+    specials: ['+1 DMG on both punch and kick vs standard'],
+    description: 'A dark-armoured fighter. No exotic ability — just consistently higher damage on every attack compared to a normal melee enemy. Deceptively straightforward but punishing if you trade carelessly.',
+    traits: ['2 DMG punch', '3 DMG kick', 'No status effects'],
+    tips: ['Treat every hit as if it hurts more — because it does.', 'This is a fight of fundamentals: don\'t get hit, counter cleanly.', 'Its lack of status effects means there\'s no ability to dodge around; it\'s purely about timing.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'purpleMan', label: 'Purple Man', color: '#7b1fa2', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 1, kickDmg: 2,
+    specials: ['Telekinesis: ranged pull toward itself (1s)', 'Purple aura on player during pull'],
+    description: 'Telekinetically yanks the player toward itself, creating instant melee range. The pull itself deals no damage but gives the Purple Man a free hit window right after.',
+    traits: ['Ranged telekinesis pull (1s)', 'No pull damage', 'Standard melee'],
+    tips: ['When pulled, use that momentum against it — the roll window just as you land can give you the first strike.', 'Stay at mid-range where the pull is less frequent.', 'It will melee immediately after the pull; roll sideways as you land to avoid the follow-up.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'pinkMan', label: 'Pink Man', color: '#ff4fa3', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 2, kickDmg: 3,
+    specials: ['Pink Arc: growing ranged projectile, 2 DMG + knockback'],
+    description: 'A fast melee threat with a wide, expanding projectile that also knocks back. The "arc" projectile grows in radius as it travels, making it harder to sidestep at longer distances.',
+    traits: ['Growing ranged projectile (2 DMG + knockback)', '+1 DMG punch & kick vs basic', 'Pink arc trail'],
+    tips: ['Dodge the arc early when it\'s small, before it expands.', 'Staying very close cancels much of the arc\'s range advantage.', 'Its enhanced melee also hurts — this is one of the more well-rounded specials.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'greenMan', label: 'Green Man', color: '#2e7d32', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
+    specials: ['Emerald Punch: 4 DMG + green aura'],
+    description: 'A powerful melee specialist with above-average damage across all attacks plus an emerald-charged heavy punch. One of the harder basic specials.',
+    traits: ['3 DMG punch', '4 DMG kick', 'Emerald punch (4 DMG)'],
+    tips: ['Do not trade — every exchange is losing for you unless you dodge first.', 'The emerald punch has a distinct green flash; use that as a dodge trigger.', 'Taking one hit from this enemy is already very costly at average health.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'yellowMan', label: 'Yellow Man', color: '#fdd835', tier: 'special',
+    hp: 15, speed: '2× normal (very fast)', punchDmg: 1, kickDmg: 2,
+    specials: ['Shock Punch: 1 DMG + 2s ragdoll + launch', 'Yellow flicker aura during stun', 'Electric jolt visual on player'],
+    description: 'The fastest special in the game — moves and attacks at double speed. Its signature Shock Punch sends the player flying into a full ragdoll stun with an electric visual effect. Short fights only.',
+    traits: ['2× movement & attack speed', 'Shock Punch (ragdoll 2s, launch)', 'Electric visual effect'],
+    tips: ['Do not let it start a combo — the speed means follow-ups arrive before you can react.', 'Keep it at max melee range; the Shock Punch has a fixed distance.', 'If stunned, you\'re helpless for 2 full seconds — every other nearby enemy will swing.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'blackMan', label: 'Black Man', color: '#111111', tier: 'special',
+    hp: 20, speed: 'Normal', punchDmg: 2, kickDmg: 3,
+    specials: ['Rock Punch: 3 DMG + 2s ragdoll stun (no launch)'],
+    description: 'The tankiest of the standard specials — 20 HP instead of 15. Consistent high-damage melee plus a Rock Punch that ragdolls without launching, leaving the player stunned at close range for follow-ups.',
+    traits: ['20 HP (highest HP tier)', '2 DMG punch, 3 DMG kick', 'Rock Punch: 3 DMG + 2s ragdoll (no launch)'],
+    tips: ['Do not eat the Rock Punch — at 20 HP it can survive long enough to land two stuns.', 'Interrupt its windup with your own attack before the punch lands.', 'Focus-target this above other enemies when in groups; its health makes it the longest fight.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'tomatoMan', label: 'Tomato Man', color: '#ff6347', tier: 'special',
+    hp: 15, speed: '2× normal (very fast)', punchDmg: 1, kickDmg: 2,
+    specials: ['High movement speed only — standard melee'],
+    description: 'The speed-focused special without a special ability. It moves at double speed and engages instantly, but has no status attacks — only pure melee pressure.',
+    traits: ['2× movement speed', 'Standard punch + kick', 'No special ability'],
+    tips: ['Sprint away to create space before committing to an attack.', 'Because it has no special ability, timing is everything — let it overrun your position, dodge, counter.', 'Less dangerous than Yellow Man: same speed, no shock stun.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'snowMan', label: 'Snow Man', color: '#e0f7ff', tier: 'special',
+    hp: 15, speed: 'Normal', punchDmg: 1, kickDmg: 2,
+    specials: ['Freeze Punch: 1 DMG + 2s freeze (input locked)'],
+    description: 'A pale icy special. Standard melee plus a Freeze Punch that locks all input for 2 seconds — no ragdoll, just standing completely frozen in place while everything else keeps moving.',
+    traits: ['Freeze Punch (2s input lock)', 'Cold blue aura during freeze', 'Standard melee otherwise'],
+    tips: ['Frozen means you CANNOT dodge incoming attacks from other enemies — clear the arena first.', 'The freeze is purely input-locking, not a ragdoll; you won\'t get knocked around but you\'re still a target.', 'Its melee otherwise is completely standard; the freeze is the only gimmick.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'glowingGreenMan', label: 'Glowing Green Man', color: '#39ff14', tier: 'special',
+    hp: 35, speed: 'Normal', punchDmg: 5, kickDmg: 10,
+    specials: [
+      'Jade Punch: 20 DMG (one-shot at average health)',
+      'Emerald Stun: 10 DMG + 2s ragdoll',
+      'Green Pull: ranged telekinesis pull + 2 DMG'
+    ],
+    description: 'The strongest enemy in the game. 35 HP, 10 DMG kicks, a 20-DMG jade punch that one-shots at average health, a 10-DMG ragdoll stun, and a ranged pull. Every single attack is life-threatening.',
+    traits: ['35 HP (maximum tier)', '5 DMG punch / 10 DMG kick', 'Jade Punch (20 DMG)', 'Emerald Stun (10 DMG + ragdoll)', 'Green Pull (ranged + 2 DMG)'],
+    tips: ['You should be at maximum health before engaging this enemy.', 'Never stand still near it — the Green Pull can chain into the Jade Punch for an instant death combo.', 'It can only use one special at a time; bait the telegraphed Jade Punch, roll away, punish hard.', 'This is a fight to survive, not dominate; deal consistent safe damage from distance.'],
+    bodyScale: 1, weightMod: 0
+  }
+];
+
+// ── Coward + arena roster ────────────────────────────────────────────────
+ENEMIES.push(
+  {
+    id: 'coward', label: 'Coward', color: '#fff59d', tier: 'rare',
+    hp: 6, speed: '130% (fleeing)', punchDmg: 0, kickDmg: 0, specials: ['Never attacks', 'Permanently flees you (goofy run)', 'Appears from level 2'],
+    description: 'A jittery yellow stickman that wants absolutely nothing to do with you. It goofy-runs away the moment you get close and never throws a single punch. Free kill — if you can catch it.',
+    traits: ['Never attacks', 'Constant goofy-run flee', 'Low HP'],
+    tips: ['Corner it against walls or crates — in the open it outruns a walk.', 'Sprint + dash makes the catch trivial.', 'Worth chasing: same kill rewards as any basic.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'slimeBlock', label: 'Slime Block', color: '#66bb6a', tier: 'rare',
+    hp: 10, speed: 'Sliding kite', punchDmg: 0, kickDmg: 0, specials: ['Sliding cube (no skeleton)', 'Ranged green bolt', 'Splits into 2 minis when killed', 'GREEN blood', 'Appears from level 4'],
+    description: 'A bouncing green cube that slides around, pelting you with slime bolts from range. Killing it splits it into two mini-slimes (which don\'t split again), and everything it bleeds is green.',
+    traits: ['Cube body', 'Ranged only', 'Splits once on death', 'Green blood'],
+    tips: ['Budget three kills, not one — the minis come out swinging.', 'Kill the minis in one sweep with a kick.', 'No burn — unlike its lava cousin it\'s all pressure, no damage-over-time.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'weakFighter', label: 'Weak Fighter', color: '#bdbdbd', tier: 'arena',
+    hp: 3, speed: '90% normal', punchDmg: 0, kickDmg: 0, specials: ['Arena beginner room only', '3 HP, deals no damage'],
+    description: 'The Arena\'s training-wheels opponent: a grey stickman with 3 HP whose punches carry literally zero force. Exists so your first two waves teach movement and hit timing consequence-free.',
+    traits: ['Arena-exclusive', '3 HP', '0 damage'],
+    tips: ['One kick kills it.', 'Practice dodging anyway — the habits matter by wave 5.', 'They never spawn outside the Arena\'s concrete room.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandWarrior', label: 'Sand Warrior', color: '#d2b48c', tier: 'arena',
+    hp: 14, speed: '110% normal', punchDmg: 2, kickDmg: 3, specials: ['Sand pit waves', 'Fast, hits harder than basics'],
+    description: 'The sand pit\'s standard soldier — quicker and meaner than any surface basic, with a 2/3 damage kit that punishes lazy trades.',
+    traits: ['Arena sand roster', 'Fast melee', 'Above-basic damage'],
+    tips: ['Treat it like a Weapon Man with sprint.', 'They hunt in packs; never fight three at once.', 'Kicks send it into the sand — follow up while it stands.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandJuggernaut', label: 'Sand Juggernaut', color: '#c19a6b', tier: 'arena',
+    hp: 30, speed: '50% (slow)', punchDmg: 3, kickDmg: 4, specials: ['30 HP tank', 'Slow but heavy'],
+    description: 'A dune of muscle. Slow enough to walk away from, tanky enough to outlast careless players, and every connected hit genuinely hurts.',
+    traits: ['30 HP', 'Half speed', 'Heavy melee'],
+    tips: ['Kite it while clearing the Sand Warriors first.', 'It can barely turn — circle strafe and jab.', 'Never let it corner you against the ring wall.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandGiant', label: 'Sand Giant', color: '#b8860b', tier: 'arena',
+    hp: 40, speed: '60% (slow)', punchDmg: 4, kickDmg: 6, specials: ['1.6× size', '40 HP', 'Late sand-pit boss unit'],
+    description: 'The sand pit\'s capstone: a towering ochre giant with a 6-damage kick that ends average runs in two connects. Fought alone it\'s a dance; fought in a wave it\'s a problem.',
+    traits: ['1.6× size', '40 HP', '4/6 damage'],
+    tips: ['Its reach is longer than it looks — respect the size multiplier.', 'Burst it with crits/slam when the adds are down.', 'Two spawn on wave 16. Save a medkit.'],
+    bodyScale: 1.6
+  },
+  {
+    id: 'lavaMinion', label: 'Lava Minion', color: '#ff5722', tier: 'arena',
+    hp: 12, speed: '120% (fast)', punchDmg: 1, kickDmg: 0, specials: ['Magma Wasteland only', 'Punch applies 3s Burn'],
+    description: 'The Magma Wasteland\'s swarm unit — fast, fragile, and every punch sets you burning for 3 seconds. One is a nuisance; five are a health drain you can\'t medkit through.',
+    traits: ['Magma-exclusive', 'Burn on hit', 'Fast, low HP'],
+    tips: ['Never trade — the burn makes even 1-damage hits expensive.', 'Kick sweeps clear clusters efficiently.', 'Burns stack your timer back up; disengage and let it tick out.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaJuggernaut', label: 'Lava Juggernaut', color: '#bf360c', tier: 'arena',
+    hp: 35, speed: '50% (slow)', punchDmg: 3, kickDmg: 4, specials: ['35 HP tank', 'Punch applies 3s Burn'],
+    description: 'A slag-crusted tank that walks through your damage and sets you alight when it finally lands one. The magma waves\' anchor unit.',
+    traits: ['35 HP', 'Burn punch', 'Half speed'],
+    tips: ['Same playbook as the Sand Juggernaut, plus never eat the punch.', 'Its kick doesn\'t burn — if you must trade, trade into the kick side.', 'Leave it for last; it can\'t catch you.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaThrower', label: 'Lava Thrower', color: '#ff8a65', tier: 'arena',
+    hp: 14, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Ranged lava bolt (Burn 3s)', 'Kites at range'],
+    description: 'A ranged pyromancer that lobs trailing lava bolts from across the pentagon. Every hit burns; every burn is 3 free damage it didn\'t have to work for.',
+    traits: ['Ranged only', 'Burn projectile', 'Kites'],
+    tips: ['Close the gap in a curve — the bolts fly straight.', 'Highest priority in any magma wave.', 'Its projectile trail makes it easy to trace back to the source.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaSplitCube', label: 'Lava Split Cube', color: '#ff8a2a', tier: 'arena',
+    hp: 10, speed: 'Sliding kite', punchDmg: 0, kickDmg: 0, specials: ['Sliding cube', 'Ranged burn bolt', 'Splits into 2 minis on death', 'Turns black when killed', 'ORANGE blood'],
+    description: 'A molten orange cube that slides around the wasteland spitting burning bolts. Kill it and it splits into two smaller cubes; kill those and their husks char black on the ground. It bleeds orange.',
+    traits: ['Cube body', 'Burn projectile', 'Splits once on death', 'Orange blood', 'Chars black when dead'],
+    tips: ['Three kills per cube — plan your stamina around it.', 'The minis inherit the burn bolts at a faster clip; don\'t stand between them.', 'Ground Slam kills the pair before they scatter.'],
+    bodyScale: 1, isCube: true
+  }
+);
+
+// ── Second wave of new rares + sandbox/magma additions ──────────────────
+ENEMIES.push(
+  {
+    id: 'juggernaut', label: 'Juggernaut', color: '#37474f', tier: 'rare',
+    hp: 45, speed: '55% (slow)', punchDmg: 3, kickDmg: 4, specials: ['Immune to flinches AND parry ragdolls', '45 HP', 'Appears from level 6'],
+    description: 'A slab of iron that simply does not react. Hits never stagger it, parries never floor it — it just keeps walking at you. Must be kited around obstacles, never traded with.',
+    traits: ['Stagger-immune', 'Parry-proof', '45 HP', 'Slow'],
+    tips: ['Your parry does nothing here — dodge instead.', 'It can\'t be interrupted; never stand in its swing arc.', 'Walls and crates are your friends: loop it while chipping.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'resilientMan', label: 'Resilient Man', color: '#ffb300', tier: 'rare',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Cheats death ONCE: ragdolls, then gets up at full health', 'Appears from level 5'],
+    description: 'An amber fighter with one spare life. The first killing blow drops him into a ragdoll heap — then he climbs back up at FULL health with a golden flash. Only the second kill sticks.',
+    traits: ['1 cheat-death charge', 'Revives at full HP', 'Standard melee'],
+    tips: ['Budget double the damage — the first "kill" is a lie.', 'He\'s helpless during the revive ragdoll; position for the follow-up.', 'The golden sparkle marks a spent revive.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'superResilientMan', label: 'Super Resilient Man', color: '#ff6f00', tier: 'rare',
+    hp: 14, speed: 'Normal', punchDmg: 2, kickDmg: 3, specials: ['Cheats death TWICE', 'Stronger stats than his weaker cousin', 'Appears from level 9'],
+    description: 'The Resilient Man\'s big brother: tougher, harder-hitting, and carrying TWO spare lives. Killing him properly means putting him down three times in one fight.',
+    traits: ['2 cheat-death charges', 'Revives at full HP', '+1 punch/kick damage'],
+    tips: ['Three health bars in a trench coat — commit or disengage, don\'t half-fight him.', 'Both revives ragdoll him briefly: free hits if you stay close.', 'One-Hit mode still needs three separate hits.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'shockerCube', label: 'Shocker Cube', color: '#2979ff', tier: 'rare',
+    hp: 10, speed: 'Sliding', punchDmg: 0, kickDmg: 0, specials: ['Closes in, then pulses an AOE ragdoll-stun', 'Splits into 2 minis on death', 'BLUE blood', 'Appears from level 5'],
+    description: 'The blue cube doesn\'t shoot — it hunts. It slides right up to you and discharges a crackling shock pulse that ragdolls everything nearby, then recharges for the next one. Bleeds blue, splits when killed.',
+    traits: ['Cube body', 'AOE stun pulse (no projectile)', 'Splits once on death', 'Blue blood'],
+    tips: ['Its whole plan is proximity — kill it at range or kick it away before the pulse.', 'The bright flash means the pulse just fired: ~4 safe seconds follow.', 'Getting stunned next to its friends is how runs end.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'slowCube', label: 'Slow Cube', color: '#80d8ff', tier: 'rare',
+    hp: 10, speed: 'Sliding kite', punchDmg: 0, kickDmg: 0, specials: ['Ranged bolt applies SLOW (45% speed, 3s)', 'Splits into 2 minis on death', 'Appears from level 5'],
+    description: 'An icy cube that pelts you with chilling bolts. Every hit cuts your movement speed to less than half for three seconds — harmless alone, lethal as setup for everything chasing you.',
+    traits: ['Cube body', 'Slow-on-hit projectile', 'Splits once on death'],
+    tips: ['Kill it FIRST in mixed groups: slowed + chased = dead.', 'The slow doesn\'t affect Dash — save it as your escape.', 'Sidestep the bolts; they fly straight.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'smashBall', label: 'Smash Ball', color: '#9e9e9e', tier: 'rare',
+    hp: 10, speed: 'Charging roll', punchDmg: 3, kickDmg: 0, specials: ['Watches from afar, then charges in a super-fast roll', 'Contact damage + knockback', 'Retreats to cooldown', 'Appears from level 5'],
+    description: 'A steel sphere that sits at a distance sizing you up, shivers for half a second, then comes at you like a cannonball. Hit or miss, it rolls back out to watching range and waits for its next window.',
+    traits: ['Rolling sphere', 'Telegraphed line charge', '3 DMG + knockback on contact', 'Retreat-and-cooldown loop'],
+    tips: ['The shiver IS the telegraph — sidestep the lane, don\'t backpedal.', 'It\'s vulnerable during the retreat; chase it down then.', 'Charges stop dead against walls: bait it into one.'],
+    bodyScale: 1, isBall: true
+  },
+  {
+    id: 'trapperMan', label: 'Trapper Man', color: '#4e342e', tier: 'rare',
+    hp: 10, speed: '90% normal', punchDmg: 1, kickDmg: 0, specials: ['SANDBOX-EXCLUSIVE', 'Plants near-invisible mines (stun + knockback)', 'Max 8 active mines'],
+    description: 'A sandbox-only saboteur who seeds the ground between you and him with barely-visible mines. Step on one and you\'re stunned, launched, and wide open. Watch for the faint red pips.',
+    traits: ['Sandbox-only', 'Proximity mines', 'Mine: stun + launch', 'Standard punch'],
+    tips: ['The tiny red glint on the ground is the only warning.', 'Mines trigger on helpers and civilians too — herd carefully.', 'He drops them along your approach line: come in at an angle.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaSmashBall', label: 'Lava Smash Ball', color: '#ff6d00', tier: 'arena',
+    hp: 12, speed: 'Charging roll', punchDmg: 3, kickDmg: 0, specials: ['Magma Wasteland waves', 'Charge contact applies Burn (3s)', 'Knockback'],
+    description: 'The Smash Ball reforged in magma: same watch-shiver-charge loop, but its molten shell sets you burning on contact and it smoulders a trail of embers wherever it rolls.',
+    traits: ['Rolling sphere', 'Burn on contact', 'Knockback', 'Magma-exclusive'],
+    tips: ['Same counters as the normal ball — the burn just raises the price of a mistake.', 'Its ember trail makes the charge lane easy to read.', 'Never tank the hit to trade: 3 damage + 3 burn is most of your health bar.'],
+    bodyScale: 1, isBall: true
+  },
+  {
+    id: 'lavaGiant', label: 'Lava Giant', color: '#5d1a09', tier: 'arena',
+    hp: 45, speed: '55% (slow)', punchDmg: 4, kickDmg: 6, specials: ['Magma Wasteland boss unit', '1.7× size', 'Punch applies Burn (3s)'],
+    description: 'The Magma Wasteland\'s crown: a towering slag colossus with 45 HP, a burning 4-damage punch and a 6-damage kick. When one wades into a wave, everything else becomes a distraction.',
+    traits: ['1.7× size', '45 HP', 'Burn punch', '6 DMG kick'],
+    tips: ['Its reach matches its size — the safe circle is bigger than you think.', 'Clear the lava minions first or their burns will finish what the giant starts.', 'Slow and stagger-prone: kite it wide and chip.'],
+    bodyScale: 1.7
+  }
+);
+
+// ── Enemy Bodyguard + neutral units ─────────────────────────────────────
+ENEMIES.push(
+  {
+    id: 'enemyBodyguard', label: 'Enemy Bodyguard', color: '#3949ab', tier: 'rare',
+    hp: 13, speed: '105% normal', punchDmg: 2, kickDmg: 2, specials: ['Spawns attached to another enemy', 'Passive until its protectee is hurt', 'Fights on once the protectee dies'],
+    description: 'An indigo enforcer that shadows another enemy like a shadow with fists. It ignores you completely — right up until you hurt its protectee, at which point it fights with everything it has. Kill the protectee and the gloves stay off for good.',
+    traits: ['Guards one enemy', 'Alert window on protectee damage', '+1 punch damage'],
+    tips: ['Hitting the VIP wakes the guard — decide if you want a 2v1 before you swing.', 'Killing the guard first never angers the protectee: safest order.', 'Ranged chip damage on the protectee still triggers the alert.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'civilianUnit', label: 'Civilian', color: '#e8d8c3', tier: 'neutral',
+    hp: 10, speed: 'Wander / goofy flee', punchDmg: 0, kickDmg: 0, specials: ['Sandbox unit', 'Flees anything scary (you too, once attacked)', 'Follows you if you save them'],
+    description: 'A harmless pastel wanderer. Enemies hunt them; they goofy-run for their lives; save one by killing its chaser and it adopts you. Hit one yourself and it fears you forever — and any armyman who saw it will make you regret it.',
+    traits: ['Never fights', 'Full status-effect victim', 'Rescue = follows you', 'May spawn with an armyman escort'],
+    tips: ['Killing civilians turns nearby armymen against you.', 'Terrified cower means it\'s badly hurt.', 'They can trip Trapper mines — herd them carefully.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'armyMeleeUnit', label: 'Army Man (Melee)', color: '#4b5320', tier: 'neutral',
+    hp: 16, speed: 'Patrol / fast chase', punchDmg: 2, kickDmg: 0, specials: ['NEUTRAL: passive until provoked', 'Aggros whoever attacks a civilian/armyman in sight', 'Hunts the player too'],
+    description: 'Olive-drab peacekeeper. He patrols minding his own business — but attack a civilian or a fellow soldier where he can see it, and he will chase the attacker down with heavy fists. He does not care whether that attacker is a Lava Man or you.',
+    traits: ['Not a helper', 'Witness-based aggro (20s)', '2 DMG punches', 'Chance to escort spawning civilians'],
+    tips: ['Fighting enemies near a soldier is free backup — LET them see the enemy strike first.', 'Punching civilians in front of one is a declaration of war.', 'His aggro expires: outrun him for ~20 seconds and he stands down.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'armyRangedUnit', label: 'Army Man (Ranged)', color: '#33691e', tier: 'neutral',
+    hp: 16, speed: 'Patrol / holds range', punchDmg: 0, kickDmg: 0, specials: ['NEUTRAL: passive until provoked', 'Fires from distance once aggroed', 'Hunts the player too'],
+    description: 'The melee soldier\'s marksman twin: same witness-based temper, but he answers provocation with steady green bolts from across the field instead of closing in.',
+    traits: ['Not a helper', 'Witness-based aggro (20s)', 'Ranged shots', 'Chance to escort spawning civilians'],
+    tips: ['He shoots whoever he\'s mad at — his bolts can hit bystanders on the way.', 'Break line of sight behind crates while his aggro cools.', 'Provoked at an enemy, he\'s free artillery. Provoked at you, he\'s a sniper problem.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'bodyguardUnit', label: 'Bodyguard', color: '#263238', tier: 'neutral',
+    hp: 15, speed: 'Follows you', punchDmg: 2, kickDmg: 0, specials: ['NOT a helper - just follows you', 'Retaliates against whatever hurts you', 'Never respawns'],
+    description: 'A charcoal-suited professional who shadows you in silence. He doesn\'t hunt, doesn\'t farm, doesn\'t respawn — but the moment something lays a hand on you, he answers it. When he dies, he\'s gone.',
+    traits: ['Follows the player', 'Retaliation-only combat', 'Permanent death'],
+    tips: ['He only reacts to damage on YOU — he won\'t peel enemies off helpers or civilians.', 'One is a solid insurance policy; several are a wall.', 'Spend him wisely: no respawns, ever.'],
+    bodyScale: 1, weightMod: 0
+  }
+);
+
+// ── Arena material men + new rares + allied units ────────────────────────
+ENEMIES.push(
+  {
+    id: 'concreteMan', label: 'Concrete Man', color: '#9e9e9e', tier: 'arena',
+    skinTexture: '../textures/concrete.jpg',
+    hp: 6, speed: '90% normal', punchDmg: 1, kickDmg: 0, specials: ['Concrete room waves (1–2)', 'Skin made of the room itself'],
+    description: 'The beginner room\'s walls, walking. A stickman skinned in raw concrete who shrugs off a couple more hits than the Weak Fighters he spawns beside — the Arena\'s first real (if gentle) test.',
+    traits: ['Arena-exclusive', 'Concrete texture skin', '6 HP, 1 DMG punch'],
+    tips: ['Two kicks and he\'s rubble.', 'He\'s the only thing in the concrete room that actually hurts — drop him first.', 'Camouflages weirdly well against the room. Watch the minimap.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'woodMan', label: 'Wood Man', color: '#a1887f', tier: 'arena',
+    skinTexture: '../textures/wood.jpg',
+    hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Brick cage waves (3–10)', 'Plank-textured skin'],
+    description: 'Knocked together from the Arena\'s own floorboards. A standard melee kit on a wood-plank body — the brick cage\'s bread-and-butter grunt from wave 3 on.',
+    traits: ['Arena-exclusive', 'Wood plank skin', 'Standard melee'],
+    tips: ['Fights exactly like a Running Man — the skin is the only trick.', 'Blends against the wooden floor; track silhouettes, not colour.', 'Standard kill rewards; no gimmick to respect.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'brickMan', label: 'Brick Man', color: '#b85c44', tier: 'arena',
+    skinTexture: '../textures/brick.jpg',
+    hp: 16, speed: '85% (heavy)', punchDmg: 2, kickDmg: 3, specials: ['Brick cage AND sand pit waves', 'Brick-textured tank'],
+    description: 'A wall section that got tired of being climbed over. Sixteen hits of patience and a 2/3 damage kit make him the toughest of the material men until the magma opens — and he follows you down into the sand pit too.',
+    traits: ['Arena-exclusive', 'Brick texture skin', '16 HP', 'Above-basic damage'],
+    tips: ['He\'s slow — treat him like a mini juggernaut and circle.', 'In the sand waves he anchors the pack; kite him away from the Sand Warriors.', 'Kicks stagger him fine — he\'s tough, not stagger-immune.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandyMan', label: 'Sandy Man', color: '#d2b48c', tier: 'arena',
+    skinTexture: '../textures/sand.jpg',
+    hp: 14, speed: '110% (fast)', punchDmg: 2, kickDmg: 3, specials: ['Sand pit waves (11–16)', 'Sand-textured skin'],
+    description: 'The sand pit given legs. Same hungry speed as the Sand Warrior with a hide of packed dune — in the pit\'s ochre light he all but disappears until he\'s already swinging.',
+    traits: ['Arena-exclusive', 'Sand texture skin', 'Fast melee'],
+    tips: ['Hardest of the material men to SEE — fight him near the ring wall where he contrasts.', 'Same counters as the Sand Warrior: don\'t trade, counter after his whiff.', 'He hunts in mixed packs with Sand Throwers; close the thrower first.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandThrower', label: 'Sand Thrower', color: '#e0c9a6', tier: 'arena',
+    hp: 12, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Sand pit waves', 'Ranged sand bolt (2 DMG)', 'Kites at range'],
+    description: 'The sand pit\'s answer to the Lava Thrower, minus the burn: a pale kiter who pelts you with stinging sand bolts from across the pit while his melee friends do the dirty work.',
+    traits: ['Arena-exclusive', 'Ranged only', '2 DMG bolts', 'Kites'],
+    tips: ['No burn means you can afford one hit closing in — but only one.', 'Priority kill in any sand wave: he wins every war of attrition.', 'Corner him against the ring wall to stop the kiting.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaBaby', label: 'Lava Baby', color: '#ff7043', tier: 'arena',
+    hp: 8, speed: '180% (very fast)', punchDmg: 1, kickDmg: 0, specials: ['Magma Wasteland swarm unit', 'Punch applies 2s Burn', 'Tiny and fast'],
+    description: 'A knee-high ember with a temper. The Magma Wasteland\'s smallest citizen sprints at you nearly twice as fast as anything else and every little slap sets you alight for two seconds.',
+    traits: ['Magma-exclusive', '0.55× size', 'Burn on hit', 'Very fast'],
+    tips: ['Hold position and swing into its approach — chasing it is a losing game.', 'One kick ends it; the trick is landing one.', 'Three burns stacking is a medkit gone. Never wade into a pack.'],
+    bodyScale: 0.55,
+    bodySliders: {
+      headSize: 1.5,
+      boneOverrides: {
+        'mixamorigLeftUpLeg':  [1, 0.65, 1], 'mixamorigRightUpLeg': [1, 0.65, 1],
+        'mixamorigLeftLeg':    [1, 0.65, 1], 'mixamorigRightLeg':   [1, 0.65, 1],
+        'mixamorigLeftArm':    [1, 0.60, 1], 'mixamorigRightArm':   [1, 0.60, 1],
+        'mixamorigLeftForeArm':[1, 0.60, 1], 'mixamorigRightForeArm':[1, 0.60, 1]
+      }
+    }
+  },
+  {
+    id: 'magmaMan', label: 'Magma Man', color: '#ff5722', tier: 'arena',
+    skinTexture: '../textures/magma.jpg',
+    hp: 20, speed: '95% normal', punchDmg: 2, kickDmg: 3, specials: ['Magma Wasteland waves', 'Molten texture skin', 'Punch applies 3s Burn'],
+    description: 'The wasteland floor stood up and started walking. A cracked-magma hide over 20 HP, with a burning punch that keeps ticking after he connects. The magma waves\' mid-weight anchor.',
+    traits: ['Magma-exclusive', 'Magma texture skin', 'Burn punch', '20 HP'],
+    tips: ['Trade into his kick side — only the punch burns.', 'He\'s nearly invisible against the magma floor. Fight him on the charred brick rim.', 'Solid priority below throwers but above juggernauts.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'charredBrickMan', label: 'Charred Brick Man', color: '#5d4037', tier: 'arena',
+    skinTexture: '../textures/charred-bricks.jpg',
+    hp: 26, speed: '70% (slow)', punchDmg: 3, kickDmg: 4, specials: ['Magma Wasteland waves', 'Charred brick skin', '26 HP heavy'],
+    description: 'Brick Man\'s wasteland-forged big brother — kiln-fired black, 26 hits deep, and swinging a 3/4 damage kit. Slow enough to escape, heavy enough to end you if you don\'t.',
+    traits: ['Magma-exclusive', 'Charred brick skin', '26 HP', 'Heavy melee'],
+    tips: ['Same circle-strafe playbook as every juggernaut-class enemy.', 'He spawns on ODD magma waves — plan your medkits around him.', 'No burn on his hits: if you must trade with something in the magma, it\'s him.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'minionMan', label: 'Minion', color: '#7986cb', tier: 'rare',
+    hp: 'Copies', speed: 'Normal', punchDmg: 'Copies', kickDmg: 'Copies', specials: ['Copies your STRONGEST helper\'s HP and damage at spawn', 'No helpers = level-1 helper stats (2 HP, 0 DMG)', 'Appears from level 4'],
+    description: 'A mirror with a grudge. The Minion checks your squad the moment it spawns and copies your strongest helper\'s stats wholesale. Built an army of upgraded bruisers? So has it. Running solo? It shows up as a 2 HP pacifist.',
+    traits: ['Stat-copies your best helper', 'Harmless if you have no helpers', 'Scales WITH you'],
+    tips: ['The stronger you build your helpers, the nastier every Minion gets — it\'s the price of an army.', 'Solo runs hard-counter it: 2 HP and literally zero damage.', 'It copies stats at SPAWN — upgrading helpers afterwards doesn\'t buff Minions already on the field.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'ragdollThrower', label: 'Ragdoll Thrower', color: '#9575cd', tier: 'rare',
+    hp: 8, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Ranged bolt RAGDOLLS you (1.3s)', 'Kites at range', 'Appears from level 6'],
+    description: 'A violet kiter whose bolts don\'t just sting — they knock you clean off your feet into a ragdoll heap. One hit is an inconvenience; one hit with anything else nearby is a funeral.',
+    traits: ['Ranged only', 'Ragdoll-stun projectile', 'Low HP', 'Kites'],
+    tips: ['THE priority target in any mixed group — being floored next to melee is how runs end.', 'Its bolts fly straight: approach in a curve.', 'Only 8 HP. One committed dash ends the problem.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'adaptiveMan', label: 'Adaptive Man', color: '#00897b', tier: 'rare',
+    hp: 10, speed: 'Normal / kites when hurt', punchDmg: 1, kickDmg: 2, specials: ['Melee brawler above 40% HP', 'Below 40%: retreats and throws ranged bolts', 'Appears from level 4'],
+    description: 'A teal switch-hitter who meets you fist-first — until you hurt him. Below 40% health he breaks off, opens distance, and starts pelting you from range instead. The fight you started is never the fight you finish.',
+    traits: ['Two-phase AI', 'Melee phase: standard punch/kick', 'Ranged phase: kiting bolts'],
+    tips: ['Burst him through the 40% line — a big hit skips the annoying phase entirely.', 'Once he flips, treat him like a Grey Man: corner him against walls.', 'His ranged phase still has the same 10 HP total. Nothing extra to chew through.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'ragdollSmashBall', label: 'Ragdoll Smash Ball', color: '#7e57c2', tier: 'rare',
+    hp: 10, speed: 'Charging roll', punchDmg: 2, kickDmg: 0, specials: ['Charge contact RAGDOLLS you (launch!)', 'Watch–shiver–charge–retreat loop', 'Appears from level 6'],
+    description: 'The Smash Ball\'s cruel violet cousin. Its charge hits softer on paper — but a connect launches you into a full ragdoll, and everything else on the field gets a free window while you\'re on the floor.',
+    traits: ['Rolling sphere', 'Ragdoll + launch on contact', 'Telegraphed line charge'],
+    tips: ['Its damage isn\'t the threat — the knockdown is. Dodge like your run depends on it, because it does.', 'Same wall counter as every ball: bait the charge into a crate.', 'Never fight it alongside melee enemies without an escape ready.'],
+    bodyScale: 1, isBall: true
+  },
+  {
+    id: 'slowBall', label: 'Slow Ball', color: '#4dd0e1', tier: 'rare',
+    hp: 10, speed: 'Charging roll', punchDmg: 2, kickDmg: 0, specials: ['Charge contact applies SLOW (45% speed, 3s)', 'Watch–shiver–charge–retreat loop', 'Appears from level 5'],
+    description: 'A frost-glazed sphere whose charge coats you in chilling slime. The hit barely hurts; the three seconds of wading through molasses while everything closes in is the actual attack.',
+    traits: ['Rolling sphere', 'Slow on contact', 'Telegraphed line charge'],
+    tips: ['Slowed with a second ball mid-charge is a death sentence — never fight two in the open.', 'Dash ignores the slow: save it as the escape.', 'It retreats after connecting; that\'s your window to close and finish it.'],
+    bodyScale: 1, isBall: true
+  },
+  {
+    id: 'splitBall', label: 'Split Ball', color: '#00bcd4', tier: 'rare',
+    hp: 10, speed: 'Charging roll', punchDmg: 2, kickDmg: 0, specials: ['Splits into TWO mini balls on death', 'Watch–shiver–charge–retreat loop', 'Appears from level 6'],
+    description: 'A cyan sphere that refuses to die politely. Kill it and it bursts into two smaller, equally bad-tempered balls that keep the charge cycle going — budget three fights for the price of one.',
+    traits: ['Rolling sphere', 'Splits once on death', 'Minis charge too'],
+    tips: ['Kill it somewhere open — the minis scatter in opposite directions.', 'The minis don\'t split again. It ends.', 'Ground Slam the pair the instant they spawn, before they separate.'],
+    bodyScale: 1, isBall: true
+  },
+  {
+    id: 'giantSlime', label: 'Giant Slime', color: '#4caf50', tier: 'rare',
+    hp: 25, speed: 'Sliding kite (slow)', punchDmg: 0, kickDmg: 0, specials: ['Splits TWO generations deep: 1 → 2 → 4 slimes', 'Ranged slime bolt (2 DMG)', 'NORMAL red blood', 'Appears from level 7'],
+    description: 'The Slime Block\'s overgrown cousin — a hulking green cube that lobs heavier bolts and refuses to stay dead. Kill it and it splits into two; kill those and each splits AGAIN. One contract, seven bodies. Unlike its little cousin, it bleeds ordinary red.',
+    traits: ['Cube body', '1.7× size', 'Splits twice: 7 slimes total', 'Red blood'],
+    tips: ['Do the arithmetic before engaging: 1 + 2 + 4 = seven kills.', 'Fight it in the open — the second-generation minis scatter wide.', 'Ground Slam the mid-generation pair before they split further.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'colossalSlime', label: 'Colossal Slime', color: '#2e7d32', tier: 'rare',
+    hp: 45, speed: 'Sliding kite (very slow)', punchDmg: 0, kickDmg: 0, specials: ['Splits THREE generations deep: 1 → 2 → 4 → 8 slimes', 'Ranged slime bolt (3 DMG)', 'NORMAL red blood', 'Appears from level 10'],
+    description: 'The final form of the slime dynasty: a monolithic dark-green cube nearly two and a half times normal size. Putting it down for good means carving through THREE full generations — fifteen slimes from one kill order. It, too, bleeds plain red.',
+    traits: ['Cube body', '2.4× size', 'Splits three times: 15 slimes total', 'Red blood', '45 HP'],
+    tips: ['This is a WAVE disguised as one enemy. Clear the field before you pop it.', 'Each generation is smaller, weaker, and faster to kill — the danger is the crossfire, not the HP.', 'Its 3-damage bolts hurt at every generation; never kite in a straight line.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'slimeKing', label: 'Slime King', color: '#00695c', tier: 'rare',
+    hp: 60, speed: 'Sliding kite (very slow)', punchDmg: 0, kickDmg: 0, specials: ['SPAWNS a baby slime every ~6s while you\'re near', 'Splits THREE generations deep on death (15 slimes)', 'Wears an actual crown', 'Appears from level 12'],
+    description: 'The crowned apex of the slime dynasty. He doesn\'t wait to die to multiply — every few seconds another baby slime plops out of him and joins the fight. Kill him and the colossal-grade three-generation split happens anyway. Long live the king; ideally not that long.',
+    traits: ['Cube body', '2.6× size', 'Live baby-slime spawner', 'Splits 3 deep on death', 'Red blood'],
+    tips: ['Every second he lives is another slime — this is a DPS check, not a dance.', 'Kill the babies LAST; they don\'t split.', 'Bring Ground Slam for the post-mortem generation waves.'],
+    bodyScale: 1, isCube: true, isSlimeKing: true
+  },
+  {
+    id: 'magnetMan', label: 'Magnet Man', color: '#d84315', tier: 'rare',
+    hp: 10, speed: '85% normal', punchDmg: 1, kickDmg: 2, specials: ['Constantly DRAGS you toward him while within range', 'Drag is weak — you can walk against it', 'Appears from level 5'],
+    description: 'A rust-red brawler with a magnetic field where his personality should be. Get within range and you\'ll feel a constant tug reeling you toward his fists — weak enough to fight, strong enough to ruin your spacing against everything else on the field.',
+    traits: ['Magnetic drag aura', 'Standard melee kit', 'MAGNETIZED status while in range'],
+    tips: ['His drag pulls you out of position against OTHER enemies — that\'s the real threat.', 'Dash breaks the tug instantly.', 'Fight him alone and the magnet barely matters; fight him in a crowd and it\'s lethal.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'reflectorMan', label: 'Reflector', color: '#e0e0e0', tier: 'rare',
+    hp: 12, speed: '90% normal', punchDmg: 1, kickDmg: 0, specials: ['BOUNCES helper/turret/drone bolts back at your team', 'Melee attacks work normally on him', 'Appears from level 6'],
+    description: 'A mirror-polished stickman who treats your firepower as a lending library. Any allied projectile that hits him flips around mid-air and comes back on the enemy team — your turret network becomes his artillery. Fists still work fine.',
+    traits: ['Reflects allied projectiles', 'Vulnerable to melee', 'Chrome finish'],
+    tips: ['MELEE HIM. Ranged builds feed him ammunition.', 'Reposition so reflected bolts don\'t line up with your helpers.', 'Ranged helpers and turrets should be lured away from his lane first.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'repulsorMan', label: 'Repulsor', color: '#90caf9', tier: 'rare',
+    hp: 12, speed: '80% (kites)', punchDmg: 0, kickDmg: 0, specials: ['Constantly PUSHES you away while in range', 'Weak ranged poke (1 DMG)', 'Appears from level 5'],
+    description: 'The Magnet Man\'s pale opposite: an ice-blue kiter wrapped in a repulsion field. Walk at him and the field walks you right back out; meanwhile he pings you with weak bolts and lets his friends do the real hurting. You\'ll see a REPULSED status while caught in the field.',
+    traits: ['Repulsion field', 'Ranged only', 'Terrible alone, infuriating in a crowd'],
+    tips: ['Dash punches straight through the field — save it for the approach.', 'He shoves you INTO hazards if you fight near lava tiles. Watch your feet.', 'Ranged helpers and turrets ignore the field entirely: his hard counter.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'stormMan', label: 'Storm Man', color: '#82b1ff', tier: 'rare',
+    hp: 12, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['ONLY spawns during the Stormy Weather modifier', 'Lightning bolt (2 DMG) that FORKS to a second target', 'Fast projectile'],
+    description: 'He rides the storm in — literally. Storm Man never appears under clear skies; switch on Stormy Weather and he starts arriving with the rain, hurling fast lightning that arcs off its first victim into the nearest ally for bonus damage. Your helpers hate him.',
+    traits: ['Weather-exclusive', 'Chain lightning (arcs once, half damage)', 'Kites at range'],
+    tips: ['Spread out from your helpers — the arc needs a second target within range.', 'His bolts are FAST; juke sideways early, not on reaction.', 'Turn off Stormy Weather and he stops spawning entirely. He IS the weather tax.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'helperUnit', label: 'Helper', color: '#4fc3f7', tier: 'neutral',
+    hp: '2+', speed: '70% of yours', punchDmg: '0+', kickDmg: '0+', specials: ['YOUR squadmate — fights enemies at your side', 'Gained via the Add Helper upgrade', 'Respawns when killed', 'Stats grow with helper upgrade picks'],
+    description: 'Your stickman\'s loyal understudy, tinted in your colour. Starts life as a 2 HP pacifist and grows into a bruiser through helper upgrades. It hunts enemies on its own, takes hits meant for you, and comes back when it falls.',
+    traits: ['Allied unit', 'Upgradeable HP/DMG/speed', 'Auto-respawns', 'Can be spawned AS any enemy shape in sandbox'],
+    tips: ['Level one helper up hard rather than collecting many weak ones — the Minion copies your BEST, not your average.', 'Helpers draw aggro: stand behind yours in special fights.', 'Sandbox\'s Spawn-as-helper checkbox turns almost any enemy into one.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'turretUnit', label: 'Sentry Turret', color: '#4fc3f7', tier: 'neutral',
+    hp: '3 / ∞', speed: 'Stationary', punchDmg: 0, kickDmg: 0, specials: ['Auto-fires at the nearest enemy in range', 'Player version (permanent) via the Turret upgrade', 'Enemy version (3 HP, expires) deployed by the Engineer'],
+    description: 'A squat automated gun on a steel base. Yours (tinted your colour) is a permanent fire-support emplacement gained from the Turret upgrade; the Engineer\'s orange knock-off is killable, temporary, and pointed at you.',
+    traits: ['Stationary auto-gun', 'Player turrets: permanent', 'Enemy turrets: killable, expire', 'New: sandbox E.Turret button'],
+    tips: ['Plant player turrets at chokepoints you keep retreating through.', 'Enemy sentries die to a couple of melee hits — dash in, smash, dash out.', 'Turret death is spectacular: it chars, falls apart, and burns. Enjoy it.'],
+    isTurret: true
+  },
+  {
+    id: 'playerUnit', label: 'The Player (You)', color: '#4fc3f7', tier: 'neutral',
+    hp: '10+', speed: 'Walk / sprint / dash', punchDmg: '1+', kickDmg: '2+', specials: ['Punch, kick, dash, parry, ground slam (upgrades)', 'Ragdolls on death — corpse stays behind', 'This is you'],
+    description: 'The stickman himself — recolourable in the menu, upgradeable through level picks, and the only entity in this world with a respawn guarantee. Punches fast, kicks hard, and leaves a very literal trail of past selves behind.',
+    traits: ['You', 'Fully upgradeable', 'Corpses persist after death', 'Feared by civilians you punch'],
+    tips: ['Kick for damage, punch for speed — mix per matchup.', 'Your corpse ragdolls where you die. Wave to your past mistakes.', 'Civilians remember being hit. Armymen remember it louder.'],
+    bodyScale: 1, weightMod: 0
+  }
+);
+
+// ── Clear variants: auto-generated from every summoned special ──────────
+// A special has a 1% chance to spawn "Clear" (also forced by the sandbox's
+// Clear flag/checkbox): translucent, and 25% weaker across the board.
+ENEMIES.filter(e => e.tier === 'special').slice().forEach(base => {
+  ENEMIES.push({
+    ...base,
+    id: base.id + 'Clear',
+    label: 'Clear ' + base.label,
+    tier: 'clear',
+    hp: Math.max(1, Math.round(base.hp * 0.75)),
+    punchDmg: +(base.punchDmg * 0.75).toFixed(2),
+    kickDmg: +(base.kickDmg * 0.75).toFixed(2),
+    isClearVariant: true,
+    specials: [...base.specials, 'Clear variant: 75% of normal stats'],
+    traits: ['Translucent body', '75% HP & damage', ...base.traits],
+    description: `A translucent, weakened apparition of the ${base.label} — every special has a 1% chance to spawn as this Clear form (and the sandbox's Clear flag summons nothing else). Same moves and behavior, but only 75% of the health and damage.`,
+    tips: ['Same moveset as the normal form — use the same counters, just finish it faster.', 'The translucency makes it easy to lose against bright skies; track its label.', ...base.tips.slice(0, 1)]
+  });
+});
+
+// ── Three.js viewer setup ──────────────────────────────────────────────────
+const canvas = document.getElementById('viewer-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+// Transparent clear so the panel's radial-gradient backdrop shows through.
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+camera.position.set(0, 1.2, 3.5);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+dirLight.position.set(2, 4, 3);
+dirLight.castShadow = true;
+scene.add(dirLight);
+const fillLight = new THREE.DirectionalLight(0x4fc3f7, 0.3);
+fillLight.position.set(-2, 1, -2);
+scene.add(fillLight);
+
+// Floor grid + a soft glow disc under the model.
+const gridHelper = new THREE.GridHelper(6, 12, 0x2b3a46, 0x1a242c);
+scene.add(gridHelper);
+const glowDisc = new THREE.Mesh(
+  new THREE.CircleGeometry(1.4, 40),
+  new THREE.MeshBasicMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.07, depthWrite: false })
+);
+glowDisc.rotation.x = -Math.PI / 2;
+glowDisc.position.y = 0.005;
+scene.add(glowDisc);
+
+// OrbitControls equivalent (manual implementation, no external dependency)
+let isDragging = false, isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let theta = 0, phi = Math.PI / 6, radius = 3.5;
+let target = new THREE.Vector3(0, 0.9, 0);
+
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  isRightDrag = e.button === 2;
+  prevMouse = { x: e.clientX, y: e.clientY };
+});
+window.addEventListener('mouseup', () => isDragging = false);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  if (isRightDrag) {
+    target.x -= dx * 0.01;
+    target.y += dy * 0.01;
+  } else {
+    theta -= dx * 0.008;
+    phi = Math.max(0.05, Math.min(Math.PI / 2, phi - dy * 0.008));
+  }
+});
+canvas.addEventListener('wheel', (e) => {
+  radius = Math.max(1.2, Math.min(8, radius + e.deltaY * 0.005));
+});
+
+function updateCamera() {
+  const x = target.x + radius * Math.sin(theta) * Math.cos(phi);
+  const y = target.y + radius * Math.sin(phi);
+  const z = target.z + radius * Math.cos(theta) * Math.cos(phi);
+  camera.position.set(x, y, z);
+  camera.lookAt(target);
+}
+
+// ── Bone-morph engine (port of src/world/characterMorph.ts) ─────────────
+// Applies the same sliders the game uses so rare variants look identical
+// to their in-game counterparts. Called on a fresh SkeletonUtils clone
+// whose bones are still in their original bind-pose, so there is no need
+// to cache originals — we read the current values as "original" directly.
+function applyBodySliders(model, sliders) {
+  const bone = name => { let b = null; model.traverse(c => { if (c.name === name) b = c; }); return b; };
+  const SPINE  = ['mixamorigSpine','mixamorigSpine1','mixamorigSpine2'];
+  const LEG_U  = ['mixamorigLeftUpLeg','mixamorigRightUpLeg'];
+  const LEG_L  = ['mixamorigLeftLeg','mixamorigRightLeg'];
+  const ARM_U  = ['mixamorigLeftArm','mixamorigRightArm'];
+
+  if (sliders.height != null) {
+    const s = sliders.height;
+    model.updateMatrixWorld(true);
+    const foot = bone('mixamorigLeftFoot');
+    const beforeY = foot ? foot.getWorldPosition(new THREE.Vector3()).y : 0;
+    [...LEG_U, ...LEG_L, ...SPINE].forEach(n => { const b = bone(n); if (b) b.scale.y *= s; });
+    const neck = bone('mixamorigNeck');
+    if (neck) neck.scale.y *= 1 + (s - 1) * 0.3;
+    if (foot) {
+      model.updateMatrixWorld(true);
+      const afterY = foot.getWorldPosition(new THREE.Vector3()).y;
+      const hips = bone('mixamorigHips');
+      if (hips) hips.position.y += beforeY - afterY;
+    }
+  }
+
+  if (sliders.weight != null) {
+    const w = sliders.weight;
+    const tF = 1 + w * 0.35, aF = 1 + w * 0.15;
+    ['mixamorigHips', ...SPINE, ...LEG_U].forEach(n => { const b = bone(n); if (b) { b.scale.x *= tF; b.scale.z *= tF; } });
+    ARM_U.forEach(n => { const b = bone(n); if (b) { b.scale.x *= aF; b.scale.z *= aF; } });
+  }
+
+  // Direct per-bone overrides — applied BEFORE headSize so headSize can
+  // measure the correct inherited scale after all structural morphs.
+  // Each entry is [sx, sy, sz] multiplied onto the bone's current local scale.
+  if (sliders.boneOverrides) {
+    for (const [name, [sx, sy, sz]] of Object.entries(sliders.boneOverrides)) {
+      const b = bone(name);
+      if (b) b.scale.set(b.scale.x * sx, b.scale.y * sy, b.scale.z * sz);
+    }
+  }
+
+  if (sliders.headSize != null) {
+    // Mirror characterMorph.ts: measure inherited scale in model-relative
+    // space (not world) to cancel ancestor distortions from all other morphs.
+    model.updateMatrixWorld(true);
+    const head = bone('mixamorigHead');
+    if (head) {
+      const relMat = model.matrixWorld.clone().invert().multiply(head.matrixWorld);
+      const iS = new THREE.Vector3();
+      relMat.decompose(new THREE.Vector3(), new THREE.Quaternion(), iS);
+      const ts = sliders.headSize;
+      head.scale.set(head.scale.x * (ts / iS.x), head.scale.y * (ts / iS.y), head.scale.z * (ts / iS.z));
+    }
+  }
+}
+
+// ── Ambient particle system ──────────────────────────────────────────────
+// style: 'orbs' (rising), 'sparks' (fast upward), 'snow' (falling)
+class SpecialParticles {
+  constructor(color, modelHeight, style = 'orbs') {
+    this.style = style;
+    const COUNT = style === 'sparks' ? 36 : 28;
+    const pos   = new Float32Array(COUNT * 3);
+    const vel   = new Float32Array(COUNT * 3);
+    const life  = new Float32Array(COUNT);
+    for (let i = 0; i < COUNT; i++) this._resetParticle(pos, vel, life, i, modelHeight, true);
+    this.pos = pos; this.vel = vel; this.life = life;
+    this.count = COUNT; this.modelH = modelHeight;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const ptSize = style === 'snow' ? 0.045 : style === 'sparks' ? 0.04 : 0.055;
+    const mat = new THREE.PointsMaterial({
+      color: new THREE.Color(color), size: ptSize,
+      blending: THREE.AdditiveBlending, transparent: true,
+      opacity: 0.85, depthWrite: false, sizeAttenuation: true
+    });
+    this.points = new THREE.Points(geo, mat);
+    this.geo = geo;
+    this.light = new THREE.PointLight(new THREE.Color(color), 0.6, 3.5);
+    this.light.position.set(0, modelHeight * 0.5, 0.4);
+  }
+  _resetParticle(pos, vel, life, i, h, scatter) {
+    const ang = Math.random() * Math.PI * 2;
+    const r   = this.style === 'sparks' ? 0.1 + Math.random() * 0.7 : 0.2 + Math.random() * 0.55;
+    pos[i*3]   = Math.cos(ang) * r;
+    pos[i*3+2] = Math.sin(ang) * r;
+    if (this.style === 'snow') {
+      pos[i*3+1] = scatter ? Math.random() * h : h + 0.15;
+      vel[i*3]   = (Math.random() - 0.5) * 0.08;
+      vel[i*3+1] = -(0.28 + Math.random() * 0.28);
+      vel[i*3+2] = (Math.random() - 0.5) * 0.08;
+    } else if (this.style === 'sparks') {
+      pos[i*3+1] = scatter ? Math.random() * h : 0.05;
+      vel[i*3]   = (Math.random() - 0.5) * 0.5;
+      vel[i*3+1] = 0.8 + Math.random() * 1.0;
+      vel[i*3+2] = (Math.random() - 0.5) * 0.5;
+    } else {
+      pos[i*3+1] = scatter ? Math.random() * h : 0.05;
+      vel[i*3]   = (Math.random() - 0.5) * 0.15;
+      vel[i*3+1] = 0.35 + Math.random() * 0.45;
+      vel[i*3+2] = (Math.random() - 0.5) * 0.15;
+    }
+    life[i] = 0.7 + Math.random() * 0.3;
+  }
+  update(dt) {
+    const { pos, vel, life, count, modelH } = this;
+    for (let i = 0; i < count; i++) {
+      pos[i*3]   += vel[i*3]   * dt;
+      pos[i*3+1] += vel[i*3+1] * dt;
+      pos[i*3+2] += vel[i*3+2] * dt;
+      life[i]    -= dt / (1.5 + Math.random() * 0.5);
+      const done = this.style === 'snow' ? pos[i*3+1] < -0.3 : pos[i*3+1] > modelH + 0.4;
+      if (life[i] <= 0 || done) this._resetParticle(pos, vel, life, i, modelH, false);
+    }
+    this.geo.attributes.position.needsUpdate = true;
+    this.light.intensity = 0.45 + Math.sin(Date.now() * 0.003) * 0.2;
+  }
+  dispose() { this.geo.dispose(); this.points.material.dispose(); }
+}
+
+const PARTICLE_STYLE_MAP = {
+  lavaMan:         { color: '#ff5722', style: 'sparks' },
+  waterMan:        { color: '#29b6f6', style: 'snow'   },
+  invisibleMan:    { color: '#d0eeff', style: 'snow'   },
+  fireMan:         { color: '#ff9800', style: 'sparks' },
+  weaponMan:       { color: '#9fa8da', style: 'orbs'   },
+  purpleMan:       { color: '#ce93d8', style: 'orbs'   },
+  pinkMan:         { color: '#f48fb1', style: 'orbs'   },
+  greenMan:        { color: '#66bb6a', style: 'orbs'   },
+  yellowMan:       { color: '#fff176', style: 'sparks' },
+  blackMan:        { color: '#78909c', style: 'orbs'   },
+  tomatoMan:       { color: '#ff7043', style: 'sparks' },
+  snowMan:         { color: '#e3f2fd', style: 'snow'   },
+  glowingGreenMan: { color: '#69ff47', style: 'sparks' },
+  medicMan:        { color: '#4caf50', style: 'orbs'   },
+  rageMan:         { color: '#ff5722', style: 'sparks' },
+  shieldBearer:    { color: '#b0bec5', style: 'orbs'   },
+  bountyHunter:    { color: '#ce93d8', style: 'sparks' },
+  brainMan:        { color: '#f8bbd0', style: 'orbs'   },
+  babyMan:         { color: '#b3e5fc', style: 'orbs'   },
+  giantMan:        { color: '#a1887f', style: 'orbs'   },
+  fatMan:          { color: '#bcaaa4', style: 'orbs'   },
+  skinnyMan:       { color: '#cfd8dc', style: 'orbs'   },
+  tallMan:         { color: '#78909c', style: 'orbs'   },
+  strongRangedMan: { color: '#64b5f6', style: 'orbs'   },
+  strongKickMan:   { color: '#ff7043', style: 'sparks' },
+  strongPunchMan:  { color: '#ef5350', style: 'sparks' },
+  comboMan:        { color: '#4db6ac', style: 'orbs'   },
+  strongComboMan:  { color: '#26a69a', style: 'orbs'   },
+  sniperMan:       { color: '#ff5252', style: 'sparks' },
+  copycatMan:      { color: '#ffd54f', style: 'orbs'   },
+  vampireMan:      { color: '#d32f2f', style: 'sparks' },
+  phaseMan:        { color: '#b39ddb', style: 'snow'   },
+  splitMan:        { color: '#4dd0e1', style: 'orbs'   },
+  armourMan:       { color: '#b0bec5', style: 'orbs'   },
+  cloakedAssassin: { color: '#455a64', style: 'snow'   },
+  engineerMan:     { color: '#ffb74d', style: 'sparks' },
+  bombMan:         { color: '#ff9800', style: 'sparks' },
+  shockerCube:     { color: '#2979ff', style: 'sparks' },
+  slowCube:        { color: '#80d8ff', style: 'snow'   },
+  smashBall:       { color: '#9e9e9e', style: 'orbs'   },
+  lavaSmashBall:   { color: '#ff6d00', style: 'sparks' },
+  lavaGiant:       { color: '#ff6d00', style: 'sparks' },
+  juggernaut:      { color: '#616161', style: 'orbs'   },
+  trapperMan:      { color: '#4e342e', style: 'orbs'   },
+  resilientMan:    { color: '#ffb300', style: 'sparks' },
+  superResilientMan: { color: '#ff6f00', style: 'sparks' },
+  enemyBodyguard:  { color: '#7986cb', style: 'orbs'   },
+};
+
+// ── FBX loader ──────────────────────────────────────────────────────────
+const loader = new FBXLoader();
+// Material-men skin textures: one shared texture per URL.
+const skinTextureCache = new Map();
+const textureLoader = new THREE.TextureLoader();
+function getSkinTexture(url) {
+  let tex = skinTextureCache.get(url);
+  if (!tex) {
+    tex = textureLoader.load(url);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    skinTextureCache.set(url, tex);
+  }
+  return tex;
+}
+let baseFbx          = null;
+let currentModel     = null;
+let pendingEnemy     = null;
+let particles        = null;
+let medicCrossSprite = null;
+
+const loadingMesh = new THREE.Mesh(
+  new THREE.BoxGeometry(0.2, 0.2, 0.2),
+  new THREE.MeshBasicMaterial({ color: 0x4fc3f7, wireframe: true })
+);
+
+// ── Idle animation ──────────────────────────────────────────────────────
+// Strip ALL hips position motion so the animation can never drift the
+// model off the ground. Locking X/Z only (as the game does) still lets
+// Y-bob float the model above the grid in a static 3D viewer; locking Y
+// too keeps feet planted while all other bones still animate freely.
+function stripRootMotion(clip) {
+  const track = clip.tracks.find(t => t.name === 'mixamorigHips.position');
+  if (!track) return;
+  const v = track.values;
+  const bx = v[0], by = v[1], bz = v[2];
+  for (let i = 0; i < v.length; i += 3) { v[i] = bx; v[i+1] = by; v[i+2] = bz; }
+}
+
+let idleClip    = null;   // shared, loaded once
+let currentMixer = null;  // one AnimationMixer per displayed model
+
+function attachIdleAnimation(model) {
+  if (currentMixer) { currentMixer.stopAllAction(); currentMixer = null; }
+  if (!idleClip || !model) return;
+  const mixer = new THREE.AnimationMixer(model);
+  const action = mixer.clipAction(idleClip);
+  action.play();
+  currentMixer = mixer;
+}
+
+// ── Model display ───────────────────────────────────────────────────────
+function showEnemy(enemy) {
+  // Tear down previous model, mixer, particles, and medic cross.
+  if (currentMixer) { currentMixer.stopAllAction(); currentMixer = null; }
+  if (currentModel) { scene.remove(currentModel); currentModel = null; }
+  if (particles) { scene.remove(particles.points); scene.remove(particles.light); particles.dispose(); particles = null; }
+  if (medicCrossSprite) {
+    medicCrossSprite.parent && medicCrossSprite.parent.remove(medicCrossSprite);
+    medicCrossSprite.material.map && medicCrossSprite.material.map.dispose();
+    medicCrossSprite.material.dispose();
+    medicCrossSprite = null;
+  }
+  // Sentry turret: the in-game primitive build (base drum + head + barrel).
+  if (enemy.isTurret) {
+    const turret = new THREE.Group();
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.28, 0.34, 0.3, 10),
+      new THREE.MeshStandardMaterial({ color: '#37474f', metalness: 0.6, roughness: 0.4 })
+    );
+    base.position.y = 0.15;
+    const head = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.24, 0.3),
+      new THREE.MeshStandardMaterial({ color: enemy.color, emissive: enemy.color, emissiveIntensity: 0.5, metalness: 0.5, roughness: 0.35 })
+    );
+    head.position.y = 0.45;
+    const barrel = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.045, 0.045, 0.3, 8),
+      new THREE.MeshStandardMaterial({ color: '#263238', metalness: 0.7, roughness: 0.3 })
+    );
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(0, 0.45, 0.26);
+    turret.add(base, head, barrel);
+    turret.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    scene.add(turret);
+    currentModel = turret;
+    target.set(0, 0.42, 0);
+    radius = 2.2;
+    return;
+  }
+
+  // Cube/ball enemies: simple primitives, no skeleton. Cubes get their
+  // in-game googly eyes on the front face.
+  if (enemy.isCube || enemy.isBall) {
+    const shapeGroup = new THREE.Group();
+    const body = new THREE.Mesh(
+      enemy.isBall ? new THREE.SphereGeometry(0.42, 20, 16) : new THREE.BoxGeometry(0.7, 0.7, 0.7),
+      new THREE.MeshStandardMaterial({ color: enemy.color, emissive: enemy.color, emissiveIntensity: 0.35, roughness: 0.5, metalness: enemy.isBall ? 0.3 : 0 })
+    );
+    body.position.y = enemy.isBall ? 0.42 : 0.38;
+    body.castShadow = true;
+    shapeGroup.add(body);
+    if (enemy.isCube) {
+      [-1, 1].forEach(side => {
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.077, 10, 8), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.3 }));
+        eye.position.set(0.133 * side, 0.098, 0.365);
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: '#111111' }));
+        pupil.position.z = 0.049;
+        eye.add(pupil);
+        body.add(eye);
+      });
+    }
+    // The Slime King's golden crown (band + four spikes on the top face).
+    if (enemy.isSlimeKing) {
+      const gold = () => new THREE.MeshStandardMaterial({ color: '#ffd54f', metalness: 0.75, roughness: 0.25, emissive: '#ffb300', emissiveIntensity: 0.25 });
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.09, 10), gold());
+      band.position.y = 0.4;
+      body.add(band);
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2;
+        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.11, 6), gold());
+        spike.position.set(Math.cos(a) * 0.13, 0.49, Math.sin(a) * 0.13);
+        body.add(spike);
+      }
+    }
+    scene.add(shapeGroup);
+    currentModel = shapeGroup;
+    target.set(0, 0.5, 0);
+    radius = 2.6;
+    const shapeParticleCfg = PARTICLE_STYLE_MAP[enemy.id];
+    if (shapeParticleCfg) {
+      particles = new SpecialParticles(shapeParticleCfg.color, 0.9, shapeParticleCfg.style);
+      scene.add(particles.points);
+      scene.add(particles.light);
+    }
+    return;
+  }
+
+  if (!baseFbx) { pendingEnemy = enemy; return; }
+
+  // SkeletonUtils.clone re-binds the skeleton; plain .clone(true) leaves
+  // bone references broken and the skinned mesh collapses to a point.
+  const clone      = skeletonClone(baseFbx);
+  const bodyScale  = enemy.bodyScale ?? 1;
+  clone.scale.setScalar(0.012 * bodyScale);
+
+  // Colour every mesh with the enemy's in-game colour (or glass for the
+  // invisible man, or a texture map for the arena's material men).
+  clone.traverse(child => {
+    if (!child.isMesh) return;
+    child.castShadow = true;
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+    const newMats = mats.map(mat => {
+      const c = mat.clone();
+      if (enemy.isGlass || enemy.isClearVariant) {
+        // Clear variants keep their base tint; the Invisible Man keeps his
+        // signature icy glass look.
+        c.color.set(enemy.isClearVariant ? enemy.color : '#c8e8ff');
+        c.transparent = true;
+        c.opacity = enemy.isClearVariant ? 0.45 : 0.35;
+        c.roughness = 0.04;
+        c.metalness = 0.15;
+      } else if (enemy.skinTexture) {
+        // Material men: white base so the map shows untinted.
+        c.map = getSkinTexture(enemy.skinTexture);
+        c.color.set('#ffffff');
+        c.needsUpdate = true;
+      } else {
+        c.color.set(enemy.color);
+      }
+      return c;
+    });
+    child.material = Array.isArray(child.material) ? newMats : newMats[0];
+  });
+
+  // Apply bone morphs for rare variants that have body sliders.
+  if (enemy.bodySliders) applyBodySliders(clone, enemy.bodySliders);
+
+  // Add to scene, start the idle animation, and apply one frame so that the
+  // fighting-stance foot position (not the T-pose bind position) is used for
+  // grounding. This prevents the model from appearing to float above the grid.
+  clone.position.set(0, 0, 0);
+  scene.add(clone);
+  attachIdleAnimation(clone);
+  if (currentMixer) currentMixer.update(0);
+  clone.updateMatrixWorld(true);
+
+  const footBone = clone.getObjectByName('mixamorigLeftFoot') || clone.getObjectByName('mixamorigRightFoot');
+  if (footBone) {
+    const fp = new THREE.Vector3();
+    footBone.getWorldPosition(fp);
+    clone.position.y = -fp.y;
+  } else {
+    const box0 = new THREE.Box3().setFromObject(clone);
+    clone.position.y = -box0.min.y;
+  }
+  clone.updateMatrixWorld(true);
+  currentModel = clone;
+
+  // Camera framing uses the full bbox taken AFTER the final position, and
+  // accounts for the panel's aspect ratio - the viewer column is tall and
+  // narrow, so the HORIZONTAL fov is usually the limiting dimension.
+  const box = new THREE.Box3().setFromObject(clone);
+  const h = box.max.y - box.min.y;
+  target.set(0, Math.max(h * 0.45, 0.7), 0);
+  const fovRad = (camera.fov * Math.PI) / 180;
+  const halfTan = Math.tan(fovRad / 2);
+  const fitVertical = (h * 1.35) / (2 * halfTan);
+  const fitHorizontal = (h * 0.9) / (2 * halfTan * Math.max(camera.aspect, 0.1));
+  radius = Math.max(fitVertical, fitHorizontal, 2.2);
+
+  // Animation is already attached above — no second call needed.
+
+  // Ambient particles for all enemy types that have a style entry - Clear
+  // variants reuse their base type's particles.
+  const particleCfg = PARTICLE_STYLE_MAP[enemy.id] || PARTICLE_STYLE_MAP[enemy.id.replace(/Clear$/, '')];
+  if (particleCfg) {
+    particles = new SpecialParticles(particleCfg.color, h, particleCfg.style);
+    scene.add(particles.points);
+    scene.add(particles.light);
+  }
+
+  // Medic: red cross sprite on the spine2 bone (chest + back facing).
+  if (enemy.id === 'medicMan') {
+    const cs = 64;
+    const cc = document.createElement('canvas');
+    cc.width = cc.height = cs;
+    const cx = cc.getContext('2d');
+    const cr = 10;
+    cx.fillStyle = 'rgba(255,255,255,0.9)';
+    cx.beginPath();
+    cx.moveTo(cr,0); cx.lineTo(cs-cr,0); cx.quadraticCurveTo(cs,0,cs,cr);
+    cx.lineTo(cs,cs-cr); cx.quadraticCurveTo(cs,cs,cs-cr,cs);
+    cx.lineTo(cr,cs); cx.quadraticCurveTo(0,cs,0,cs-cr);
+    cx.lineTo(0,cr); cx.quadraticCurveTo(0,0,cr,0);
+    cx.closePath(); cx.fill();
+    cx.fillStyle = '#d32f2f';
+    cx.fillRect(10, 26, 44, 12);
+    cx.fillRect(26, 10, 12, 44);
+    const tex = new THREE.CanvasTexture(cc);
+    const smat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false });
+    medicCrossSprite = new THREE.Sprite(smat);
+    medicCrossSprite.renderOrder = 2;
+    medicCrossSprite.scale.setScalar(22);
+    const spineBone = currentModel.getObjectByName('mixamorigSpine2');
+    if (spineBone) spineBone.add(medicCrossSprite);
+  }
+}
+
+scene.add(loadingMesh);
+// Load base mesh.
+loader.load('/anims/stickman_base.fbx',
+  fbx => {
+    baseFbx = fbx;
+    scene.remove(loadingMesh);
+    if (pendingEnemy) { showEnemy(pendingEnemy); pendingEnemy = null; }
+  },
+  null,
+  err => console.error('FBX load error:', err)
+);
+// Load idle animation (fighting-idle — same one the game uses for all actors).
+loader.load('/anims/fighting-idle.fbx',
+  anim => {
+    const clip = anim.animations[0];
+    if (!clip) return;
+    stripRootMotion(clip);
+    // Drop scale tracks so the animation never fights our bone morphs.
+    clip.tracks = clip.tracks.filter(t => !t.name.endsWith('.scale'));
+    idleClip = clip;
+    // Attach to currently displayed model if already visible.
+    if (currentModel) attachIdleAnimation(currentModel);
+  },
+  null,
+  err => console.warn('Idle anim load error:', err)
+);
+
+// ── Resize handling ───────────────────────────────────────────────────────
+function resizeViewer() {
+  const panel = canvas.parentElement;
+  if (!panel) return;
+  const hintBar = panel.querySelector('.viewer-controls-hint');
+  const hintH = hintBar ? hintBar.offsetHeight : 28;
+  const w = panel.clientWidth;
+  const h = panel.clientHeight - hintH;
+  if (w <= 0 || h <= 0) { requestAnimationFrame(resizeViewer); return; }
+  renderer.setSize(w, h, false);
+  canvas.style.height = h + 'px';
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+// ── Render loop ──────────────────────────────────────────────────────────
+let animFrame;
+let lastT = 0;
+let autoRotate = true;
+document.getElementById('auto-rotate').addEventListener('change', function () { autoRotate = this.checked; });
+function animate(t) {
+  animFrame = requestAnimationFrame(animate);
+  // Clamp AND NaN-guard dt: the first frame has no previous timestamp, and a
+  // NaN here would poison theta/rotations/mixer state permanently.
+  const dt = Math.min(Math.max((t - lastT) / 1000, 0), 0.1) || 0;
+  lastT = t;
+  loadingMesh.rotation.y += dt * 1.5;
+  if (autoRotate && !isDragging) theta += dt * 0.35;
+  if (currentMixer) currentMixer.update(dt);
+  if (particles) particles.update(dt);
+  updateCamera();
+  renderer.render(scene, camera);
+}
+// Start via rAF so the first invocation receives a real timestamp.
+requestAnimationFrame(animate);
+
+const ro = new ResizeObserver(resizeViewer);
+ro.observe(canvas.parentElement);
+requestAnimationFrame(resizeViewer);
+
+// ── Build UI ──────────────────────────────────────────────────────────────
+function tierLabel(tier) {
+  return { basic: 'Basic', rare: 'Rare Variant', arena: 'Arena Roster', special: 'Summoned Special', clear: 'Clear Variant', neutral: 'Neutral Units' }[tier] ?? tier;
+}
+function tierClass(tier) {
+  return { basic: 'badge-basic', rare: 'badge-rare', arena: 'badge-arena', special: 'badge-special', clear: 'badge-clear', neutral: 'badge-neutral' }[tier] ?? '';
+}
+function tierColor(tier) {
+  return { basic: '#aed581', rare: '#ffcc80', arena: '#ff8a65', special: '#ef9a9a', clear: '#d0eeff', neutral: '#c5e1a5' }[tier] ?? '#ccc';
+}
+function hpMax(tier) {
+  return tier === 'special' ? 35 : tier === 'clear' ? 27 : tier === 'arena' ? 45 : 20;
+}
+function speedLabel(s) { return s; }
+
+// Level gates from worldObjects.ts's rare-enemy roll table - shown as a
+// badge so players know when each rare starts appearing naturally.
+const SPAWN_LEVELS = {
+  babyMan: 2, shieldBearer: 3, sniperMan: 3, copycatMan: 4, vampireMan: 4,
+  phaseMan: 5, bombMan: 5, splitMan: 6, armourMan: 6, giantMan: 6, tallMan: 6,
+  cloakedAssassin: 7, fatMan: 7, engineerMan: 8,
+  coward: 2, slimeBlock: 4, shockerCube: 5, slowCube: 5, smashBall: 5,
+  juggernaut: 6, resilientMan: 5, superResilientMan: 9,
+  minionMan: 4, adaptiveMan: 4, slowBall: 5,
+  ragdollThrower: 6, ragdollSmashBall: 6, splitBall: 6,
+  giantSlime: 7, colossalSlime: 10,
+  slimeKing: 12, magnetMan: 5, reflectorMan: 6, repulsorMan: 5
+};
+
+function renderInfo(enemy) {
+  const panel = document.getElementById('info-panel');
+  const dmgMax = 20;
+  // Some entries carry descriptive stat strings ('Copies', '2+') - the
+  // bars just render empty for those instead of poisoning the width with NaN.
+  const hpPct = Math.round((enemy.hp / hpMax(enemy.tier)) * 100) || 0;
+  const punchPct = Math.round((enemy.punchDmg / dmgMax) * 100) || 0;
+  const kickPct = Math.round((enemy.kickDmg / dmgMax) * 100) || 0;
+
+  const spawnLevel = SPAWN_LEVELS[enemy.id];
+  panel.classList.remove('fade-in');
+  void panel.offsetWidth; // restart the CSS animation
+  panel.classList.add('fade-in');
+  panel.innerHTML = `
+    <div class="enemy-name" style="color:${enemy.color}">${enemy.label}</div>
+    <span class="enemy-type-badge ${tierClass(enemy.tier)}">${tierLabel(enemy.tier)}</span>${spawnLevel ? `<span class="enemy-type-badge badge-spawn">Spawns from level ${spawnLevel}</span>` : ''}
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">HP</div>
+        <div class="stat-value" style="color:#ef9a9a">${enemy.hp}</div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${hpPct}%;background:#ef5350"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Punch DMG</div>
+        <div class="stat-value" style="color:#ffb74d">${enemy.punchDmg || '—'}</div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${punchPct}%;background:#ff9800"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Kick DMG</div>
+        <div class="stat-value" style="color:#f06292">${enemy.kickDmg || '—'}</div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${kickPct}%;background:#e91e63"></div></div>
+      </div>
+    </div>
+    <div class="stat-card" style="margin-bottom:22px;padding:10px 14px">
+      <div class="stat-label">Movement</div>
+      <div style="font-size:14px;margin-top:4px">${enemy.speed}</div>
+    </div>
+
+    <h3>Abilities &amp; Traits</h3>
+    <div class="abilities">
+      ${enemy.traits.map(t => `<span class="ability-tag" style="color:${enemy.color};border-color:${enemy.color}33;background:${enemy.color}11">${t}</span>`).join('')}
+    </div>
+    ${enemy.specials.length ? `
+    <h3>Special Attacks</h3>
+    <div class="abilities" style="margin-bottom:22px">
+      ${enemy.specials.map(s => `<span class="ability-tag" style="color:#ffb74d;border-color:#ffb74d33;background:#ffb74d11">${s}</span>`).join('')}
+    </div>` : ''}
+
+    <h3>Description</h3>
+    <p class="description">${enemy.description}</p>
+
+    <h3>Combat Tips</h3>
+    <ul class="tips-list">
+      ${enemy.tips.map(t => `<li>${t}</li>`).join('')}
+    </ul>
+  `;
+}
+
+let selectedEnemy = null;
+function selectEnemy(enemy) {
+  selectedEnemy = enemy;
+  document.querySelectorAll('.enemy-btn').forEach(b => {
+    const active = b.dataset.id === enemy.id;
+    b.classList.toggle('active', active);
+    if (active) b.scrollIntoView({ block: 'nearest' });
+  });
+  showEnemy(enemy);
+  renderInfo(enemy);
+}
+
+let sortedEnemies = [];
+function buildSidebar(list) {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '';
+  let lastTier = null;
+  const tierOrder = ['basic', 'rare', 'arena', 'special', 'clear', 'neutral'];
+  const sorted = [...list].sort((a, b) => tierOrder.indexOf(a.tier) - tierOrder.indexOf(b.tier));
+  sortedEnemies = sorted;
+  sorted.forEach(enemy => {
+    if (enemy.tier !== lastTier) {
+      lastTier = enemy.tier;
+      const sec = document.createElement('div');
+      sec.className = 'sidebar-section';
+      const count = list.filter(e => e.tier === enemy.tier).length;
+      sec.style.color = tierColor(enemy.tier);
+      sec.innerHTML = `${tierLabel(enemy.tier)} <span class="count">(${count})</span>`;
+      sidebar.appendChild(sec);
+    }
+    const btn = document.createElement('button');
+    btn.className = 'enemy-btn';
+    btn.dataset.id = enemy.id;
+    btn.innerHTML = `<span class="dot" style="background:${enemy.color};color:${enemy.color}"></span>${enemy.label}`;
+    btn.addEventListener('click', () => selectEnemy(enemy));
+    sidebar.appendChild(btn);
+  });
+  document.getElementById('header-subtitle').textContent = `Stickman Action — ${list.length} enemies catalogued`;
+}
+
+// Search
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.enemy-btn').forEach(btn => {
+    const match = btn.textContent.toLowerCase().includes(q);
+    btn.style.display = match ? '' : 'none';
+  });
+  const sections = document.querySelectorAll('.sidebar-section');
+  sections.forEach(sec => {
+    let next = sec.nextElementSibling;
+    let anyVisible = false;
+    while (next && !next.classList.contains('sidebar-section')) {
+      if (next.style.display !== 'none') anyVisible = true;
+      next = next.nextElementSibling;
+    }
+    sec.style.display = anyVisible ? '' : 'none';
+  });
+});
+
+// Random enemy jump.
+document.getElementById('random-btn').addEventListener('click', () => {
+  const pool = sortedEnemies.filter(e => e !== selectedEnemy);
+  selectEnemy(pool[Math.floor(Math.random() * pool.length)]);
+});
+
+// Keyboard: up/down arrows step through the (currently visible) roster,
+// '/' focuses the search box.
+window.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement !== document.getElementById('search')) {
+    e.preventDefault();
+    document.getElementById('search').focus();
+    return;
+  }
+  if (document.activeElement === document.getElementById('search') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    document.activeElement.blur();
+  }
+  if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+  if (document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'text') return;
+  e.preventDefault();
+  const visible = sortedEnemies.filter(en => {
+    const btn = document.querySelector(`.enemy-btn[data-id="${en.id}"]`);
+    return btn && btn.style.display !== 'none';
+  });
+  if (visible.length === 0) return;
+  const idx = visible.indexOf(selectedEnemy);
+  const next = e.key === 'ArrowDown'
+    ? visible[(idx + 1 + visible.length) % visible.length]
+    : visible[(idx - 1 + visible.length) % visible.length];
+  selectEnemy(next);
+});
+
+// Init
+buildSidebar(ENEMIES);
+selectEnemy(ENEMIES[0]);
+
+// Debug handle (harmless in production, invaluable when the viewer misbehaves).
+window.__ency = { scene, renderer, camera, get model() { return currentModel; } };
+  </script>
+</body>
+</html>

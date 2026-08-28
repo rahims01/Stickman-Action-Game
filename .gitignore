@@ -1,0 +1,12 @@
+node_modules
+dist
+.DS_Store
+.claude
+instructions
+
+# Raw source assets. Byte-identical renamed copies are served from public/.
+# walking.fbx is the one root-only file (no public/ counterpart), so it's kept.
+/anims/*
+!/anims/walking.fbx
+/sfx/
+/textures/
