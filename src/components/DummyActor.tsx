@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
@@ -54,11 +55,11 @@ export const DummyActor: React.FC<DummyActorProps> = ({ position, velocity, heal
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
   const ragdollRef = useRef<RagdollHandle | null>(null);
 
-  const baseFbx = useFBX('/anims/stickman_base.fbx');
-  const idleAnim = useFBX('/anims/fighting-idle.fbx');
-  const hitAnim = useFBX('/anims/hit-to-body.fbx');
-  const kidneyHitAnim = useFBX('/anims/kidney-hit.fbx');
-  const stomachHitAnim = useFBX('/anims/stomach-hit.fbx');
+  const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
+  const hitAnim = useFBX(asset('/anims/hit-to-body.fbx'));
+  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 

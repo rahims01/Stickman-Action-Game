@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
@@ -125,12 +126,12 @@ export const HelperActor: React.FC<HelperActorProps> = ({
   const rightFootBoneRef = useRef<THREE.Object3D | null>(null);
   const tmpVec = useRef(new THREE.Vector3()).current;
 
-  const baseFbx = useFBX('/anims/stickman_base.fbx');
-  const idleAnim = useFBX('/anims/fighting-idle.fbx');
-  const walkAnim = useFBX('/anims/walk.fbx');
-  const punchAnim = useFBX('/anims/punch.fbx');
-  const kickAnim = useFBX('/anims/kick.fbx');
-  const throwAnim = useFBX('/anims/throw.fbx');
+  const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
+  const walkAnim = useFBX(asset('/anims/walk.fbx'));
+  const punchAnim = useFBX(asset('/anims/punch.fbx'));
+  const kickAnim = useFBX(asset('/anims/kick.fbx'));
+  const throwAnim = useFBX(asset('/anims/throw.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 

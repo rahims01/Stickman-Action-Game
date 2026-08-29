@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { useTexture } from '@react-three/drei';
@@ -90,7 +91,7 @@ const buildRingSegments = (segments: number, radius: number) => {
 // the growing brick/wood box, the circular sand pit after the floor drops,
 // and finally the pentagon magma wasteland.
 export const ArenaEnvironment: React.FC<ArenaEnvironmentProps> = ({ phase, boxHalf }) => {
-  const [brickTex, woodTex, sandTex] = useTexture(['/textures/brick.jpg', '/textures/wood.jpg', '/textures/sand.jpg']);
+  const [brickTex, woodTex, sandTex] = useTexture([asset('/textures/brick.jpg'), asset('/textures/wood.jpg'), asset('/textures/sand.jpg')]);
   const magmaTex = useMemo(createMagmaTexture, []);
   const concreteTex = useMemo(createConcreteTexture, []);
 

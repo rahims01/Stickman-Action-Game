@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX, Html } from '@react-three/drei';
@@ -266,31 +267,31 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
   const tmpVec = useRef(new THREE.Vector3()).current;
   const kickHitTargetsRef = useRef<Set<string>>(new Set());
 
-  const baseFbx = useFBX('/anims/stickman_base.fbx');
-  const idleAnim = useFBX('/anims/fighting-idle.fbx');
-  const walkAnim = useFBX('/anims/walk.fbx');
+  const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
+  const walkAnim = useFBX(asset('/anims/walk.fbx'));
   // Cowards flee with the goofy-run clip instead of the normal walk.
-  const goofyRunAnim = useFBX('/anims/goofy-running.fbx');
-  const punchAnim = useFBX('/anims/punch.fbx');
-  const kickAnim = useFBX('/anims/kick.fbx');
+  const goofyRunAnim = useFBX(asset('/anims/goofy-running.fbx'));
+  const punchAnim = useFBX(asset('/anims/punch.fbx'));
+  const kickAnim = useFBX(asset('/anims/kick.fbx'));
   // A small variety pool per reaction tier - one is picked at random each
   // time a hit/bigHit reaction triggers, instead of always playing the
   // exact same flinch.
-  const hitAnim = useFBX('/anims/hit-to-body.fbx');
-  const kidneyHitAnim = useFBX('/anims/kidney-hit.fbx');
-  const stomachHitAnim = useFBX('/anims/stomach-hit.fbx');
+  const hitAnim = useFBX(asset('/anims/hit-to-body.fbx'));
+  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
   // Reused purely as dramatic, non-lethal staggers at critically low health
   // - never played on an actual kill, which still skips straight to the
   // ragdoll corpse per the project's no-death-clips rule. "falling-back-death"
   // is just a leftover filename from its source library.
-  const bigHitAnim = useFBX('/anims/falling-back-death.fbx');
-  const bigHitToHeadAnim = useFBX('/anims/big-hit-to-head.fbx');
-  const bigKidneyHitAnim = useFBX('/anims/big-kidney-hit.fbx');
-  const bigSideHitAnim = useFBX('/anims/big-side-hit.fbx');
-  const bigStomachHitAnim = useFBX('/anims/big-stomach-hit.fbx');
+  const bigHitAnim = useFBX(asset('/anims/falling-back-death.fbx'));
+  const bigHitToHeadAnim = useFBX(asset('/anims/big-hit-to-head.fbx'));
+  const bigKidneyHitAnim = useFBX(asset('/anims/big-kidney-hit.fbx'));
+  const bigSideHitAnim = useFBX(asset('/anims/big-side-hit.fbx'));
+  const bigStomachHitAnim = useFBX(asset('/anims/big-stomach-hit.fbx'));
   // Windup for ranged specials (greyMan, lavaMan, purpleMan, etc.) - a
   // throwing motion reads far better than reusing the melee punch clip.
-  const throwAnim = useFBX('/anims/throw.fbx');
+  const throwAnim = useFBX(asset('/anims/throw.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 

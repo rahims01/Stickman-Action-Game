@@ -1,3 +1,4 @@
+import { asset } from './assetPath';
 // Plain singleton audio manager (no React) built on the Web Audio API.
 // Browsers block audio until a user gesture, so everything initializes
 // lazily on the first pointer/key input; every play() before that is a
@@ -16,15 +17,15 @@ export type SfxName =
   | 'ambMagma';
 
 const FILES: Record<SfxName, string> = {
-  punch: '/sfx/punch.mp3',
-  death: '/sfx/death.mp3',
-  slimeHit: '/sfx/slime-hit.mp3',
-  footGrass: '/sfx/grass-footstep.mp3',
-  footRock: '/sfx/rock-footstep.mp3',
-  footWood: '/sfx/wood-footstep.mp3',
-  ambDay: '/sfx/day-ambience-main.mp3',
-  ambNight: '/sfx/night-ambience-main.mp3',
-  ambMagma: '/sfx/magma-ambience-arena.mp3'
+  punch: asset('/sfx/punch.mp3'),
+  death: asset('/sfx/death.mp3'),
+  slimeHit: asset('/sfx/slime-hit.mp3'),
+  footGrass: asset('/sfx/grass-footstep.mp3'),
+  footRock: asset('/sfx/rock-footstep.mp3'),
+  footWood: asset('/sfx/wood-footstep.mp3'),
+  ambDay: asset('/sfx/day-ambience-main.mp3'),
+  ambNight: asset('/sfx/night-ambience-main.mp3'),
+  ambMagma: asset('/sfx/magma-ambience-arena.mp3')
 };
 
 const AMBIENCE_LEVEL = 0.35;

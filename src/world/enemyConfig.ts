@@ -1,3 +1,4 @@
+import { asset } from './assetPath';
 import * as THREE from 'three';
 import { BodySliders } from './characterMorph';
 import {
@@ -1709,7 +1710,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Concrete Man',
     maxHealth: 6,
     color: '#9e9e9e',
-    skinTexture: '/textures/concrete.jpg',
+    skinTexture: asset('/textures/concrete.jpg'),
     moveSpeedMultiplier: 0.9,
     attackSpeedMultiplier: 1,
     isStationary: false,
@@ -1722,7 +1723,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Wood Man',
     maxHealth: 10,
     color: '#a1887f',
-    skinTexture: '/textures/wood.jpg',
+    skinTexture: asset('/textures/wood.jpg'),
     moveSpeedMultiplier: 1,
     attackSpeedMultiplier: 1,
     isStationary: false,
@@ -1736,7 +1737,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Brick Man',
     maxHealth: 16,
     color: '#b85c44',
-    skinTexture: '/textures/brick.jpg',
+    skinTexture: asset('/textures/brick.jpg'),
     moveSpeedMultiplier: 0.85,
     attackSpeedMultiplier: 0.9,
     isStationary: false,
@@ -1750,7 +1751,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Sandy Man',
     maxHealth: 14,
     color: '#d2b48c',
-    skinTexture: '/textures/sand.jpg',
+    skinTexture: asset('/textures/sand.jpg'),
     moveSpeedMultiplier: 1.1,
     attackSpeedMultiplier: 1.1,
     isStationary: false,
@@ -1807,7 +1808,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Magma Man',
     maxHealth: 20,
     color: '#ff5722',
-    skinTexture: '/textures/magma.jpg',
+    skinTexture: asset('/textures/magma.jpg'),
     moveSpeedMultiplier: 0.95,
     attackSpeedMultiplier: 1,
     isStationary: false,
@@ -1821,7 +1822,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     label: 'Charred Brick Man',
     maxHealth: 26,
     color: '#5d4037',
-    skinTexture: '/textures/charred-bricks.jpg',
+    skinTexture: asset('/textures/charred-bricks.jpg'),
     moveSpeedMultiplier: 0.7,
     attackSpeedMultiplier: 0.8,
     isStationary: false,

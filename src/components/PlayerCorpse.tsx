@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX, Html } from '@react-three/drei';
@@ -31,7 +32,7 @@ export const PlayerCorpse: React.FC<PlayerCorpseProps> = ({ position, rotationY,
   const baseYRef = useRef(0);
   const sunkNotifiedRef = useRef(false);
 
-  const baseFbx = useFBX('/anims/stickman_base.fbx');
+  const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
   useEffect(() => {

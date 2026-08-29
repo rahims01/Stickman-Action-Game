@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
@@ -147,35 +148,35 @@ const resolveCollision = (
 };
 
 const ANIM_FILES: Record<AnimationState, string> = {
-  idle: '/anims/idle.fbx',
-  idle2: '/anims/idle-2.fbx',
-  idle3: '/anims/idle-3.fbx',
-  idle4: '/anims/idle-4.fbx',
-  idle5: '/anims/idle-5.fbx',
-  walk: '/anims/walk.fbx',
-  run: '/anims/run.fbx',
-  runToStop: '/anims/run-to-stop.fbx',
-  jump: '/anims/jump.fbx',
-  fallingIdle: '/anims/falling-idle.fbx',
-  hardLanding: '/anims/hard-landing.fbx',
-  fallingToRoll: '/anims/falling-to-roll.fbx',
-  crouchEnter: '/anims/stand-to-cover.fbx',
-  crouchEnter2: '/anims/stand-to-cover-2.fbx',
-  crouchExit: '/anims/cover-to-stand.fbx',
-  crouchExitMoving: '/anims/cover-to-stand-2.fbx',
-  crouchSneakLeft: '/anims/crouched-sneaking-left.fbx',
-  crouchSneakRight: '/anims/crouched-sneaking-right.fbx',
-  coverSneakLeft: '/anims/left-cover-sneak.fbx',
-  coverSneakRight: '/anims/right-cover-sneak.fbx',
-  punch: '/anims/punch.fbx',
-  kick: '/anims/kick.fbx',
-  hit: '/anims/hit-to-body.fbx',
+  idle: asset('/anims/idle.fbx'),
+  idle2: asset('/anims/idle-2.fbx'),
+  idle3: asset('/anims/idle-3.fbx'),
+  idle4: asset('/anims/idle-4.fbx'),
+  idle5: asset('/anims/idle-5.fbx'),
+  walk: asset('/anims/walk.fbx'),
+  run: asset('/anims/run.fbx'),
+  runToStop: asset('/anims/run-to-stop.fbx'),
+  jump: asset('/anims/jump.fbx'),
+  fallingIdle: asset('/anims/falling-idle.fbx'),
+  hardLanding: asset('/anims/hard-landing.fbx'),
+  fallingToRoll: asset('/anims/falling-to-roll.fbx'),
+  crouchEnter: asset('/anims/stand-to-cover.fbx'),
+  crouchEnter2: asset('/anims/stand-to-cover-2.fbx'),
+  crouchExit: asset('/anims/cover-to-stand.fbx'),
+  crouchExitMoving: asset('/anims/cover-to-stand-2.fbx'),
+  crouchSneakLeft: asset('/anims/crouched-sneaking-left.fbx'),
+  crouchSneakRight: asset('/anims/crouched-sneaking-right.fbx'),
+  coverSneakLeft: asset('/anims/left-cover-sneak.fbx'),
+  coverSneakRight: asset('/anims/right-cover-sneak.fbx'),
+  punch: asset('/anims/punch.fbx'),
+  kick: asset('/anims/kick.fbx'),
+  hit: asset('/anims/hit-to-body.fbx'),
   // Reused purely as a dramatic, non-lethal stagger reaction when a hit
   // lands at critically low health - the player never actually dies from
   // this clip (health > 0 the whole time); on an actual kill the FSM still
   // skips straight to the ragdoll corpse, per the project's no-death-clips
   // rule. The clip's filename is just a leftover from its source library.
-  bigHit: '/anims/falling-back-death.fbx'
+  bigHit: asset('/anims/falling-back-death.fbx')
 };
 
 const ONE_SHOT_STATES: AnimationState[] = [
@@ -335,17 +336,17 @@ export const Player: React.FC<PlayerProps> = ({
   const canSprintRef = useRef(true);
   const lastReportedStaminaRef = useRef(-1);
 
-  const baseModel = useFBX('/anims/stickman_base.fbx');
+  const baseModel = useFBX(asset('/anims/stickman_base.fbx'));
   // A small variety pool per reaction tier, loaded separately from the
   // fixed AnimationState-driven `anims` map below since they aren't their
   // own distinct states - one is picked at random each time hit/bigHit
   // triggers instead of always playing the exact same flinch.
-  const kidneyHitAnim = useFBX('/anims/kidney-hit.fbx');
-  const stomachHitAnim = useFBX('/anims/stomach-hit.fbx');
-  const bigHitToHeadAnim = useFBX('/anims/big-hit-to-head.fbx');
-  const bigKidneyHitAnim = useFBX('/anims/big-kidney-hit.fbx');
-  const bigSideHitAnim = useFBX('/anims/big-side-hit.fbx');
-  const bigStomachHitAnim = useFBX('/anims/big-stomach-hit.fbx');
+  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
+  const bigHitToHeadAnim = useFBX(asset('/anims/big-hit-to-head.fbx'));
+  const bigKidneyHitAnim = useFBX(asset('/anims/big-kidney-hit.fbx'));
+  const bigSideHitAnim = useFBX(asset('/anims/big-side-hit.fbx'));
+  const bigStomachHitAnim = useFBX(asset('/anims/big-stomach-hit.fbx'));
   const anims = {
     idle: useFBX(ANIM_FILES.idle),
     idle2: useFBX(ANIM_FILES.idle2),

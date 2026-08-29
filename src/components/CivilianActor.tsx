@@ -1,3 +1,4 @@
+import { asset } from '../world/assetPath';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
@@ -156,13 +157,13 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   const attackCooldownRef = useRef(0.5 + Math.random());
   const pendingMeleeRef = useRef<{ impactIn: number; target: { kind: 'player' } | { kind: 'enemy'; id: string } } | null>(null);
 
-  const baseFbx = useFBX('/anims/stickman_base.fbx');
-  const idleAnim = useFBX('/anims/idle.fbx');
-  const terrifiedAnim = useFBX('/anims/terrified.fbx');
-  const walkAnim = useFBX('/anims/walk.fbx');
-  const goofyRunAnim = useFBX('/anims/goofy-running.fbx');
-  const punchAnim = useFBX('/anims/punch.fbx');
-  const throwAnim = useFBX('/anims/throw.fbx');
+  const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  const idleAnim = useFBX(asset('/anims/idle.fbx'));
+  const terrifiedAnim = useFBX(asset('/anims/terrified.fbx'));
+  const walkAnim = useFBX(asset('/anims/walk.fbx'));
+  const goofyRunAnim = useFBX(asset('/anims/goofy-running.fbx'));
+  const punchAnim = useFBX(asset('/anims/punch.fbx'));
+  const throwAnim = useFBX(asset('/anims/throw.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
   const tint = useMemo(

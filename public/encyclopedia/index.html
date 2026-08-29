@@ -1474,7 +1474,7 @@ function showEnemy(enemy) {
 
 scene.add(loadingMesh);
 // Load base mesh.
-loader.load('/anims/stickman_base.fbx',
+loader.load('../anims/stickman_base.fbx',
   fbx => {
     baseFbx = fbx;
     scene.remove(loadingMesh);
@@ -1484,7 +1484,7 @@ loader.load('/anims/stickman_base.fbx',
   err => console.error('FBX load error:', err)
 );
 // Load idle animation (fighting-idle — same one the game uses for all actors).
-loader.load('/anims/fighting-idle.fbx',
+loader.load('../anims/fighting-idle.fbx',
   anim => {
     const clip = anim.animations[0];
     if (!clip) return;

@@ -1,3 +1,4 @@
+import { asset } from './world/assetPath';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GameCanvas, FlagGuideInfo, SandboxActions } from './components/GameCanvas';
 import { ViewMode } from './types/game.types';
@@ -604,7 +605,7 @@ export const App: React.FC = () => {
           </button>
           <button
             className="menu-btn"
-            onClick={() => window.open('/encyclopedia/index.html', '_blank')}
+            onClick={() => window.open(asset('/encyclopedia/index.html'), '_blank')}
             style={{ padding: '10px 26px', fontSize: '14px', fontWeight: 600, borderRadius: '10px', border: '1px solid rgba(255,167,38,0.4)', background: 'rgba(255,167,38,0.07)', color: '#ffcc80', cursor: 'pointer', letterSpacing: '2px' }}
           >
             📖 ENCYCLOPEDIA
@@ -1230,7 +1231,7 @@ export const App: React.FC = () => {
                       </label>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
-                      <button onClick={() => window.open('/encyclopedia/index.html', '_blank')}
+                      <button onClick={() => window.open(asset('/encyclopedia/index.html'), '_blank')}
                         style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid rgba(255,167,38,0.5)', background: 'rgba(255,167,38,0.08)', color: '#ffcc80', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
                         Enemy Encyclopedia ↗
                       </button>
