@@ -557,7 +557,7 @@ export const App: React.FC = () => {
             }}
           />
         ))}
-        <img src="/logo.jpg" alt="" style={{ width: '88px', height: '88px', borderRadius: '20px', opacity: 0.95, boxShadow: '0 0 40px rgba(79,195,247,0.25)', zIndex: 1 }} />
+        <img src={asset('/logo.jpg')} alt="" style={{ width: '88px', height: '88px', borderRadius: '20px', opacity: 0.95, boxShadow: '0 0 40px rgba(79,195,247,0.25)', zIndex: 1 }} />
         <div style={{ textAlign: 'center', zIndex: 1 }}>
           <div className="game-title" style={{ fontSize: '46px', fontWeight: 700, letterSpacing: '9px' }}>STICKMAN ACTION</div>
           <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', letterSpacing: '3px', marginTop: '6px' }}>
@@ -895,7 +895,7 @@ export const App: React.FC = () => {
           justifyContent: 'center',
           zIndex: 100
         }}>
-          <img src="/logo.jpg" alt="" style={{ width: '76px', height: '76px', borderRadius: '16px', marginBottom: '22px', opacity: 0.95, boxShadow: '0 0 32px rgba(79,195,247,0.25)' }} />
+          <img src={asset('/logo.jpg')} alt="" style={{ width: '76px', height: '76px', borderRadius: '16px', marginBottom: '22px', opacity: 0.95, boxShadow: '0 0 32px rgba(79,195,247,0.25)' }} />
           <div className="game-title" style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '5px' }}>STICKMAN ACTION</div>
           <div className="loading-spinner" style={{ marginTop: '26px' }} />
           <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', marginTop: '16px', letterSpacing: '2px' }}>LOADING WORLD…</div>
@@ -1154,7 +1154,7 @@ export const App: React.FC = () => {
             {/* ── Header ── */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: settingsMinimized ? 0 : '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/logo.jpg" alt="" style={{ width: '24px', height: '24px', borderRadius: '5px' }} />
+                <img src={asset('/logo.jpg')} alt="" style={{ width: '24px', height: '24px', borderRadius: '5px' }} />
                 <h3 style={{ margin: 0, fontSize: '14px', color: gameMode === 'sandbox' ? '#a6e22e' : '#4fc3f7' }}>
                   {gameMode === 'sandbox' ? '🧪 Sandbox' : 'Stickman Settings'}
                 </h3>
