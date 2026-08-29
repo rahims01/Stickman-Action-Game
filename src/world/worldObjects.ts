@@ -128,6 +128,7 @@ const RARE_ENEMY_ROLL_TABLE: RareEnemyRollEntry[] = [
   // Newer rare roster - each gated behind a level so early runs stay
   // beginner-friendly, roughly ordered by how disruptive the gimmick is.
   { type: 'sniperMan', chance: 1 / 110, minLevel: 3 },
+  { type: 'strikerMan', chance: 1 / 120, minLevel: 4 },
   { type: 'copycatMan', chance: 1 / 110, minLevel: 4 },
   { type: 'vampireMan', chance: 1 / 120, minLevel: 4 },
   { type: 'phaseMan', chance: 1 / 130, minLevel: 5 },

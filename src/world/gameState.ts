@@ -247,6 +247,20 @@ export const ASSASSIN_BACKSTAB_MULTIPLIER = 2;
 export const SNIPER_AIM_DURATION = 1.0;
 export const SNIPER_SHOT_COOLDOWN = 5;
 
+// --- Ultimate Soccer crossover ---
+// Ball constants and the Magnus coefficient were handed over from Ultimate
+// Soccer's own source. The Magnus formula is engine-independent, and the
+// deflection it produces happens to be scale-free between their pitch and our
+// arena: lateral drift goes as omega * x^2 / v, so our shorter distances and
+// slower ball very nearly cancel (~1.1 m of curve either way). Don't "correct"
+// the coefficient for our scale — it's already right.
+export const CROSSOVER_BALL_MASS = 0.43;
+export const CROSSOVER_MAGNUS_K = 0.003;
+export const STRIKER_SHOT_SPEED = 14;
+export const STRIKER_SHOT_SPIN = 11;
+export const STRIKER_SHOT_DAMAGE = 3;
+export const STRIKER_SHOT_COOLDOWN = 3.2;
+
 // Engineer Man: deploys a killable sentry turret near himself on a cooldown.
 export const ENGINEER_DEPLOY_COOLDOWN = 12;
 export const MAX_ENEMY_TURRETS = 3;

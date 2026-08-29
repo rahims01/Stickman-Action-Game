@@ -32,7 +32,11 @@ import {
   PLAYER_MAX_HEALTH,
   PUNCH_DAMAGE,
   SNIPER_SHOT_COOLDOWN,
-  SPECIAL_ENEMY_MAX_HEALTH
+  SPECIAL_ENEMY_MAX_HEALTH,
+  STRIKER_SHOT_COOLDOWN,
+  STRIKER_SHOT_DAMAGE,
+  STRIKER_SHOT_SPEED,
+  STRIKER_SHOT_SPIN
 } from './gameState';
 
 export type EnemyType =
@@ -120,6 +124,7 @@ export type EnemyType =
   | 'minionMan'
   | 'ragdollThrower'
   | 'adaptiveMan'
+  | 'strikerMan'
   | 'bountyHunter';
 
 export const COMMON_BASIC_ENEMY_TYPES: EnemyType[] = ['fightingDummy', 'runningMan', 'punchMan', 'kickMan', 'greyMan'];
@@ -166,6 +171,7 @@ export const RARE_ENEMY_TYPES: EnemyType[] = [
   'minionMan',
   'ragdollThrower',
   'adaptiveMan',
+  'strikerMan',
   'giantSlime',
   'colossalSlime',
   'slimeKing',
@@ -248,7 +254,8 @@ export type SpecialKind =
   | 'greenPull'
   | 'sniperShot'
   | 'slowShot'
-  | 'shockPulse';
+  | 'shockPulse'
+  | 'curveShot';
 
 export interface AttackPayload {
   damage: number;
@@ -277,6 +284,11 @@ export interface AttackPayload {
   // Storm Man: the bolt arcs to a second nearby target for half damage
   // (handled in GameCanvas's hit chokepoints; stripped on the chained zap).
   chainLightning?: boolean;
+  // Striker (Ultimate Soccer crossover): angular velocity in rad/s about the
+  // vertical axis. Projectiles.tsx bends the shot's heading by the resulting
+  // Magnus acceleration each frame, so the ball curves in flight. The side it
+  // bends toward is randomised per shot.
+  curveSpin?: number;
 }
 
 export interface EnemyConfig {
@@ -466,6 +478,7 @@ export const AMBIENT_PARTICLE_CONFIG: Partial<Record<EnemyType, { color: string;
   reflectorMan:    { color: '#eeeeee', emitY: 1.1, interval: 0.4 },
   repulsorMan:     { color: '#90caf9', emitY: 1.0, interval: 0.3 },
   stormMan:        { color: '#b3e5fc', emitY: 1.2, interval: 0.2 },
+  strikerMan:      { color: '#26c6da', emitY: 1.0, interval: 0.34 },
 };
 
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
@@ -1173,6 +1186,35 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
       }
     ],
     specialCooldownOverride: SNIPER_SHOT_COOLDOWN
+  },
+  // --- Ultimate Soccer crossover guest ---
+  // Kites and volleys a football that BENDS mid-flight (see curveSpin and
+  // Projectiles.tsx). Aiming straight at where he's pointing is a mistake —
+  // the ball arrives about a metre to one side, and which side is random per
+  // shot. Keeps a kick for anyone who closes the distance on him.
+  strikerMan: {
+    label: 'Striker',
+    maxHealth: BASIC_ENEMY_MAX_HEALTH,
+    color: '#00838f',
+    moveSpeedMultiplier: 1.1,
+    attackSpeedMultiplier: 1,
+    isStationary: false,
+    isSpecial: false,
+    canPunch: false,
+    canKick: true,
+    kick: { damage: KICK_DAMAGE, range: 'melee' },
+    staysAtRange: true,
+    specials: [
+      {
+        kind: 'curveShot',
+        damage: STRIKER_SHOT_DAMAGE,
+        range: 'ranged',
+        projectileColor: '#f5f5f5',
+        speed: STRIKER_SHOT_SPEED,
+        curveSpin: STRIKER_SHOT_SPIN
+      }
+    ],
+    specialCooldownOverride: STRIKER_SHOT_COOLDOWN
   },
   bombMan: {
     label: 'Bomb Man',

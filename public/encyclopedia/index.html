@@ -355,6 +355,14 @@ const ENEMIES = [
     bodyScale: 1, weightMod: 0
   },
   {
+    id: 'strikerMan', label: 'Striker', color: '#00838f', tier: 'rare',
+    hp: 10, speed: 'Kiting', punchDmg: 0, kickDmg: 2, specials: ['Curving football: 3 DMG, bends in flight', 'Appears from level 4'],
+    description: 'A guest from Ultimate Soccer, and the only enemy whose projectile does not travel in a straight line. He keeps his distance and volleys a football that bends roughly a metre off its launch heading before it reaches you — and the side it bends toward is chosen at random per shot, so he cannot be read after the first one. Close him down and he answers with a kick rather than a punch.',
+    traits: ['Kites at range', 'Shot curves ~1 m in flight', 'Bend direction random per shot', 'Kicks in melee'],
+    tips: ['Do not sidestep early — the ball is still turning, and guessing wrong walks you into it.', 'Dodge late and across the bend, or break line of sight entirely.', 'Standard 10 HP and no armour — the shot is the whole threat, so closing the gap ends him quickly.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
     id: 'copycatMan', label: 'Copycat Man', color: '#d4af37', tier: 'rare',
     hp: 10, speed: 'Normal', punchDmg: 1, kickDmg: 2, specials: ['Mirrors your last-used attack (punch/kick)', 'Appears from level 4'],
     description: 'A gold-tinted mimic that watches how you fight and answers in kind — whatever you last threw (punch or kick), it throws back at you. Fight it with punches and it jabs; finish an enemy with a kick and expect a sweep coming.',
@@ -1202,6 +1210,7 @@ const PARTICLE_STYLE_MAP = {
   comboMan:        { color: '#4db6ac', style: 'orbs'   },
   strongComboMan:  { color: '#26a69a', style: 'orbs'   },
   sniperMan:       { color: '#ff5252', style: 'sparks' },
+  strikerMan:      { color: '#26c6da', style: 'orbs'   },
   copycatMan:      { color: '#ffd54f', style: 'orbs'   },
   vampireMan:      { color: '#d32f2f', style: 'sparks' },
   phaseMan:        { color: '#b39ddb', style: 'snow'   },
@@ -1557,7 +1566,7 @@ function speedLabel(s) { return s; }
 // Level gates from worldObjects.ts's rare-enemy roll table - shown as a
 // badge so players know when each rare starts appearing naturally.
 const SPAWN_LEVELS = {
-  babyMan: 2, shieldBearer: 3, sniperMan: 3, copycatMan: 4, vampireMan: 4,
+  babyMan: 2, shieldBearer: 3, sniperMan: 3, strikerMan: 4, copycatMan: 4, vampireMan: 4,
   phaseMan: 5, bombMan: 5, splitMan: 6, armourMan: 6, giantMan: 6, tallMan: 6,
   cloakedAssassin: 7, fatMan: 7, engineerMan: 8,
   coward: 2, slimeBlock: 4, shockerCube: 5, slowCube: 5, smashBall: 5,

@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { AttackPayload } from '../world/enemyConfig';
-import { CivilianState, EnemyState, HUMANOID_RADIUS, HelperState } from '../world/gameState';
+import { CROSSOVER_BALL_MASS, CROSSOVER_MAGNUS_K, CivilianState, EnemyState, HUMANOID_RADIUS, HelperState } from '../world/gameState';
 import { AABB } from '../world/worldObjects';
 
 export interface ProjectileSpawnConfig {
@@ -21,6 +21,10 @@ export interface ProjectileSpawnConfig {
   targetCivilianId?: string;
   // 'helper' projectiles skip the player/helpers and instead check enemies.
   shooterTeam?: 'enemy' | 'helper';
+  // Striker's football: angular velocity (rad/s) about the vertical axis. The
+  // heading is bent by the resulting Magnus acceleration every frame; the side
+  // it bends toward is randomised per shot so the same enemy isn't readable.
+  curveSpin?: number;
 }
 
 export interface ProjectilesHandle {
@@ -41,6 +45,8 @@ interface ProjectilesProps {
   onHitEnemy?: (enemyId: string, damage: number, now: number) => void;
   onHitCivilian?: (civilianId: string, payload: AttackPayload, now: number, attackerColor: string, attackerId?: string) => void;
 }
+
+const CURVE_AXIS = new THREE.Vector3(0, 1, 0);
 
 const POOL_SIZE = 16;
 const TRAIL_POOL_SIZE = 128;
@@ -64,6 +70,8 @@ interface ProjectileSlot {
   targetHelperId: string | null;
   targetCivilianId: string | null;
   shooterTeam: 'enemy' | 'helper';
+  // Signed: magnitude is the spin, sign is which way this particular shot bends.
+  curveSpin: number;
 }
 
 interface TrailSlot {
@@ -97,7 +105,8 @@ export const Projectiles = forwardRef<ProjectilesHandle, ProjectilesProps>(({ pl
       trailTimer: 0,
       targetHelperId: null,
       targetCivilianId: null,
-      shooterTeam: 'enemy' as 'enemy' | 'helper'
+      shooterTeam: 'enemy' as 'enemy' | 'helper',
+      curveSpin: 0
     }))
   );
   const nextIndex = useRef(0);
@@ -142,6 +151,7 @@ export const Projectiles = forwardRef<ProjectilesHandle, ProjectilesProps>(({ pl
       slot.targetHelperId = config.targetHelperId ?? null;
       slot.targetCivilianId = config.targetCivilianId ?? null;
       slot.shooterTeam = config.shooterTeam ?? 'enemy';
+      slot.curveSpin = (config.curveSpin ?? 0) * (Math.random() < 0.5 ? -1 : 1);
       slot.direction.copy(config.to).sub(config.from);
       slot.direction.y = 0;
       if (slot.direction.lengthSq() < 1e-6) slot.direction.set(0, 0, 1);
@@ -167,6 +177,17 @@ export const Projectiles = forwardRef<ProjectilesHandle, ProjectilesProps>(({ pl
       if (!slot.active) return;
       const mesh = meshes.current[i];
       if (!mesh) return;
+      // Magnus curve. Perpendicular acceleration is (k/m)*omega*v, and since
+      // direction is a unit vector travelling at `speed`, that acceleration is
+      // exactly a turn rate of (k/m)*omega radians per second about Y — the
+      // speed cancels, so the heading bends at a constant rate regardless of
+      // how fast the ball was struck.
+      if (slot.curveSpin !== 0) {
+        slot.direction.applyAxisAngle(
+          CURVE_AXIS,
+          (CROSSOVER_MAGNUS_K / CROSSOVER_BALL_MASS) * slot.curveSpin * dt
+        );
+      }
       const step = slot.speed * dt;
       mesh.position.addScaledVector(slot.direction, step);
       slot.traveled += step;

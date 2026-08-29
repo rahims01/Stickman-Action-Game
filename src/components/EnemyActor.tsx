@@ -623,6 +623,7 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
         growing: special.growing,
         trail: special.trail,
         speed: special.speed,
+        curveSpin: special.curveSpin,
         attackerId: id,
         targetHelperId: target.kind === 'helper' ? target.helperId : undefined,
         targetCivilianId: target.kind === 'civilian' ? target.civilianId : undefined
