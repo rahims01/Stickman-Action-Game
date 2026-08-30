@@ -617,6 +617,16 @@ export const App: React.FC = () => {
           >
             📊 STATS
           </button>
+          {/* Crossover: the Striker and the footballs come from Ultimate
+              Soccer, and their game carries the reciprocal link back here. */}
+          <button
+            className="menu-btn"
+            onClick={() => window.open('https://rahims01.github.io/Ultimate-Soccer/', '_blank', 'noopener')}
+            title="Our crossover partner — the Striker and the footballs in this game come from theirs"
+            style={{ padding: '10px 26px', fontSize: '14px', fontWeight: 600, borderRadius: '10px', border: '1px solid rgba(0,200,120,0.45)', background: 'rgba(0,200,120,0.08)', color: '#5ce6a8', cursor: 'pointer', letterSpacing: '2px' }}
+          >
+            ⚽ ULTIMATE SOCCER
+          </button>
           <button
             className="menu-btn"
             onClick={() => { setConfirmResetAch(false); setShowAchievements(true); }}
@@ -1404,6 +1414,11 @@ export const App: React.FC = () => {
                           title="Not a helper: just follows you and retaliates against whatever hurts you. Dies for good."
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(96,125,139,0.6)', background: 'rgba(96,125,139,0.12)', color: '#b0bec5', cursor: 'pointer', fontSize: '11px' }}>
                           🕴 Bodyguard
+                        </button>
+                        <button onClick={() => sb(a => a.spawnVip())}
+                          title="A high-value civilian escorted by three bodyguards assigned to him, not to you. Flees like a civilian; the escort fights."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(255,213,79,0.6)', background: 'rgba(255,213,79,0.12)', color: '#ffd54f', cursor: 'pointer', fontSize: '11px' }}>
+                          ⭐ VIP + Escort
                         </button>
                         <button onClick={() => sb(a => a.spawnEnemyBodyguard())}
                           title="Attaches to a random living enemy and guards it — only fights once its protectee is hurt"

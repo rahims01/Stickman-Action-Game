@@ -614,13 +614,43 @@ export interface EnemyState {
 
 // The civilian FAMILY: plain civilians plus the armed neutral units that
 // share their plumbing (enemy targeting, status effects, hit-tests, bars).
-export type CivilianRole = 'civilian' | 'armyMelee' | 'armyRanged' | 'bodyguard';
+export type CivilianRole = 'civilian' | 'armyMelee' | 'armyRanged' | 'bodyguard' | 'vip';
+
+export const isArmyRole = (role?: CivilianRole): boolean =>
+  role === 'armyMelee' || role === 'armyRanged' || role === 'bodyguard';
+
+// Army men proactively engage enemies on sight rather than waiting to be
+// provoked, so these two fractions decide when self-preservation wins.
+// Below URGENT they break off mid-fight to heal; below SEEK they only go for
+// a medkit once nothing is left to fight.
+export const ARMY_MEDKIT_URGENT_FRACTION = 0.25;
+export const ARMY_MEDKIT_SEEK_FRACTION = 0.55;
+export const ARMY_MEDKIT_HEAL = 8;
+
+// A hurt army man draws help. Every army man independently computes the same
+// ordering from the same roster, so the nearest N agree on who responds
+// without any shared state or messaging between them.
+export const ARMY_SUPPORT_LOW_FRACTION = 0.5;
+export const ARMY_SUPPORT_RADIUS = 24;
+export const ARMY_SUPPORT_RESPONDERS = 2;
+
+// A frightened civilian runs toward protection rather than just away from
+// the threat — which conveniently drags the threat into an army man's sight.
+export const CIVILIAN_SEEK_ARMY_RADIUS = 26;
+
+// The VIP: a high-value civilian who spawns with a permanent escort.
+export const VIP_MAX_HEALTH = 24;
+export const VIP_BODYGUARD_COUNT = 3;
+export const BODYGUARD_PROTECT_DISTANCE = 2.6;
 
 export interface CivilianState {
   id: string;
   // Defaults to 'civilian'. Army roles fight back when provoked; the
   // bodyguard shadows the player. None of them are helpers.
   role?: CivilianRole;
+  // Bodyguards only: whose civilian they're escorting. Unset means they
+  // shadow the player, which is the original sandbox bodyguard behaviour.
+  protectCivilianId?: string;
   health: number;
   maxHealth: number;
   position: THREE.Vector3;

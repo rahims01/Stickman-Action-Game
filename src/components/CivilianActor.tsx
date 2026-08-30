@@ -7,13 +7,14 @@ import { SkeletonUtils } from 'three-stdlib';
 import { createRagdoll, RagdollHandle } from '../world/ragdoll';
 import { physicsWorld } from '../world/physicsWorld';
 import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision';
-import { AABB, MAP_RADIUS } from '../world/worldObjects';
+import { AABB, MAP_RADIUS, MedkitDef } from '../world/worldObjects';
 import {
   ARMY_CHASE_SPEED,
   ARMY_MELEE_COOLDOWN,
   ARMY_MELEE_DAMAGE,
   ARMY_RANGED_COOLDOWN,
   ARMY_RANGED_DAMAGE,
+  ARMY_SIGHT_RADIUS,
   BODYGUARD_FOLLOW_DISTANCE,
   CIVILIAN_FLEE_SPEED,
   CIVILIAN_FOLLOW_DISTANCE,
@@ -26,7 +27,17 @@ import {
   ENEMY_ATTACK_RANGE,
   ENEMY_RANGED_ATTACK_RANGE,
   EnemyState,
-  HUMANOID_RADIUS
+  HUMANOID_RADIUS,
+  ARMY_MEDKIT_SEEK_FRACTION,
+  ARMY_MEDKIT_URGENT_FRACTION,
+  ARMY_SUPPORT_LOW_FRACTION,
+  ARMY_SUPPORT_RADIUS,
+  ARMY_SUPPORT_RESPONDERS,
+  BODYGUARD_PROTECT_DISTANCE,
+  CIVILIAN_SEEK_ARMY_RADIUS,
+  CivilianState,
+  MEDKIT_PICKUP_RADIUS,
+  isArmyRole
 } from '../world/gameState';
 import { ProjectilesHandle } from './Projectiles';
 import {
@@ -54,6 +65,8 @@ interface CivilianActorProps {
   aggroPlayer?: boolean;
   aggroEnemyId?: string;
   aggroUntilMs?: number;
+  // Bodyguards: whose civilian to escort. Unset means the player.
+  protectCivilianId?: string;
   // Bystander panic (plain civilians): saw a fellow civilian/armyman get
   // attacked nearby - flee away from the scene until this expires.
   panicUntilMs?: number;
@@ -73,6 +86,12 @@ interface CivilianActorProps {
   statusEffects: StatusEffects;
   onBurnDamage: (civilianId: string, amount: number) => void;
   showHealthBar?: boolean;
+  // The full roster, so an army man can spot a comrade in trouble and a
+  // frightened civilian can run toward the nearest soldier.
+  civilians: CivilianState[];
+  // Army men break off to heal when hurt; picking one up consumes it.
+  medkits: MedkitDef[];
+  onTakeMedkit?: (civilianId: string, medkitId: string) => void;
   onSunk: (id: string) => void;
 }
 
@@ -97,7 +116,9 @@ const CIVILIAN_COLORS = ['#e8d8c3', '#d7e3f4', '#e4d9ee', '#dcecd5', '#f4e3d7'];
 const ROLE_COLORS: Record<Exclude<CivilianRole, 'civilian'>, string> = {
   armyMelee: '#4b5320',
   armyRanged: '#33691e',
-  bodyguard: '#263238'
+  bodyguard: '#263238',
+  // The VIP reads as somebody important: pale suit, stands out in a crowd.
+  vip: '#ffd54f'
 };
 
 // A harmless sandbox wanderer. Strolls around aimlessly; the moment any
@@ -118,6 +139,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   aggroPlayer = false,
   aggroEnemyId,
   aggroUntilMs = 0,
+  protectCivilianId,
   panicUntilMs = 0,
   panicFromX,
   panicFromZ,
@@ -132,6 +154,9 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   statusEffects,
   onBurnDamage,
   showHealthBar = true,
+  civilians,
+  medkits,
+  onTakeMedkit,
   onSunk
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -363,7 +388,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
     // provoked (aggro set by GameCanvas when they witness an attack), then
     // hunt the attacker - player included. Bodyguards shadow the player and
     // hunt whatever hurt him. ────────────────────────────────────────────
-    if (role !== 'civilian') {
+    if (role !== 'civilian' && role !== 'vip') {
       const prevXa = pos.x;
       const prevZa = pos.z;
 
@@ -393,19 +418,121 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       }
       attackCooldownRef.current = Math.max(0, attackCooldownRef.current - actualDelta);
 
-      // Resolve the current aggro target, if it's still valid.
+      // Resolve who this soldier is dealing with this frame.
+      //
+      // Enemies are engaged ON SIGHT — no provocation needed, because an
+      // armed soldier standing idle beside a hostile reads as broken. The
+      // PLAYER is the opposite: only ever a target if he started it, which
+      // is what aggroPlayer records.
       const aggroValid = Date.now() < aggroUntilMs;
+      const healthFrac = maxHealth > 0 ? health / maxHealth : 1;
+
+      let nearestEnemy: EnemyState | undefined;
+      let nearestEnemyDist = Infinity;
+      for (const e of enemies) {
+        if (e.health <= 0) continue;
+        const d = Math.hypot(e.position.x - pos.x, e.position.z - pos.z);
+        if (d < nearestEnemyDist) {
+          nearestEnemyDist = d;
+          nearestEnemy = e;
+        }
+      }
+      const sightedEnemy = nearestEnemyDist <= ARMY_SIGHT_RADIUS ? nearestEnemy : undefined;
+
+      // Self-preservation. Critically hurt, he breaks off mid-fight to heal;
+      // merely hurt, he waits until the shooting stops.
+      const wantsMedkit =
+        medkits.length > 0 &&
+        (healthFrac < ARMY_MEDKIT_URGENT_FRACTION ||
+          (healthFrac < ARMY_MEDKIT_SEEK_FRACTION && !sightedEnemy));
+
+      let medkitGoal: { id: string; x: number; z: number } | undefined;
+      if (wantsMedkit) {
+        let best = Infinity;
+        for (const m of medkits) {
+          const d = Math.hypot(m.position[0] - pos.x, m.position[2] - pos.z);
+          if (d < best) {
+            best = d;
+            medkitGoal = { id: m.id, x: m.position[0], z: m.position[2] };
+          }
+        }
+      }
+
+      // Answering a call for help. Every soldier derives the same responder
+      // ordering from the same roster, so the two nearest agree on who goes
+      // without any coordination between them.
+      let supportGoal: THREE.Vector3 | undefined;
+      if (!sightedEnemy && !medkitGoal) {
+        let inTrouble: CivilianState | undefined;
+        let troubleDist = Infinity;
+        for (const c of civilians) {
+          if (c.id === id || c.health <= 0 || !isArmyRole(c.role)) continue;
+          if (c.health / c.maxHealth >= ARMY_SUPPORT_LOW_FRACTION) continue;
+          const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
+          if (d <= ARMY_SUPPORT_RADIUS && d < troubleDist) {
+            troubleDist = d;
+            inTrouble = c;
+          }
+        }
+        if (inTrouble) {
+          const victim = inTrouble;
+          const responders = civilians
+            .filter(
+              (c) =>
+                c.health > 0 &&
+                isArmyRole(c.role) &&
+                c.id !== victim.id &&
+                c.health / c.maxHealth >= ARMY_SUPPORT_LOW_FRACTION
+            )
+            .sort(
+              (a, b) =>
+                Math.hypot(a.position.x - victim.position.x, a.position.z - victim.position.z) -
+                Math.hypot(b.position.x - victim.position.x, b.position.z - victim.position.z)
+            )
+            .slice(0, ARMY_SUPPORT_RESPONDERS);
+          if (responders.some((r) => r.id === id)) supportGoal = victim.position;
+        }
+      }
+
       let targetPos: THREE.Vector3 | null = null;
       let targetKind: { kind: 'player' } | { kind: 'enemy'; id: string } | null = null;
       if (aggroValid && aggroPlayer) {
         targetPos = playerPos;
         targetKind = { kind: 'player' };
-      } else if (aggroValid && aggroEnemyId) {
+      } else if (!medkitGoal && sightedEnemy) {
+        targetPos = sightedEnemy.position;
+        targetKind = { kind: 'enemy', id: sightedEnemy.id };
+      } else if (!medkitGoal && aggroValid && aggroEnemyId) {
         const enemy = enemies.find((e) => e.id === aggroEnemyId && e.health > 0);
         if (enemy) {
           targetPos = enemy.position;
           targetKind = { kind: 'enemy', id: enemy.id };
         }
+      }
+
+      // Heading for a medkit or a comrade overrides fighting for movement
+      // purposes; both are handled as pure movement with no attack.
+      if (medkitGoal || supportGoal) {
+        const goal: { x: number; z: number } = medkitGoal ?? { x: supportGoal!.x, z: supportGoal!.z };
+        const gdx = goal.x - pos.x;
+        const gdz = goal.z - pos.z;
+        const gdist = Math.hypot(gdx, gdz);
+        if (medkitGoal && gdist < MEDKIT_PICKUP_RADIUS) {
+          onTakeMedkit?.(id, medkitGoal.id);
+          transitionTo('idle', 0.2);
+        } else if (gdist > 0.4 && oneShotTimerRef.current === null) {
+          const heading = pickOpenHeading(pos, Math.atan2(gdx, gdz), colliders, HUMANOID_RADIUS);
+          rotateTowardAngle(groupRef.current, heading, 9, actualDelta);
+          transitionTo(medkitGoal ? 'flee' : 'walk', 0.2);
+          groupRef.current.translateZ(
+            (medkitGoal ? CIVILIAN_FLEE_SPEED : ARMY_CHASE_SPEED) * slowFactor * actualDelta
+          );
+        }
+        const resolvedGoal = resolveCircleVsBoxes(prevXa, prevZa, pos.x, pos.z, HUMANOID_RADIUS, colliders);
+        pos.x = resolvedGoal.x;
+        pos.z = resolvedGoal.z;
+        position.copy(pos);
+        return;
       }
 
       if (targetPos && targetKind && oneShotTimerRef.current === null) {
@@ -448,11 +575,16 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
         }
       } else if (oneShotTimerRef.current === null) {
         if (role === 'bodyguard') {
-          // Off duty: shadow the player.
-          const dx = playerPos.x - pos.x;
-          const dz = playerPos.z - pos.z;
+          // Off duty: shadow whoever we're assigned to. A VIP's escort sticks
+          // tighter than the player's, so the three of them read as a unit
+          // rather than a loose crowd.
+          const ward = protectCivilianId ? civilians.find((c) => c.id === protectCivilianId && c.health > 0) : undefined;
+          const anchor = ward ? ward.position : playerPos;
+          const followAt = ward ? BODYGUARD_PROTECT_DISTANCE : BODYGUARD_FOLLOW_DISTANCE;
+          const dx = anchor.x - pos.x;
+          const dz = anchor.z - pos.z;
           const d = Math.hypot(dx, dz);
-          if (d > BODYGUARD_FOLLOW_DISTANCE) {
+          if (d > followAt) {
             const heading = pickOpenHeading(pos, Math.atan2(dx, dz), colliders, HUMANOID_RADIUS);
             rotateTowardAngle(groupRef.current, heading, 9, actualDelta);
             transitionTo(d > 7 ? 'flee' : 'walk', 0.2);
@@ -533,12 +665,34 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       }
     }
 
+    // Frightened people run TOWARD protection, not just away from danger.
+    // If there's a soldier within sight, head for him instead of blindly
+    // fleeing — which also drags the pursuer into the soldier's line of fire,
+    // and army men engage on sight, so the rescue happens on its own.
+    let guardian: CivilianState | undefined;
+    if (threatened) {
+      let guardDist = Infinity;
+      for (const c of civilians) {
+        if (c.health <= 0 || !isArmyRole(c.role)) continue;
+        const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
+        if (d <= CIVILIAN_SEEK_ARMY_RADIUS && d < guardDist) {
+          guardDist = d;
+          guardian = c;
+        }
+      }
+      // Already tucked in behind him — stop running and stand your ground.
+      if (guardian && guardDist < CIVILIAN_FOLLOW_DISTANCE) guardian = undefined;
+    }
+
     const prevX = pos.x;
     const prevZ = pos.z;
     let moveHeading: number | null = null;
     let moveSpeed = 0;
 
-    if (threatened && fleeAway.lengthSq() > 0.0001) {
+    if (threatened && guardian) {
+      moveHeading = Math.atan2(guardian.position.x - pos.x, guardian.position.z - pos.z);
+      moveSpeed = CIVILIAN_FLEE_SPEED;
+    } else if (threatened && fleeAway.lengthSq() > 0.0001) {
       moveHeading = Math.atan2(fleeAway.x, fleeAway.z);
       moveSpeed = CIVILIAN_FLEE_SPEED;
       transitionTo('flee', 0.15);

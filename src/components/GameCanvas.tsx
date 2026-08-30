@@ -160,6 +160,10 @@ import {
   VAMPIRE_LIFESTEAL_FRACTION,
   computeCritChance,
   createStatModifiers,
+  ARMY_MEDKIT_HEAL,
+  BODYGUARD_PROTECT_DISTANCE,
+  VIP_BODYGUARD_COUNT,
+  VIP_MAX_HEALTH,
   FOOTBALL_KICK_SPEED,
   FOOTBALL_MAX_ROLL_SECONDS,
   FOOTBALL_STUN_MS,
@@ -214,6 +218,7 @@ export interface SandboxActions {
   spawnCivilianHelper: () => void;
   spawnArmyMan: (kind: 'melee' | 'ranged') => void;
   spawnBodyguard: () => void;
+  spawnVip: () => void;
   spawnEnemyBodyguard: () => void;
   spawnEnemyTurret: () => void;
   spawnFlag: (variant: 'normal' | 'giant' | 'bonus' | 'challenge' | 'clear' | 'boss') => void;
@@ -1313,6 +1318,40 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // civilian or fellow armyman attacked - by an enemy OR by the player.
       spawnArmyMan: (kind) => {
         setCivilians((prev) => [...prev, makeArmyUnit(kind, generateEnemySpawnPosition())]);
+      },
+      // VIP: a high-value civilian who never travels alone. Flees like any
+      // civilian, but arrives with a permanent escort of three bodyguards
+      // assigned to HIM rather than to the player, so they move as a unit.
+      spawnVip: () => {
+        const pos = generateEnemySpawnPosition();
+        const vipId = `civilian-${nextCivilianId.current++}`;
+        const vip: CivilianState = {
+          id: vipId,
+          role: 'vip',
+          health: VIP_MAX_HEALTH,
+          maxHealth: VIP_MAX_HEALTH,
+          position: new THREE.Vector3(...pos),
+          velocity: new THREE.Vector3(),
+          statusEffects: createStatusEffects()
+        };
+        const escort: CivilianState[] = Array.from({ length: VIP_BODYGUARD_COUNT }, (_, i) => {
+          const angle = (i / VIP_BODYGUARD_COUNT) * Math.PI * 2;
+          return {
+            id: `civilian-${nextCivilianId.current++}`,
+            role: 'bodyguard' as const,
+            protectCivilianId: vipId,
+            health: BODYGUARD_MAX_HEALTH,
+            maxHealth: BODYGUARD_MAX_HEALTH,
+            position: new THREE.Vector3(
+              pos[0] + Math.sin(angle) * BODYGUARD_PROTECT_DISTANCE,
+              0,
+              pos[2] + Math.cos(angle) * BODYGUARD_PROTECT_DISTANCE
+            ),
+            velocity: new THREE.Vector3(),
+            statusEffects: createStatusEffects()
+          };
+        });
+        setCivilians((prev) => [...prev, vip, ...escort]);
       },
       // Bodyguard: NOT a helper - a neutral unit that just follows the
       // player and retaliates against whatever hurts him. Dies for good.
@@ -2891,6 +2930,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     nextFlagId.current += flagCountForLevel(nextLevel);
   };
 
+  // An army man reaching a medkit heals and consumes it, on the same terms
+  // as the player: the kit relocates rather than disappearing (outside arenas).
+  const handleCivilianTakeMedkit = (civilianId: string, medkitId: string) => {
+    setCivilians((prev) =>
+      prev.map((c) =>
+        c.id === civilianId && c.health > 0
+          ? { ...c, health: Math.min(c.maxHealth, c.health + ARMY_MEDKIT_HEAL) }
+          : c
+      )
+    );
+    setMedkits((prev) =>
+      isArena ? prev.filter((m) => m.id !== medkitId) : prev.map((m) => (m.id === medkitId ? generateMedkitDef(m.id) : m))
+    );
+  };
+
   const handleFootballKick = (footballId: string, dirX: number, dirZ: number) => {
     const ball = footballsRef.current.find((b) => b.id === footballId);
     if (!ball) return;
@@ -3124,6 +3178,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             key={c.id}
             id={c.id}
             role={c.role}
+            civilians={civilians}
+            protectCivilianId={c.protectCivilianId}
+            medkits={medkits}
+            onTakeMedkit={handleCivilianTakeMedkit}
             health={c.health}
             maxHealth={c.maxHealth}
             position={c.position}
@@ -3273,8 +3331,29 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             border: '2px solid rgba(79,195,247,0.45)',
             boxShadow: '0 0 18px rgba(0,0,0,0.55), inset 0 0 24px rgba(0,0,0,0.4)',
             zIndex: 15,
-            pointerEvents: 'none'
+            // Sandbox only: the minimap doubles as a teleport pad. Everywhere
+            // else it stays click-through so it can't swallow game input.
+            pointerEvents: isSandbox ? 'auto' : 'none',
+            cursor: isSandbox ? 'crosshair' : 'default'
           }}
+          title={isSandbox ? 'Click to teleport there' : undefined}
+          onClick={
+            isSandbox
+              ? (ev) => {
+                  const player = playerGroupRef.current;
+                  if (!player) return;
+                  // Inverse of MinimapDriver's toMap(): same extent and scale,
+                  // measured off the rendered box so CSS sizing can't skew it.
+                  const rect = ev.currentTarget.getBoundingClientRect();
+                  const mx = ((ev.clientX - rect.left) / rect.width) * MINIMAP_SIZE;
+                  const my = ((ev.clientY - rect.top) / rect.height) * MINIMAP_SIZE;
+                  const extent = Math.max(mapShape.halfX, mapShape.halfZ) * 1.06;
+                  const scale = MINIMAP_SIZE / (extent * 2);
+                  player.position.x = (mx - MINIMAP_SIZE / 2) / scale;
+                  player.position.z = (my - MINIMAP_SIZE / 2) / scale;
+                }
+              : undefined
+          }
         />
       )}
       {levelChoiceOptions && !isSandbox && (
