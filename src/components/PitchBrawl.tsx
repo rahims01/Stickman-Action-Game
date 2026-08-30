@@ -5,6 +5,7 @@ import { useFBX } from '@react-three/drei';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { useInputs } from '../hooks/useInputs';
+import { FootballMesh } from './FootballMesh';
 import { resolveCircleVsBoxes } from '../world/collision';
 import { createRagdoll, RagdollHandle } from '../world/ragdoll';
 import { physicsWorld, stepPhysicsWorld } from '../world/physicsWorld';
@@ -372,15 +373,6 @@ interface BallProps {
   frozen: boolean;
 }
 
-const PANEL_DIRS: [number, number, number][] = [
-  [0, 1, 0],
-  [0, -1, 0],
-  [0.94, 0.34, 0],
-  [-0.94, 0.34, 0],
-  [0, 0.34, 0.94],
-  [0, 0.34, -0.94]
-];
-
 const Ball: React.FC<BallProps> = ({ ball, onGoal, frozen }) => {
   const ref = useRef<THREE.Group>(null);
   const rollAxis = useRef(new THREE.Vector3());
@@ -454,16 +446,7 @@ const Ball: React.FC<BallProps> = ({ ball, onGoal, frozen }) => {
 
   return (
     <group ref={ref} position={[0, BALL_RADIUS, 0]}>
-      <mesh castShadow>
-        <sphereGeometry args={[BALL_RADIUS, 20, 20]} />
-        <meshStandardMaterial color="#f7f7f7" roughness={0.6} />
-      </mesh>
-      {PANEL_DIRS.map((d, i) => (
-        <mesh key={i} position={[d[0] * BALL_RADIUS * 0.9, d[1] * BALL_RADIUS * 0.9, d[2] * BALL_RADIUS * 0.9]}>
-          <sphereGeometry args={[BALL_RADIUS * 0.36, 8, 8]} />
-          <meshStandardMaterial color="#1c1c1c" roughness={0.7} />
-        </mesh>
-      ))}
+      <FootballMesh radius={BALL_RADIUS} />
     </group>
   );
 };

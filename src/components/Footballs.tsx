@@ -12,6 +12,7 @@ import {
 import { EnemyState } from '../world/gameState';
 import { AABB } from '../world/worldObjects';
 import { resolveCircleVsBoxes } from '../world/collision';
+import { FootballMesh } from './FootballMesh';
 
 interface FootballsProps {
   footballs: FootballState[];
@@ -19,17 +20,6 @@ interface FootballsProps {
   colliders: AABB[];
   onEnemyStruck: (enemyId: string, damage: number) => void;
 }
-
-// Panel directions for the dark patches. Six is enough to read as a football
-// while it spins; a real 32-panel ball at this size is invisible detail.
-const PANEL_DIRS: [number, number, number][] = [
-  [0, 1, 0],
-  [0, -1, 0],
-  [0.94, 0.34, 0],
-  [-0.94, 0.34, 0],
-  [0, 0.34, 0.94],
-  [0, 0.34, -0.94]
-];
 
 const spin = new THREE.Vector3();
 const rollAxis = new THREE.Vector3();
@@ -112,16 +102,7 @@ export const Footballs: React.FC<FootballsProps> = ({ footballs, enemies, collid
           }}
           position={[ball.position.x, FOOTBALL_RADIUS, ball.position.z]}
         >
-          <mesh castShadow>
-            <sphereGeometry args={[FOOTBALL_RADIUS, 18, 18]} />
-            <meshStandardMaterial color="#f7f7f7" roughness={0.65} />
-          </mesh>
-          {PANEL_DIRS.map((d, i) => (
-            <mesh key={i} position={[d[0] * FOOTBALL_RADIUS * 0.9, d[1] * FOOTBALL_RADIUS * 0.9, d[2] * FOOTBALL_RADIUS * 0.9]}>
-              <sphereGeometry args={[FOOTBALL_RADIUS * 0.36, 8, 8]} />
-              <meshStandardMaterial color="#1c1c1c" roughness={0.7} />
-            </mesh>
-          ))}
+          <FootballMesh radius={FOOTBALL_RADIUS} />
         </group>
       ))}
     </group>
