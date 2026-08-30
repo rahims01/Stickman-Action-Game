@@ -13,6 +13,7 @@ import { LevelUpChoice, OPTION_INFO } from './LevelUpChoice';
 import { Projectiles, ProjectilesHandle } from './Projectiles';
 import { BattleFlag } from './BattleFlag';
 import { Medkit } from './Medkit';
+import { Footballs } from './Footballs';
 import { SkyCycle } from './SkyCycle';
 import { PlayerCorpse } from './PlayerCorpse';
 import { BloodParticles, BloodParticlesHandle } from './BloodParticles';
@@ -33,6 +34,7 @@ import {
   INITIAL_CRATE_DEFS,
   INITIAL_DUMMY_SPAWNS,
   INITIAL_FLAG_DEFS,
+  INITIAL_FOOTBALL_SPAWNS,
   INITIAL_MEDKIT_DEFS,
   INITIAL_PLATFORM_DEFS,
   LightBlockDef,
@@ -157,7 +159,11 @@ import {
   VAMPIRE_KILL_HEAL,
   VAMPIRE_LIFESTEAL_FRACTION,
   computeCritChance,
-  createStatModifiers
+  createStatModifiers,
+  FOOTBALL_KICK_SPEED,
+  FOOTBALL_MAX_ROLL_SECONDS,
+  FOOTBALL_STUN_MS,
+  FootballState
 } from '../world/gameState';
 import {
   AttackPayload,
@@ -835,6 +841,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   );
   const [flags, setFlags] = useState(isEmptyMapMode ? [] as typeof INITIAL_FLAG_DEFS : INITIAL_FLAG_DEFS);
   const [medkits, setMedkits] = useState(isArena ? [] as MedkitDef[] : INITIAL_MEDKIT_DEFS);
+  // Footballs are never consumed, so unlike medkits they're built once and
+  // then mutated in place — position/velocity never go through setState.
+  const footballsRef = useRef<FootballState[]>(
+    (isArena ? [] : INITIAL_FOOTBALL_SPAWNS).map((f) => ({
+      id: f.id,
+      position: new THREE.Vector3(f.position[0], 0, f.position[2]),
+      velocity: new THREE.Vector3(),
+      rollTimer: 0,
+      hitThisKick: new Set<string>()
+    }))
+  );
 
   // ── Arena mode state ──────────────────────────────────────────────────
   const [arenaPhase, setArenaPhase] = useState<ArenaPhase>('concrete');
@@ -2874,6 +2891,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     nextFlagId.current += flagCountForLevel(nextLevel);
   };
 
+  const handleFootballKick = (footballId: string, dirX: number, dirZ: number) => {
+    const ball = footballsRef.current.find((b) => b.id === footballId);
+    if (!ball) return;
+    ball.velocity.set(dirX * FOOTBALL_KICK_SPEED, 0, dirZ * FOOTBALL_KICK_SPEED);
+    ball.rollTimer = FOOTBALL_MAX_ROLL_SECONDS;
+    ball.hitThisKick.clear();
+    audio.play('punch');
+  };
+
+  // A rolling ball damages AND knocks down, reusing the same
+  // ragdollStunUntilMs knockdown a parry or a mine produces.
+  const handleFootballStrike = (enemyId: string, damage: number) => {
+    handleEnemyHit(enemyId, damage);
+    setEnemies((prev) =>
+      prev.map((e) => (e.id === enemyId && e.health > 0 ? { ...e, ragdollStunUntilMs: Date.now() + FOOTBALL_STUN_MS } : e))
+    );
+  };
+
   return (
     <>
       <Canvas shadows camera={{ fov: cameraFov, near: 0.1, far: 1000 }} style={{ width: '100%', height: '100%' }}>
@@ -2954,6 +2989,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           onTurretHit={handleTurretHit}
           civilians={civilians}
           onCivilianHit={handleCivilianHitByPlayer}
+          footballs={footballsRef.current}
+          onFootballKick={handleFootballKick}
           lastAttackRef={playerLastAttackRef}
           footstepSound={footstepSound}
         />
@@ -3164,6 +3201,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         {medkits.map((m) => (
           <Medkit key={m.id} position={m.position} />
         ))}
+        <Footballs
+          footballs={footballsRef.current}
+          enemies={enemies}
+          colliders={isArena ? arenaColliders : colliders}
+          onEnemyStruck={handleFootballStrike}
+        />
         {playerCorpses.map((c) => (
           <PlayerCorpse
             key={c.id}

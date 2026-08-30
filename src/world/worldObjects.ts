@@ -1,5 +1,5 @@
 import { COMMON_BASIC_ENEMY_TYPES, EnemyType } from './enemyConfig';
-import { FLAGS_PER_LEVEL_INCREMENT, MAX_CONCURRENT_RARE_ENEMIES } from './gameState';
+import { FLAGS_PER_LEVEL_INCREMENT, INITIAL_FOOTBALL_COUNT, MAX_CONCURRENT_RARE_ENEMIES } from './gameState';
 
 export interface CrateDef {
   id: string;
@@ -285,6 +285,19 @@ export const generateMedkitDef = (id: string): MedkitDef => {
   return { id, position: [x, 0, z] };
 };
 
+// Ultimate Soccer crossover: a football lying in the arena. Unlike crates and
+// medkits these are never consumed — a kicked ball rolls, knocks people down,
+// comes to rest and is kickable again — so there's no respawn counterpart.
+export interface FootballSpawn {
+  id: string;
+  position: [number, number, number];
+}
+
+export const generateFootballSpawn = (id: string): FootballSpawn => {
+  const [x, z] = randomPointInRing(SPAWN_EXCLUSION_RADIUS, MAP_RADIUS * 0.7);
+  return { id, position: [x, 0, z] };
+};
+
 // Purely decorative - spawned one at a time by the "add a light block"
 // level-up option, each at a random spot with a random glow color.
 export interface LightBlockDef {
@@ -360,6 +373,7 @@ export const INITIAL_DUMMY_SPAWNS: [number, number, number][] = Array.from({ len
 );
 export const INITIAL_FLAG_DEFS: BattleFlagDef[] = Array.from({ length: INITIAL_FLAG_COUNT }, (_, i) => generateFlagDef(`flag-${i}`));
 export const INITIAL_MEDKIT_DEFS: MedkitDef[] = Array.from({ length: INITIAL_MEDKIT_COUNT }, (_, i) => generateMedkitDef(`medkit-${i}`));
+export const INITIAL_FOOTBALL_SPAWNS: FootballSpawn[] = Array.from({ length: INITIAL_FOOTBALL_COUNT }, (_, i) => generateFootballSpawn(`football-${i}`));
 export const INITIAL_BASIC_ENEMY_SPAWNS: { type: EnemyType; position: [number, number, number] }[] = (() => {
   let rareCount = 0;
   return Array.from({ length: INITIAL_BASIC_ENEMY_COUNT }, () => {

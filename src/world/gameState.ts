@@ -261,6 +261,35 @@ export const STRIKER_SHOT_SPIN = 11;
 export const STRIKER_SHOT_DAMAGE = 3;
 export const STRIKER_SHOT_COOLDOWN = 3.2;
 
+// Football weapon. Kicking one launches it; while it rolls it knocks down
+// anything it touches, then it comes to rest and can be kicked again — so a
+// well-placed ball is a reusable area-denial tool rather than a consumable.
+export const FOOTBALL_RADIUS = 0.2;
+export const FOOTBALL_KICK_SPEED = STRIKER_SHOT_SPEED;
+// Per-second velocity retention. Low enough that a ball stops in a few
+// seconds rather than crossing the whole map.
+export const FOOTBALL_DAMPING = 0.55;
+// Below this the ball is treated as at rest and becomes kickable again.
+export const FOOTBALL_REST_SPEED = 0.6;
+export const FOOTBALL_MAX_ROLL_SECONDS = 6;
+export const FOOTBALL_KICK_RADIUS = 1.0;
+export const FOOTBALL_HIT_DAMAGE = 4;
+export const FOOTBALL_STUN_MS = 2200;
+export const INITIAL_FOOTBALL_COUNT = 3;
+
+// Position and velocity are deliberately mutable Vector3s rather than React
+// state — same rule as enemies and dummies. Only `id` ever reaches setState.
+export interface FootballState {
+  id: string;
+  position: THREE.Vector3;
+  velocity: THREE.Vector3;
+  // Seconds of rolling left. 0 means at rest.
+  rollTimer: number;
+  // Enemies already struck by the CURRENT kick, so one ball rolling through a
+  // line of enemies hits each of them once instead of every frame.
+  hitThisKick: Set<string>;
+}
+
 // Engineer Man: deploys a killable sentry turret near himself on a cooldown.
 export const ENGINEER_DEPLOY_COOLDOWN = 12;
 export const MAX_ENEMY_TURRETS = 3;

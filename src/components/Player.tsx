@@ -22,6 +22,9 @@ import {
   FLASHLIGHT_DISTANCE_PER_LEVEL,
   FLASHLIGHT_INTENSITY_PER_LEVEL,
   FIST_HIT_RADIUS,
+  FOOTBALL_KICK_RADIUS,
+  FOOTBALL_RADIUS,
+  FootballState,
   FOOT_HIT_RADIUS,
   GROUND_SLAM_EXTRA_DAMAGE,
   GROUND_SLAM_RADIUS,
@@ -85,6 +88,11 @@ interface PlayerProps {
   // Sandbox civilians - hittable (which scares them off you permanently).
   civilians?: CivilianState[];
   onCivilianHit?: (civilianId: string, damage: number) => void;
+  // Ultimate Soccer crossover: footballs lying in the arena. A kick that lands
+  // near one launches it instead of (or as well as) damaging whatever else is
+  // in range — the ball then rolls and knocks people down on its own.
+  footballs?: FootballState[];
+  onFootballKick?: (footballId: string, dirX: number, dirZ: number) => void;
   // Arena mode: replaces the procedural map's walls/platforms/crates with
   // the arena's own colliders.
   overrideColliders?: AABB[];
@@ -258,6 +266,8 @@ export const Player: React.FC<PlayerProps> = ({
   onTurretHit,
   civilians = [],
   onCivilianHit,
+  footballs,
+  onFootballKick,
   overrideColliders,
   baseGroundYRef,
   damageMultiplier = 1,
@@ -1256,6 +1266,23 @@ export const Player: React.FC<PlayerProps> = ({
         if (dist < FOOT_HIT_RADIUS + HUMANOID_RADIUS) {
           hitSomething = true;
           onCivilianHit?.(c.id, rollCritDamage((KICK_DAMAGE + damageBonus) * damageMultiplier, critChance));
+        }
+      });
+
+      // Footballs are checked last and don't set hitSomething: booting a ball
+      // shouldn't consume the swing, so one kick can catch an enemy AND the
+      // ball sitting behind them. Only balls at rest are kickable.
+      footballs?.forEach((ball) => {
+        if (ball.rollTimer > 0) return;
+        const dx = ball.position.x - foot.x;
+        const dz = ball.position.z - foot.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist < FOOTBALL_KICK_RADIUS + FOOTBALL_RADIUS) {
+          // Aim along the player's facing rather than foot-to-ball, so the
+          // ball goes where you're looking instead of wherever the swing
+          // happened to plant the foot.
+          const yaw = playerRef.current?.rotation.y ?? 0;
+          onFootballKick?.(ball.id, Math.sin(yaw), Math.cos(yaw));
         }
       });
 
