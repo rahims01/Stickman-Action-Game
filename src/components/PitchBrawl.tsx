@@ -22,6 +22,7 @@ import {
   GOAL_HALF_WIDTH,
   GOAL_HEIGHT,
   GOAL_POST_RADIUS,
+  KICKOFF_SETTLE_MS,
   KICK_REACH,
   PASS_SPEED,
   PITCH_HALF_X,
@@ -61,6 +62,13 @@ const stripRootMotion = (clip: THREE.AnimationClip) => {
     values[i + 2] = baseZ;
   }
 };
+
+interface MatchControl {
+  // Mutable and read per frame — a render-time flag would latch on forever,
+  // since nothing re-renders when the settle window simply elapses.
+  frozenUntil: number;
+  winner: PitchSide | null;
+}
 
 type PitchAnim = 'idle' | 'walk' | 'run' | 'kick';
 
@@ -127,10 +135,10 @@ interface ActorProps {
   ball: BallState;
   onKick: (from: PitchPlayerState, dirX: number, dirZ: number, speed: number) => void;
   onTackle: (tackler: PitchPlayerState, victim: PitchPlayerState | null) => void;
-  frozen: boolean;
+  control: MatchControl;
 }
 
-const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, frozen }) => {
+const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, control }) => {
   const groupRef = useRef<THREE.Group>(null);
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const actionsRef = useRef<{ [k in PitchAnim]?: THREE.AnimationAction }>({});
@@ -153,11 +161,14 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
       const sources = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      mesh.material = sources.map((m) => {
+      const cloned = sources.map((m) => {
         const c = (m as THREE.MeshStandardMaterial).clone();
         c.color.set(SIDE_COLORS[state.side]);
         return c;
       });
+      // Preserve the single-vs-array shape. Assigning a one-element array to
+      // a mesh whose geometry has no groups renders nothing at all.
+      mesh.material = Array.isArray(mesh.material) ? cloned : cloned[0];
       mesh.castShadow = true;
     });
   }, [model, state.side]);
@@ -247,7 +258,7 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
       }
     }
     state.tackleCooldown = Math.max(0, state.tackleCooldown - dt);
-    if (frozen) {
+    if (control.winner !== null || now < control.frozenUntil) {
       group.position.set(pos.x, 0, pos.z);
       return;
     }
@@ -370,10 +381,10 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
 interface BallProps {
   ball: BallState;
   onGoal: (concededBy: PitchSide) => void;
-  frozen: boolean;
+  control: MatchControl;
 }
 
-const Ball: React.FC<BallProps> = ({ ball, onGoal, frozen }) => {
+const Ball: React.FC<BallProps> = ({ ball, onGoal, control }) => {
   const ref = useRef<THREE.Group>(null);
   const rollAxis = useRef(new THREE.Vector3());
 
@@ -381,7 +392,7 @@ const Ball: React.FC<BallProps> = ({ ball, onGoal, frozen }) => {
     const group = ref.current;
     if (!group) return;
     const dt = Math.min(delta, 0.05);
-    if (!frozen) {
+    if (control.winner === null && Date.now() >= control.frozenUntil) {
       const sub = dt / BALL_SUBSTEPS;
       for (let i = 0; i < BALL_SUBSTEPS; i++) {
         const px = ball.position.x;
@@ -473,8 +484,10 @@ interface PitchBrawlProps {
 
 export const PitchBrawl: React.FC<PitchBrawlProps> = ({ onExit }) => {
   const [score, setScore] = useState<Record<PitchSide, number>>({ home: 0, away: 0 });
-  const [kickoffAt, setKickoffAt] = useState(() => Date.now());
   const [winner, setWinner] = useState<PitchSide | null>(null);
+  // Read every frame by the ball and the players. Kept out of React state
+  // because the settle window ending is not a render-triggering event.
+  const control = useRef<MatchControl>({ frozenUntil: Date.now() + KICKOFF_SETTLE_MS, winner: null }).current;
 
   const ball = useRef<BallState>({
     position: new THREE.Vector3(),
@@ -514,7 +527,7 @@ export const PitchBrawl: React.FC<PitchBrawlProps> = ({ onExit }) => {
       p.downUntilMs = 0;
       p.tackleCooldown = 0;
     });
-    setKickoffAt(Date.now());
+    control.frozenUntil = Date.now() + KICKOFF_SETTLE_MS;
   };
 
   const handleKick = (from: PitchPlayerState, dirX: number, dirZ: number, speed: number) => {
@@ -546,13 +559,14 @@ export const PitchBrawl: React.FC<PitchBrawlProps> = ({ onExit }) => {
     const scorer: PitchSide = concededBy === 'home' ? 'away' : 'home';
     setScore((prev) => {
       const next = { ...prev, [scorer]: prev[scorer] + 1 };
-      if (next[scorer] >= GOALS_TO_WIN) setWinner(scorer);
+      if (next[scorer] >= GOALS_TO_WIN) {
+        control.winner = scorer;
+        setWinner(scorer);
+      }
       return next;
     });
     resetPositions();
   };
-
-  const frozen = winner !== null || Date.now() - kickoffAt < 700;
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', background: '#0d1310' }}>
@@ -562,7 +576,7 @@ export const PitchBrawl: React.FC<PitchBrawlProps> = ({ onExit }) => {
         <PhysicsStepper />
         <PitchCamera ball={ball} />
         <PitchEnvironment />
-        <Ball ball={ball} onGoal={handleGoal} frozen={frozen} />
+        <Ball ball={ball} onGoal={handleGoal} control={control} />
         {players.map((p) => (
           <PitchActor
             key={p.id}
@@ -571,7 +585,7 @@ export const PitchBrawl: React.FC<PitchBrawlProps> = ({ onExit }) => {
             ball={ball}
             onKick={handleKick}
             onTackle={handleTackle}
-            frozen={frozen}
+            control={control}
           />
         ))}
       </Canvas>
