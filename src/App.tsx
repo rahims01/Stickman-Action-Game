@@ -1,5 +1,6 @@
 import { asset } from './world/assetPath';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { PitchBrawl } from './components/PitchBrawl';
 import { GameCanvas, FlagGuideInfo, SandboxActions } from './components/GameCanvas';
 import { ViewMode } from './types/game.types';
 import { GameModifiers, LOW_HEALTH_FRACTION_THRESHOLD, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA, SavedHelper, StatModifiers, createDefaultModifiers, createStatModifiers } from './world/gameState';
@@ -123,7 +124,7 @@ function saveProgress(data: SavedProgress) {
   }
 }
 
-type GameMode = 'normal' | 'sandbox' | 'arena';
+type GameMode = 'normal' | 'sandbox' | 'arena' | 'pitchbrawl';
 
 // Randomized once at module load - the rising ember particles on the menu.
 const MENU_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
@@ -425,7 +426,7 @@ export const App: React.FC = () => {
     { label: 'Basic', types: ['fightingDummy', 'punchDummy', 'kickDummy', 'runningMan', 'punchMan', 'kickMan', 'greyMan'] },
     { label: 'Specials', types: SPECIAL_ENEMY_TYPES },
     { label: 'Rare / Variants', types: ['giantMan', 'babyMan', 'tallMan', 'fatMan', 'skinnyMan', 'brainMan', 'medicMan', 'rageMan', 'shieldBearer'] },
-    { label: 'New Rares', types: ['sniperMan', 'copycatMan', 'vampireMan', 'phaseMan', 'splitMan', 'armourMan', 'cloakedAssassin', 'engineerMan', 'bombMan', 'coward', 'slimeBlock', 'giantSlime', 'colossalSlime', 'slimeKing', 'shockerCube', 'slowCube', 'smashBall', 'ragdollSmashBall', 'slowBall', 'splitBall', 'juggernaut', 'resilientMan', 'superResilientMan', 'minionMan', 'ragdollThrower', 'adaptiveMan', 'magnetMan', 'repulsorMan', 'reflectorMan', 'stormMan', 'enemyBodyguard'] },
+    { label: 'New Rares', types: ['sniperMan', 'copycatMan', 'vampireMan', 'phaseMan', 'splitMan', 'armourMan', 'cloakedAssassin', 'engineerMan', 'bombMan', 'coward', 'slimeBlock', 'giantSlime', 'colossalSlime', 'slimeKing', 'shockerCube', 'slowCube', 'smashBall', 'ragdollSmashBall', 'slowBall', 'splitBall', 'juggernaut', 'resilientMan', 'superResilientMan', 'minionMan', 'ragdollThrower', 'adaptiveMan', 'magnetMan', 'repulsorMan', 'reflectorMan', 'stormMan', 'enemyBodyguard', 'strikerMan'] },
     { label: 'Sandbox Only', types: ['trapperMan'] },
     { label: 'Arena', types: ['weakFighter', 'concreteMan', 'woodMan', 'brickMan', 'sandyMan', 'sandThrower', 'sandWarrior', 'sandJuggernaut', 'sandGiant', 'lavaBaby', 'magmaMan', 'charredBrickMan', 'lavaMinion', 'lavaJuggernaut', 'lavaThrower', 'lavaSplitCube', 'lavaSmashBall', 'lavaGiant'] },
     { label: 'Strong Variants', types: ['strongRangedMan', 'strongKickMan', 'strongPunchMan', 'comboMan', 'strongComboMan'] },
@@ -507,7 +508,7 @@ export const App: React.FC = () => {
     sniperMan: '🎯 Sniper', copycatMan: '🪞 Copycat', vampireMan: '🧛 Vampire',
     phaseMan: '👻 Phase', splitMan: '🧬 Split', armourMan: '🦾 Armour',
     cloakedAssassin: '🗡️ Assassin', engineerMan: '🔧 Engineer', bombMan: '💣 Bomb',
-    coward: '🏃 Coward', slimeBlock: '🟩 Slime', weakFighter: '🤕 Weakling',
+    strikerMan: '⚽ Striker', coward: '🏃 Coward', slimeBlock: '🟩 Slime', weakFighter: '🤕 Weakling',
     sandWarrior: '🏜️ S.Warrior', sandJuggernaut: '🏜️ S.Jugg', sandGiant: '🏜️ S.Giant',
     lavaMinion: '🌋 L.Minion', lavaJuggernaut: '🌋 L.Jugg', lavaThrower: '🌋 L.Thrower', lavaSplitCube: '🟧 L.Cube',
     shockerCube: '🟦 Shocker', slowCube: '🧊 Slow Cube', smashBall: '⚫ Smash Ball',
@@ -594,6 +595,14 @@ export const App: React.FC = () => {
             style={{ padding: '18px 42px', fontSize: '19px', fontWeight: 700, borderRadius: '12px', border: '2px solid #a6e22e', background: 'linear-gradient(180deg, rgba(166,226,46,0.16), rgba(166,226,46,0.05))', color: '#a6e22e', cursor: 'pointer', letterSpacing: '2px' }}
           >
             🧪 SANDBOX
+          </button>
+          <button
+            className="menu-btn"
+            onClick={() => setGameMode('pitchbrawl')}
+            title="Ultimate Soccer crossover: 3v3, one free ball, first to three. A landed tackle puts BOTH players on the floor."
+            style={{ padding: '18px 42px', fontSize: '19px', fontWeight: 700, borderRadius: '12px', border: '2px solid #5ce6a8', background: 'linear-gradient(180deg, rgba(92,230,168,0.16), rgba(92,230,168,0.05))', color: '#5ce6a8', cursor: 'pointer', letterSpacing: '2px' }}
+          >
+            ⚽ PITCH BRAWL
           </button>
         </div>
         <div style={{ display: 'flex', gap: '14px', zIndex: 1 }}>
@@ -844,6 +853,10 @@ export const App: React.FC = () => {
       </div>
     );
   }
+
+  // Pitch Brawl is a self-contained mode with its own Canvas, arena and
+  // rules — none of GameCanvas's world, progression or entity systems apply.
+  if (gameMode === 'pitchbrawl') return <PitchBrawl onExit={() => setGameMode(null)} />;
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
