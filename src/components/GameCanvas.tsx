@@ -849,7 +849,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Footballs are never consumed, so unlike medkits they're built once and
   // then mutated in place — position/velocity never go through setState.
   const footballsRef = useRef<FootballState[]>(
-    (isArena ? [] : INITIAL_FOOTBALL_SPAWNS).map((f) => ({
+    (isArena || !modifiers.footballs ? [] : INITIAL_FOOTBALL_SPAWNS).map((f) => ({
       id: f.id,
       position: new THREE.Vector3(f.position[0], 0, f.position[2]),
       velocity: new THREE.Vector3(),

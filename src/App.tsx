@@ -476,7 +476,8 @@ export const App: React.FC = () => {
     { key: 'glassCannon', label: '🔮 Glass Cannon', desc: 'You deal 2× damage but have half max health.' },
     { key: 'speedDemon', label: '⚡ Speed Demon', desc: 'You and all enemies move & attack ~30% faster.' },
     { key: 'permanentNight', label: '🌙 Permanent Night', desc: 'The sun never rises; enemies keep their night bonus.' },
-    { key: 'weather', label: '🌧 Stormy Weather', desc: 'Rain and thick fog cut visibility drastically.' }
+    { key: 'weather', label: '🌧 Stormy Weather', desc: 'Rain and thick fog cut visibility drastically.' },
+    { key: 'footballs', label: '⚽ Footballs', desc: 'Ultimate Soccer crossover: kickable footballs litter the map. Boot one into a crowd to knock them all down.' }
   ];
 
   const setTimeOfDay = (t: 'day' | 'night' | null) => {

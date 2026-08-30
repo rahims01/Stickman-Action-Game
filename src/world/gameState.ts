@@ -440,6 +440,10 @@ export interface GameModifiers {
   permanentNight: boolean;
   // Stormy weather: rain + thick fog cut visibility drastically.
   weather: boolean;
+  // Ultimate Soccer crossover: scatters kickable footballs across the map.
+  // Off by default — the crossover ball belongs to Pitch Brawl, and this is
+  // the opt-in way to bring it into a normal run.
+  footballs: boolean;
 }
 
 export const createDefaultModifiers = (): GameModifiers => ({
@@ -448,7 +452,8 @@ export const createDefaultModifiers = (): GameModifiers => ({
   glassCannon: false,
   speedDemon: false,
   permanentNight: false,
-  weather: false
+  weather: false,
+  footballs: false
 });
 
 export const GLASS_CANNON_DAMAGE_MULTIPLIER = 2;
