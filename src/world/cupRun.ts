@@ -26,6 +26,41 @@ export interface CupFighter {
   damage: number;
 }
 
+// Difficulty lives in BEHAVIOUR, not in the health bar. A 2x-HP version of
+// the same fighter doesn't fight harder, it fights longer, which reads as
+// tedium. So health barely moves across the draw and everything that makes a
+// late-round opponent dangerous is in here — courtesy of Ultimate Soccer,
+// whose difficulty settings vary exactly these levers and no stats at all.
+export interface CupAiProfile {
+  // Seconds in range before it commits to a swing. The window the player has
+  // to beat it to the punch; without one a fight is either trivial or a
+  // stunlock, with nothing in between.
+  reactionDelay: number;
+  // Wind-up before the hit actually lands. This is the tell — it turns
+  // "I got hit" into "I should have seen that".
+  telegraph: number;
+  // Error injection: fraction of swings that visibly whiff. Generous early,
+  // near-zero for the top seed.
+  missChance: number;
+  // Holds at the edge of its reach instead of walking into the player's face,
+  // so late opponents are harder to corner and trade with.
+  spacing: boolean;
+  // Multiplies the gap between swings. Lower = more aggressive.
+  tempo: number;
+}
+
+export const aiProfileForSeed = (seed: number): CupAiProfile => {
+  // t: 0 for the weakest fighter in the draw, 1 for the top seed.
+  const t = (CUP_FIGHTER_COUNT - seed) / (CUP_FIGHTER_COUNT - 1);
+  return {
+    reactionDelay: 0.35 - t * 0.2,
+    telegraph: 0.15,
+    missChance: 0.5 - t * 0.45,
+    spacing: t > 0.55,
+    tempo: 1.25 - t * 0.45
+  };
+};
+
 export interface CupMatch {
   id: string;
   round: CupRoundKind;
@@ -122,7 +157,9 @@ export const createCupField = (playerColor: string): CupFighter[] => {
     // stronger fighters tend to survive, so the final really is the hardest
     // fight the player will have.
     const rank = CUP_FIGHTER_COUNT - f.seed; // 7 for seed 1, 0 for seed 8
-    f.maxHealth = 12 + rank * 2;
+    // Health spans only 15 -> 22 (+47%). The first pass ran 12 -> 26 (+117%)
+    // and that turns the final into a damage sponge: longer, not harder.
+    f.maxHealth = 15 + rank;
     f.damage = 2 + Math.floor(rank / 3);
   });
   return drawn;
@@ -188,4 +225,7 @@ export const DUEL_AI_SPEED = 4.2;
 export const DUEL_ATTACK_RANGE = 1.6;
 export const DUEL_ATTACK_COOLDOWN = 0.85;
 export const DUEL_AI_ATTACK_COOLDOWN = 1.15;
+// Locked out of swinging again until the previous swing has fully recovered,
+// so a landed hit can never chain into a stunlock.
+export const DUEL_RECOVERY = 0.35;
 export const DUEL_HIT_LOCK = 0.3;

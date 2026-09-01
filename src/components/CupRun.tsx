@@ -18,10 +18,12 @@ import {
   DUEL_ATTACK_COOLDOWN,
   DUEL_ATTACK_RANGE,
   DUEL_HIT_LOCK,
+  DUEL_RECOVERY,
   DUEL_PLAYER_SPEED,
   ROUND_LABEL,
   ROUND_ORDER,
   advanceBracket,
+  aiProfileForSeed,
   createBracket,
   createCupField,
   findPlayerMatch,
@@ -69,6 +71,11 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   const currentRef = useRef<DuelAnim>('idle');
   const oneShotRef = useRef<number | null>(null);
   const pendingHitRef = useRef<number | null>(null);
+  // Cleared when the swing is a deliberate whiff (error injection).
+  const swingWillLandRef = useRef(true);
+  const reactionRef = useRef(0);
+  const recoveryRef = useRef(0);
+  const profile = useMemo(() => aiProfileForSeed(fighter.seed), [fighter.seed]);
   const ragdollRef = useRef<RagdollHandle | null>(null);
   const inputs = useInputs();
 
@@ -167,9 +174,10 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
         pendingHitRef.current -= dt;
         if (pendingHitRef.current <= 0) {
           const dmg = fighter.damage;
+          const lands = swingWillLandRef.current;
           pendingHitRef.current = null;
           const d = Math.hypot(foe.position.x - self.position.x, foe.position.z - self.position.z);
-          if (d <= DUEL_ATTACK_RANGE + 0.4) onLand(dmg);
+          if (lands && d <= DUEL_ATTACK_RANGE + 0.4) onLand(dmg);
         }
       }
       if (oneShotRef.current <= 0) {
@@ -201,14 +209,23 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
     } else {
       // Close to range, then swing. Backs off slightly after landing one so
       // the duel has a rhythm rather than two bodies grinding together.
-      if (dist > DUEL_ATTACK_RANGE * 0.85) {
+      // Better fighters hold the edge of their reach rather than walking
+      // into the player's face, which makes them harder to corner and trade
+      // with. Weaker ones just close and flail.
+      const hold = profile.spacing ? DUEL_ATTACK_RANGE * 0.92 : DUEL_ATTACK_RANGE * 0.7;
+      if (dist > hold + 0.15) {
         mx = dx;
         mz = dz;
-      } else if (dist < DUEL_ATTACK_RANGE * 0.5) {
+      } else if (dist < hold - 0.15) {
         mx = -dx;
         mz = -dz;
       }
-      attack = dist <= DUEL_ATTACK_RANGE;
+      // Reaction delay: it must be in range for a beat before committing.
+      // This is the window the player has to beat it to the punch, and its
+      // absence is what made every fight either trivial or a stunlock.
+      if (dist <= DUEL_ATTACK_RANGE) reactionRef.current += dt;
+      else reactionRef.current = 0;
+      attack = reactionRef.current >= profile.reactionDelay;
     }
 
     const len = Math.hypot(mx, mz);
@@ -234,14 +251,29 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
       group.rotation.y = self.facing;
     }
 
-    const cooldown = isPlayer ? DUEL_ATTACK_COOLDOWN : DUEL_AI_ATTACK_COOLDOWN;
-    if (attack && self.attackCooldown <= 0 && oneShotRef.current === null && dist <= DUEL_ATTACK_RANGE + 0.5) {
+    recoveryRef.current = Math.max(0, recoveryRef.current - dt);
+    const cooldown = isPlayer ? DUEL_ATTACK_COOLDOWN : DUEL_AI_ATTACK_COOLDOWN * profile.tempo;
+    if (
+      attack &&
+      self.attackCooldown <= 0 &&
+      recoveryRef.current <= 0 &&
+      oneShotRef.current === null &&
+      dist <= DUEL_ATTACK_RANGE + 0.5
+    ) {
       const useKick = isPlayer ? inputs.kick && !inputs.punch : Math.random() < 0.4;
       playOneShot(useKick ? 'kick' : 'punch');
-      // Land the hit part-way through the swing rather than on the frame the
-      // button went down, so the animation and the damage agree.
-      pendingHitRef.current = 0.3;
+      // Telegraph: the hit lands part-way through the swing, not on the frame
+      // the decision was made. That gap is the tell the player reads.
+      pendingHitRef.current = isPlayer ? 0.3 : profile.telegraph + 0.15;
+      // Error injection. A weak fighter visibly mistimes half its swings;
+      // the top seed almost never does. Same animation either way, so a miss
+      // reads as a miss rather than as the game not registering a hit.
+      swingWillLandRef.current = isPlayer || Math.random() >= profile.missChance;
       self.attackCooldown = cooldown;
+      // Nothing may swing again until the previous swing has recovered, so a
+      // landed hit can never chain into a stunlock.
+      recoveryRef.current = DUEL_RECOVERY;
+      reactionRef.current = 0;
     }
 
     group.position.set(self.position.x, 0, self.position.z);
