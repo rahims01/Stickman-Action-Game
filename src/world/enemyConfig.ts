@@ -402,7 +402,7 @@ export interface EnemyConfig {
   // miming an overarm throw while a ball leaves his foot reads worse than
   // any wrong-looking kick could. A 'kick' also drops the projectile's
   // spawn height to boot level rather than chest level.
-  rangedAnim?: 'throw' | 'kick';
+  rangedAnim?: 'throw' | 'kick' | 'shoot';
   // Reflector: helper/turret/drone projectiles that hit him bounce back at
   // full damage on the enemy team instead of damaging him.
   isReflector?: boolean;
@@ -1220,7 +1220,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         curveSpin: STRIKER_SHOT_SPIN
       }
     ],
-    rangedAnim: 'kick',
+    rangedAnim: 'shoot',
     specialCooldownOverride: STRIKER_SHOT_COOLDOWN
   },
   bombMan: {

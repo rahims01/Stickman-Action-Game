@@ -119,7 +119,7 @@ interface EnemyActorProps {
   hasArmourOverride?: boolean;
 }
 
-type EnemyAnimState = 'idle' | 'walk' | 'punch' | 'kick' | 'hit' | 'bigHit' | 'throw' | 'dead';
+type EnemyAnimState = 'idle' | 'walk' | 'punch' | 'kick' | 'hit' | 'bigHit' | 'throw' | 'shoot' | 'dead';
 
 // What this enemy is currently engaging - resolved fresh every decision
 // frame from whichever of {player, ...helpers} is closest, but pinned to a
@@ -292,6 +292,9 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
   // Windup for ranged specials (greyMan, lavaMan, purpleMan, etc.) - a
   // throwing motion reads far better than reusing the melee punch clip.
   const throwAnim = useFBX(asset('/anims/throw.fbx'));
+  // Ultimate Soccer crossover: a real planted-foot instep drive, on the same
+  // stock Mixamo rig, so it binds directly with no retargeting.
+  const shootAnim = useFBX(asset('/anims/shoot.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
@@ -480,20 +483,25 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
     const punchClip = punchAnim.animations[0];
     const kickClip = kickAnim.animations[0];
     const throwClip = throwAnim.animations[0];
+    const shootClip = shootAnim.animations[0];
     const hitClips = [hitAnim, kidneyHitAnim, stomachHitAnim]
       .map((a) => a.animations[0])
       .filter((c): c is THREE.AnimationClip => !!c);
     const bigHitClips = [bigHitAnim, bigHitToHeadAnim, bigKidneyHitAnim, bigSideHitAnim, bigStomachHitAnim]
       .map((a) => a.animations[0])
       .filter((c): c is THREE.AnimationClip => !!c);
-    [idleClip, walkClip, punchClip, kickClip, throwClip, ...hitClips, ...bigHitClips].forEach((clip) => clip && stripRootMotion(clip));
+    // These clips are NOT exported in-place — they carry root motion, so the
+    // usual strip is what keeps a striker from sliding across the map on
+    // every shot.
+    [idleClip, walkClip, punchClip, kickClip, throwClip, shootClip, ...hitClips, ...bigHitClips].forEach((clip) => clip && stripRootMotion(clip));
 
     if (idleClip) actionsRef.current.idle = mixer.clipAction(idleClip);
     if (walkClip) actionsRef.current.walk = mixer.clipAction(walkClip);
     [
       ['punch', punchClip],
       ['kick', kickClip],
-      ['throw', throwClip]
+      ['throw', throwClip],
+      ['shoot', shootClip]
     ].forEach(([key, clip]) => {
       if (!clip) return;
       const action = mixer.clipAction(clip as THREE.AnimationClip);
@@ -524,6 +532,7 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
     punchAnim,
     kickAnim,
     throwAnim,
+    shootAnim,
     hitAnim,
     kidneyHitAnim,
     stomachHitAnim,
@@ -555,7 +564,7 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
     activeVariantActionRef.current = null;
   };
 
-  const playOneShot = (next: 'punch' | 'kick' | 'throw', fade = 0.12) => {
+  const playOneShot = (next: 'punch' | 'kick' | 'throw' | 'shoot', fade = 0.12) => {
     const action = actionsRef.current[next];
     const prevAction = getCurrentAction();
     if (!action) {

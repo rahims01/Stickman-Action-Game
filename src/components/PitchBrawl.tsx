@@ -70,7 +70,7 @@ interface MatchControl {
   winner: PitchSide | null;
 }
 
-type PitchAnim = 'idle' | 'walk' | 'run' | 'kick';
+type PitchAnim = 'idle' | 'walk' | 'run' | 'shoot' | 'pass' | 'tackle';
 
 // ── The pitch itself ──────────────────────────────────────────────────────
 const PitchEnvironment: React.FC = () => {
@@ -152,7 +152,12 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
   const idleFbx = useFBX(asset('/anims/idle.fbx'));
   const walkFbx = useFBX(asset('/anims/walk.fbx'));
   const runFbx = useFBX(asset('/anims/run.fbx'));
-  const kickFbx = useFBX(asset('/anims/kick.fbx'));
+  // Real football animations from Ultimate Soccer, on the same stock Mixamo
+  // rig, so they bind directly. They are NOT exported in-place — root motion
+  // is stripped below or players slide across the pitch on every strike.
+  const shootFbx = useFBX(asset('/anims/shoot.fbx'));
+  const passFbx = useFBX(asset('/anims/pass.fbx'));
+  const tackleFbx = useFBX(asset('/anims/slide-tackle.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
@@ -191,7 +196,9 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
     bind('idle', idleFbx, true);
     bind('walk', walkFbx, true);
     bind('run', runFbx, true);
-    bind('kick', kickFbx, false);
+    bind('shoot', shootFbx, false);
+    bind('pass', passFbx, false);
+    bind('tackle', tackleFbx, false);
     actionsRef.current.idle?.play();
     ragdollRef.current = createRagdoll(model, physicsWorld);
     return () => {
@@ -199,7 +206,7 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
       ragdollRef.current = null;
       mixer.stopAllAction();
     };
-  }, [model, idleFbx, walkFbx, runFbx, kickFbx]);
+  }, [model, idleFbx, walkFbx, runFbx, shootFbx, passFbx, tackleFbx]);
 
   const transitionTo = (next: PitchAnim) => {
     if (currentRef.current === next) return;
@@ -211,13 +218,13 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
     currentRef.current = next;
   };
 
-  const playKick = () => {
-    const action = actionsRef.current.kick;
+  const playOneShot = (name: 'shoot' | 'pass' | 'tackle') => {
+    const action = actionsRef.current[name];
     if (!action) return;
     const from = actionsRef.current[currentRef.current];
     action.reset().play();
     if (from && from !== action) from.crossFadeTo(action, 0.1, false);
-    currentRef.current = 'kick';
+    currentRef.current = name;
     oneShotRef.current = action.getClip().duration;
   };
 
@@ -338,7 +345,6 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
       const canTackle = victim !== null && victimDist < TACKLE_COMMIT_RANGE;
 
       if (canShoot && (!canTackle || ballDist <= victimDist)) {
-        playKick();
         const goalX = goalLineX(state.side === 'home' ? 'away' : 'home');
         // The human shoots where they're facing; the AI aims at the mouth.
         let dx: number;
@@ -352,15 +358,16 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
         }
         const n = Math.hypot(dx, dz) || 1;
         const towardGoal = Math.sign(goalX) === Math.sign(dx);
+        playOneShot(towardGoal ? 'shoot' : 'pass');
         onKick(state, dx / n, dz / n, towardGoal ? SHOT_SPEED : PASS_SPEED);
         state.tackleCooldown = TACKLE_COOLDOWN;
       } else if (canTackle) {
-        playKick();
+        playOneShot('tackle');
         onTackle(state, victim);
         state.tackleCooldown = TACKLE_COOLDOWN;
       } else if (state.isHuman) {
         // Committed to nothing: a whiff still costs you.
-        playKick();
+        playOneShot('tackle');
         onTackle(state, null);
         state.tackleCooldown = TACKLE_COOLDOWN;
       }
