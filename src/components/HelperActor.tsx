@@ -8,8 +8,9 @@ import { createRagdoll, RagdollHandle } from '../world/ragdoll';
 import { physicsWorld } from '../world/physicsWorld';
 import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision';
 import { AABB } from '../world/worldObjects';
-import { AMBIENT_PARTICLE_CONFIG, AttackPayload, ENEMY_CONFIGS, EnemyType, SpecialKind } from '../world/enemyConfig';
+import { AMBIENT_PARTICLE_CONFIG, AttackPayload, CUBE_ENEMY_TYPES, ENEMY_CONFIGS, EnemyType, SMASH_BALL_TYPES, SpecialKind } from '../world/enemyConfig';
 import { applyBodySliders, cacheBoneTransforms } from '../world/characterMorph';
+import { StatusEffects, getSlowFactor, isFrozen, tickBurn } from '../world/statusEffects';
 import { ProjectilesHandle } from './Projectiles';
 import {
   CORPSE_SINK_DURATION,
@@ -41,6 +42,10 @@ interface HelperActorProps {
   overrideColor?: string;
   overrideSizeMultiplier?: number;
   overrideType?: EnemyType;
+  // Own effect struct (see HelperState). Enemy specials now land their burn,
+  // freeze, slow and stun on helpers instead of only their damage.
+  statusEffects?: StatusEffects;
+  onBurnDamage?: (helperId: string, amount: number) => void;
   // Ranged Helpers upgrade: kite at range and throw bolts whose damage
   // scales with punchDamage, instead of closing to melee.
   isRanged?: boolean;
@@ -87,6 +92,8 @@ export const HelperActor: React.FC<HelperActorProps> = ({
   overrideColor,
   overrideSizeMultiplier,
   overrideType,
+  statusEffects,
+  onBurnDamage,
   isRanged = false,
   position,
   velocity,
@@ -244,6 +251,19 @@ export const HelperActor: React.FC<HelperActorProps> = ({
     if (mixerRef.current) mixerRef.current.update(actualDelta);
     if (!groupRef.current || !playerRef.current) return;
 
+    // Status effects, ticked the same way the player and civilians tick
+    // theirs. Burn drains health through the same damage path an enemy hit
+    // uses; freeze locks the helper in place for its duration.
+    if (statusEffects) {
+      const nowSec = performance.now() / 1000;
+      const burn = tickBurn(statusEffects, nowSec);
+      if (burn > 0) onBurnDamage?.(id, burn);
+      if (isFrozen(statusEffects, nowSec) && health > 0) {
+        groupRef.current.position.set(position.x, position.y, position.z);
+        return;
+      }
+    }
+
     if (frozenRef.current) {
       if (velocity.lengthSq() > 0.0001) {
         ragdollRef.current?.applyImpulseToHips(velocity);
@@ -355,7 +375,9 @@ export const HelperActor: React.FC<HelperActorProps> = ({
         const safeAngle = pickOpenHeading(groupRef.current.position, moveAngle, colliders, HUMANOID_RADIUS);
         rotateTowardAngle(groupRef.current, safeAngle, 9, actualDelta);
         transitionTo('walk');
-        groupRef.current.translateZ(ENEMY_BASE_MOVE_SPEED * moveSpeedMultiplier * actualDelta);
+        // Slow Cube's shot and anything else that slows now bites on helpers too.
+        const slowFactor = statusEffects ? getSlowFactor(statusEffects, performance.now() / 1000) : 1;
+        groupRef.current.translateZ(ENEMY_BASE_MOVE_SPEED * moveSpeedMultiplier * slowFactor * actualDelta);
       } else {
         transitionTo('idle');
       }
@@ -482,9 +504,44 @@ export const HelperActor: React.FC<HelperActorProps> = ({
   const modelScale = overrideSizeMultiplier !== undefined ? 0.012 * overrideSizeMultiplier : 0.009;
 
   const healthFraction = health / Math.max(maxHealth, 1);
+  // Cube and smash-ball enemy types are not humanoids. Recruiting one as a
+  // helper previously still drew the stickman rig, so a Slime Block ally
+  // looked like a green man — the AI was right, the body was wrong.
+  const shape: 'cube' | 'ball' | 'humanoid' = overrideType
+    ? CUBE_ENEMY_TYPES.includes(overrideType)
+      ? 'cube'
+      : SMASH_BALL_TYPES.includes(overrideType)
+        ? 'ball'
+        : 'humanoid'
+    : 'humanoid';
+  const bodyScale = overrideSizeMultiplier ?? 1;
+  const bodyColor = overrideColor ?? overrideConfig?.color ?? tint ?? '#8bc34a';
+
   return (
     <group ref={groupRef}>
-      <primitive object={model} scale={modelScale} />
+      {shape === 'humanoid' && <primitive object={model} scale={modelScale} />}
+      {shape === 'cube' && (
+        <mesh position={[0, 0.45 * bodyScale, 0]} castShadow>
+          <boxGeometry args={[0.9 * bodyScale, 0.9 * bodyScale, 0.9 * bodyScale]} />
+          <meshStandardMaterial
+            color={bodyColor}
+            roughness={overrideConfig?.roughness ?? 0.6}
+            metalness={overrideConfig?.metalness ?? 0}
+            transparent={overrideConfig?.opacity !== undefined}
+            opacity={overrideConfig?.opacity ?? 1}
+          />
+        </mesh>
+      )}
+      {shape === 'ball' && (
+        <mesh position={[0, 0.5 * bodyScale, 0]} castShadow>
+          <sphereGeometry args={[0.5 * bodyScale, 18, 18]} />
+          <meshStandardMaterial
+            color={bodyColor}
+            roughness={overrideConfig?.roughness ?? 0.5}
+            metalness={overrideConfig?.metalness ?? 0.1}
+          />
+        </mesh>
+      )}
       {overrideColor !== undefined && (
         <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 0]}>
           <circleGeometry args={[0.55, 24]} />

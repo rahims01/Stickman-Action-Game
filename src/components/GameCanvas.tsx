@@ -887,7 +887,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       id: h.id ?? `helper-${i}`,
       health: h.maxHealth,
       position: new THREE.Vector3(i * 1.5 + 2, 0, 0),
-      velocity: new THREE.Vector3()
+      velocity: new THREE.Vector3(),
+      statusEffects: createStatusEffects()
     }));
   });
   const [lightBlocks, setLightBlocks] = useState<LightBlockDef[]>([]);
@@ -1427,6 +1428,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           attackSpeedMultiplier: HELPER_BASE_SPEED_MULTIPLIER,
           position: pos,
           velocity: new THREE.Vector3(),
+          statusEffects: createStatusEffects(),
           overrideColor: '#e8d8c3'
         }]);
       },
@@ -1448,6 +1450,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           attackSpeedMultiplier: Math.max(cfg.attackSpeedMultiplier, HELPER_BASE_SPEED_MULTIPLIER),
           position: pos,
           velocity: new THREE.Vector3(),
+          statusEffects: createStatusEffects(),
           overrideColor: cfg.color,
           overrideSizeMultiplier: cfg.sizeMultiplier ?? 1,
           overrideType: type
@@ -2362,6 +2365,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     spawnDamageNumber(hitPos, roundedDamage, attackerColor);
     if (roundedDamage > 0) spawnBlood(hitPos);
 
+    // Route the payload through the one effect chokepoint, exactly as the
+    // player and civilians do. Without this, specials landed their DAMAGE on
+    // helpers while burn, freeze, slow, stun, pull and aura silently did
+    // nothing to them — helpers were immune to every effect in the game.
+    const attackerPos = attackerId
+      ? (enemies.find((e) => e.id === attackerId)?.position ?? target.position)
+      : target.position;
+    applyAttackPayload(target.statusEffects, _now, payload, attackerPos, target.position);
+
     const nextHealth = Math.max(0, target.health - roundedDamage);
     applyVampireLifesteal(attackerId, roundedDamage, nextHealth === 0);
     // Just update health — when health hits 0 the HelperActor ragdolls for 15s
@@ -2679,7 +2691,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             instanceKey: 0,
             health: dead.maxHealth,
             position: spawnHelperNearPlayer(),
-            velocity: new THREE.Vector3()
+            velocity: new THREE.Vector3(),
+            // Fresh struct on respawn: a replacement must not inherit the
+            // burn that was ticking on the body it replaces.
+            statusEffects: createStatusEffects()
           }
         : {
             id: `helper-${nextHelperId.current++}`,
@@ -2692,7 +2707,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             moveSpeedMultiplier: 0.7,
             attackSpeedMultiplier: 0.7,
             position: spawnHelperNearPlayer(),
-            velocity: new THREE.Vector3()
+            velocity: new THREE.Vector3(),
+            statusEffects: createStatusEffects()
           };
       return [...prev.filter((h) => h.id !== helperId), replacement];
     });
@@ -2715,7 +2731,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     moveSpeedMultiplier: HELPER_BASE_SPEED_MULTIPLIER,
     attackSpeedMultiplier: HELPER_BASE_SPEED_MULTIPLIER,
     position: spawnHelperNearPlayer(),
-    velocity: new THREE.Vector3()
+    velocity: new THREE.Vector3(),
+    statusEffects: createStatusEffects()
   });
 
   // Sandbox-only: apply an upgrade's stat effect with no enemy auto-scaling and no level advance.
@@ -3240,6 +3257,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             overrideColor={h.overrideColor}
             overrideSizeMultiplier={h.overrideSizeMultiplier}
             overrideType={h.overrideType as EnemyType | undefined}
+            statusEffects={h.statusEffects}
+            onBurnDamage={(hid, dmg) => handleHelperHit(hid, { damage: dmg, range: 'melee' }, performance.now() / 1000, '#ff7043')}
             isRanged={!!h.isRanged}
             position={h.position}
             velocity={h.velocity}

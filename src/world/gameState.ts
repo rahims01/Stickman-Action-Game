@@ -740,6 +740,10 @@ export interface HelperState {
   // Ranged Helpers upgrade: kites at range and fires bolts (damage scales
   // with punchDamage) instead of closing to melee.
   isRanged?: boolean;
+  // Own status-effect struct, mirroring the player's and the civilians'.
+  // Without this, enemy specials landed damage on helpers but every effect
+  // (burn, freeze, slow, stun, pull, aura) silently did nothing to them.
+  statusEffects: StatusEffects;
 }
 
 // Serialisable snapshot of a helper — no THREE objects, safe for localStorage.
