@@ -257,7 +257,12 @@ export const SNIPER_SHOT_COOLDOWN = 5;
 export const CROSSOVER_BALL_MASS = 0.43;
 export const CROSSOVER_MAGNUS_K = 0.003;
 export const STRIKER_SHOT_SPEED = 14;
-export const STRIKER_SHOT_SPIN = 11;
+// 11 is football-realistic, but realistic spin is calibrated for a ~100 m
+// pitch and the deflection is scale-free, so it carries the same ~1.1 m break
+// onto a 20 m arena — which reads nearly straight. Dialled up for a visible,
+// dodgeable bend (~2 m) on Ultimate Soccer's recommendation. k stays at the
+// physically honest 0.003; spin is the intuitive 'how much English' knob.
+export const STRIKER_SHOT_SPIN = 18;
 export const STRIKER_SHOT_DAMAGE = 3;
 export const STRIKER_SHOT_COOLDOWN = 3.2;
 

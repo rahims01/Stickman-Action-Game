@@ -75,38 +75,57 @@ const FIGHTER_NAMES = [
   'Gravedigger'
 ];
 
+// Fisher-Yates. A (() => Math.random() - 0.5) comparator is not a uniform
+// shuffle and biases toward leaving items near where they started, which
+// matters here because it skews who the player is drawn against.
+const shuffle = <T,>(arr: T[]): T[] => {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
 const FIGHTER_COLORS = ['#c0392b', '#2c6fbb', '#8e44ad', '#16a085', '#d68910', '#7f8c8d', '#2c3e50'];
 
 /** Builds the field: the player as one entrant plus seven AI, seeded 1..8. */
 export const createCupField = (playerColor: string): CupFighter[] => {
-  const names = [...FIGHTER_NAMES].sort(() => Math.random() - 0.5);
+  const names = shuffle([...FIGHTER_NAMES]);
+  const colors = shuffle([...FIGHTER_COLORS]);
+
+  // Placeholders first: seeds decide strength, so stats can't be assigned
+  // until after the draw. Getting this backwards meant the top seed could be
+  // the weakest fighter in the field and the final was no harder than the
+  // first round — the ordering below is the whole point of a bracket.
   const field: CupFighter[] = [
-    {
-      id: 'player',
-      name: 'You',
-      color: playerColor,
-      seed: 0,
-      isPlayer: true,
-      maxHealth: 20,
-      damage: 3
-    }
+    { id: 'player', name: 'You', color: playerColor, seed: 0, isPlayer: true, maxHealth: 20, damage: 3 }
   ];
   for (let i = 0; i < CUP_FIGHTER_COUNT - 1; i++) {
     field.push({
       id: `cpu-${i}`,
       name: names[i % names.length],
-      color: FIGHTER_COLORS[i % FIGHTER_COLORS.length],
+      color: colors[i % colors.length],
       seed: 0,
       isPlayer: false,
-      // Later seeds hit harder, so the final is genuinely the hardest fight.
-      maxHealth: 14 + i * 2,
-      damage: 2 + Math.floor(i / 3)
+      maxHealth: 0,
+      damage: 0
     });
   }
-  // Shuffle, then seed by position so the player's path varies per run.
-  const shuffled = field.sort(() => Math.random() - 0.5);
-  shuffled.forEach((f, i) => (f.seed = i + 1));
-  return shuffled;
+
+  // The player is drawn into a random slot so their path varies per run.
+  const drawn = shuffle(field);
+  drawn.forEach((f, i) => {
+    f.seed = i + 1;
+    if (f.isPlayer) return;
+    // Seed 1 is the top seed and the toughest fighter; seed 8 the weakest.
+    // Combined with 1v8 pairing and the strength-weighted simulation below,
+    // stronger fighters tend to survive, so the final really is the hardest
+    // fight the player will have.
+    const rank = CUP_FIGHTER_COUNT - f.seed; // 7 for seed 1, 0 for seed 8
+    f.maxHealth = 12 + rank * 2;
+    f.damage = 2 + Math.floor(rank / 3);
+  });
+  return drawn;
 };
 
 /** Standard single-elimination pairing: 1v8, 2v7, 3v6, 4v5 by seed order. */
