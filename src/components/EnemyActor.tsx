@@ -611,8 +611,11 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
       hitRegisteredRef.current = true;
       activePayloadRef.current = null;
       activeTargetRef.current = target;
-      playOneShot('throw');
-      const from = groupRef.current.position.clone().add(new THREE.Vector3(0, 1.2, 0));
+      const rangedAnim = config.rangedAnim ?? 'throw';
+      playOneShot(rangedAnim);
+      const from = groupRef.current.position
+        .clone()
+        .add(new THREE.Vector3(0, rangedAnim === 'kick' ? 0.35 : 1.2, 0));
       const to = target.position.clone().add(new THREE.Vector3(0, 1.0, 0));
       const damageMultiplier = (isClear ? CLEAR_VARIANT_WEAKNESS : 1) * (isGiant ? GIANT_INSTANCE_DAMAGE_MULTIPLIER : 1);
       projectilesRef.current?.spawn({

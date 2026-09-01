@@ -397,6 +397,12 @@ export interface EnemyConfig {
   // Repulsor: the opposite - constantly pushes the player AWAY, making
   // melee a grind while he pokes from range.
   isRepulsor?: boolean;
+  // Which one-shot clip plays when this type fires its RANGED special.
+  // Defaults to 'throw'. The Striker uses 'kick', because a footballer
+  // miming an overarm throw while a ball leaves his foot reads worse than
+  // any wrong-looking kick could. A 'kick' also drops the projectile's
+  // spawn height to boot level rather than chest level.
+  rangedAnim?: 'throw' | 'kick';
   // Reflector: helper/turret/drone projectiles that hit him bounce back at
   // full damage on the enemy team instead of damaging him.
   isReflector?: boolean;
@@ -1214,6 +1220,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         curveSpin: STRIKER_SHOT_SPIN
       }
     ],
+    rangedAnim: 'kick',
     specialCooldownOverride: STRIKER_SHOT_COOLDOWN
   },
   bombMan: {
