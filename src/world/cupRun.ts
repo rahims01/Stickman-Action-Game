@@ -53,11 +53,30 @@ export const aiProfileForSeed = (seed: number): CupAiProfile => {
   // t: 0 for the weakest fighter in the draw, 1 for the top seed.
   const t = (CUP_FIGHTER_COUNT - seed) / (CUP_FIGHTER_COUNT - 1);
   return {
-    reactionDelay: 0.35 - t * 0.2,
+    // Deliberately NON-linear. Human visual reaction is ~0.20-0.25s, so
+    // 0.35 -> 0.30 is imperceptible while 0.20 -> 0.15 is enormous: below
+    // ~0.20 the player stops reacting and starts having to predict. That
+    // threshold is the real difficulty cliff, and interpolating linearly
+    // smears it across eight even steps so no single fight feels like a wall.
+    // This curve keeps seeds 8-4 comfortably reactable (0.35 -> 0.27) and
+    // drops 2 and 1 through the threshold (0.19, 0.15).
+    reactionDelay: 0.35 - 0.2 * Math.pow(t, 1.6),
+    // Flat, and it is what keeps even the top seed fair: 0.30s from wind-up
+    // to impact stays reactable however fast the opponent commits. The final
+    // is hard to catch off guard, but its swings are honest.
     telegraph: 0.15,
-    missChance: 0.5 - t * 0.45,
+    // Capped well below half. Past ~0.4 a whiff stops reading as a bad
+    // fighter and starts reading as broken hit detection. Most misses should
+    // come from the spacing lever below instead: swinging from the wrong
+    // distance whiffs believably, a dice roll does not.
+    missChance: 0.35 - t * 0.3,
     spacing: t > 0.55,
-    tempo: 1.25 - t * 0.45
+    // Capped at 0.90, not 0.80. Reaction and tempo measure different things —
+    // defensive skill versus aggression — and maxing both turns the final
+    // into a relentless DPS race, which reads as a slider being turned up.
+    // The memorable version is precise but PATIENT: threat from accuracy,
+    // not frequency.
+    tempo: 1.25 - t * 0.35
   };
 };
 

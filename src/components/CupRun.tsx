@@ -76,6 +76,9 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   const reactionRef = useRef(0);
   const recoveryRef = useRef(0);
   const profile = useMemo(() => aiProfileForSeed(fighter.seed), [fighter.seed]);
+  // Cloned materials, kept so the wind-up can flash them.
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+  const telegraphRef = useRef(0);
   const ragdollRef = useRef<RagdollHandle | null>(null);
   const inputs = useInputs();
 
@@ -89,6 +92,7 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
   useEffect(() => {
+    const mats: THREE.MeshStandardMaterial[] = [];
     model.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
@@ -101,8 +105,10 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
       // Preserve the single-vs-array shape: a one-element array on geometry
       // with no groups renders nothing.
       mesh.material = Array.isArray(mesh.material) ? cloned : cloned[0];
+      mats.push(...cloned);
       mesh.castShadow = true;
     });
+    materialsRef.current = mats;
   }, [model, fighter.color]);
 
   useEffect(() => {
@@ -184,6 +190,15 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
         oneShotRef.current = null;
         transitionTo('idle');
       }
+    }
+    // Wind-up tell. At 0.15s reaction the top seed cannot be beaten on
+    // reflex, so the player has to READ the swing instead — which only works
+    // if the wind-up is unmistakable. Brightest on the fighters fast enough
+    // to need it.
+    if (telegraphRef.current > 0) {
+      telegraphRef.current = Math.max(0, telegraphRef.current - dt);
+      const strength = isPlayer ? 0 : (0.35 - profile.reactionDelay) * 2.4;
+      materialsRef.current.forEach((m) => m.emissive.setScalar(strength * (telegraphRef.current > 0 ? 1 : 0)));
     }
     self.attackCooldown = Math.max(0, self.attackCooldown - dt);
     self.hitLock = Math.max(0, self.hitLock - dt);
@@ -274,6 +289,7 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
       // landed hit can never chain into a stunlock.
       recoveryRef.current = DUEL_RECOVERY;
       reactionRef.current = 0;
+      telegraphRef.current = profile.telegraph + 0.15;
     }
 
     group.position.set(self.position.x, 0, self.position.z);
