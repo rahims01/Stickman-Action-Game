@@ -1,6 +1,7 @@
 import { asset } from './world/assetPath';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PitchBrawl } from './components/PitchBrawl';
+import { CupRun } from './components/CupRun';
 import { GameCanvas, FlagGuideInfo, SandboxActions } from './components/GameCanvas';
 import { ViewMode } from './types/game.types';
 import { GameModifiers, LOW_HEALTH_FRACTION_THRESHOLD, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA, SavedHelper, StatModifiers, createDefaultModifiers, createStatModifiers } from './world/gameState';
@@ -124,7 +125,7 @@ function saveProgress(data: SavedProgress) {
   }
 }
 
-type GameMode = 'normal' | 'sandbox' | 'arena' | 'pitchbrawl';
+type GameMode = 'normal' | 'sandbox' | 'arena' | 'pitchbrawl' | 'cuprun';
 
 // Randomized once at module load - the rising ember particles on the menu.
 const MENU_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
@@ -604,6 +605,14 @@ export const App: React.FC = () => {
           >
             ⚽ PITCH BRAWL
           </button>
+          <button
+            className="menu-btn"
+            onClick={() => setGameMode('cuprun')}
+            title="Ultimate Soccer crossover: an 8-fighter knockout bracket. Three fights, three arenas, one trophy."
+            style={{ padding: '18px 42px', fontSize: '19px', fontWeight: 700, borderRadius: '12px', border: '2px solid #ffd54f', background: 'linear-gradient(180deg, rgba(255,213,79,0.16), rgba(255,213,79,0.05))', color: '#ffd54f', cursor: 'pointer', letterSpacing: '2px' }}
+          >
+            🏆 CUP RUN
+          </button>
         </div>
         <div style={{ display: 'flex', gap: '14px', zIndex: 1 }}>
           <button
@@ -857,6 +866,7 @@ export const App: React.FC = () => {
   // Pitch Brawl is a self-contained mode with its own Canvas, arena and
   // rules — none of GameCanvas's world, progression or entity systems apply.
   if (gameMode === 'pitchbrawl') return <PitchBrawl onExit={() => setGameMode(null)} />;
+  if (gameMode === 'cuprun') return <CupRun playerTint={stickmanColor} onExit={() => setGameMode(null)} />;
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
