@@ -42,6 +42,7 @@ import {
   TACKLE_DOWN_MS,
   WHIFF_STUMBLE_MS,
   goalLineX,
+  inGoalMouth,
   kickoffSpots,
   sweptGoalCheck
 } from '../world/pitchBrawl';
@@ -328,6 +329,11 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
     const resolved = resolveCircleVsBoxes(prevX, prevZ, pos.x, pos.z, PITCH_PLAYER_RADIUS, PITCH_WALL_COLLIDERS);
     pos.x = resolved.x;
     pos.z = resolved.z;
+    // The end boards now have a gap at each goal mouth so the ball can cross
+    // the line. Players must not use it as a door, so they get a hard bound
+    // regardless of where the colliders are.
+    pos.x = Math.max(-PITCH_HALF_X + PITCH_PLAYER_RADIUS, Math.min(PITCH_HALF_X - PITCH_PLAYER_RADIUS, pos.x));
+    pos.z = Math.max(-PITCH_HALF_Z + PITCH_PLAYER_RADIUS, Math.min(PITCH_HALF_Z - PITCH_PLAYER_RADIUS, pos.z));
 
     // One button. Near the ball it shoots; near an opponent it tackles.
     if (wantsAction && oneShotRef.current === null && state.tackleCooldown <= 0) {
@@ -433,7 +439,11 @@ const Ball: React.FC<BallProps> = ({ ball, onGoal, control }) => {
         // main game where stopping keeps it findable.
         let bx = nx;
         let bz = nz;
-        if (Math.abs(bx) > PITCH_HALF_X - BALL_RADIUS) {
+        // The end boards are open across the goal mouth, so the ball must be
+        // allowed through there. Clamping the full width was why shooting did
+        // nothing: the ball bounced at 14.8 and the goal line sits at 15, so
+        // it could never cross the line it needed to cross.
+        if (!inGoalMouth(bz) && Math.abs(bx) > PITCH_HALF_X - BALL_RADIUS) {
           bx = Math.sign(bx) * (PITCH_HALF_X - BALL_RADIUS);
           ball.velocity.x *= -BALL_RESTITUTION;
         }

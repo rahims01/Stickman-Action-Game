@@ -67,14 +67,34 @@ export const WHIFF_STUMBLE_MS = 900;
 
 export const KICKOFF_SETTLE_MS = 700;
 
+// The end walls are SPLIT either side of the goal mouth rather than spanning
+// the full width. A solid end wall makes the goal unscorable — the ball
+// bounces off the boards a fraction before the line it needs to cross — and
+// it also draws a wall straight across the mouth the posts are framing.
+const endWall = (side: 'px' | 'nx'): AABB[] => {
+  const minX = side === 'px' ? PITCH_HALF_X : -PITCH_HALF_X - PITCH_WALL_THICKNESS;
+  const maxX = side === 'px' ? PITCH_HALF_X + PITCH_WALL_THICKNESS : -PITCH_HALF_X;
+  return [
+    { id: `pitch-wall-${side}-a`, minX, maxX, minZ: -PITCH_HALF_Z - PITCH_WALL_THICKNESS, maxZ: -GOAL_HALF_WIDTH, topY: PITCH_WALL_HEIGHT },
+    { id: `pitch-wall-${side}-b`, minX, maxX, minZ: GOAL_HALF_WIDTH, maxZ: PITCH_HALF_Z + PITCH_WALL_THICKNESS, topY: PITCH_WALL_HEIGHT }
+  ];
+};
+
 export const PITCH_WALL_COLLIDERS: AABB[] = [
-  // +X and -X end walls
-  { id: 'pitch-wall-px', minX: PITCH_HALF_X, maxX: PITCH_HALF_X + PITCH_WALL_THICKNESS, minZ: -PITCH_HALF_Z - PITCH_WALL_THICKNESS, maxZ: PITCH_HALF_Z + PITCH_WALL_THICKNESS, topY: PITCH_WALL_HEIGHT },
-  { id: 'pitch-wall-nx', minX: -PITCH_HALF_X - PITCH_WALL_THICKNESS, maxX: -PITCH_HALF_X, minZ: -PITCH_HALF_Z - PITCH_WALL_THICKNESS, maxZ: PITCH_HALF_Z + PITCH_WALL_THICKNESS, topY: PITCH_WALL_HEIGHT },
-  // +Z and -Z side walls
+  ...endWall('px'),
+  ...endWall('nx'),
+  // +Z and -Z side walls run the full length.
   { id: 'pitch-wall-pz', minX: -PITCH_HALF_X, maxX: PITCH_HALF_X, minZ: PITCH_HALF_Z, maxZ: PITCH_HALF_Z + PITCH_WALL_THICKNESS, topY: PITCH_WALL_HEIGHT },
   { id: 'pitch-wall-nz', minX: -PITCH_HALF_X, maxX: PITCH_HALF_X, minZ: -PITCH_HALF_Z - PITCH_WALL_THICKNESS, maxZ: -PITCH_HALF_Z, topY: PITCH_WALL_HEIGHT }
 ];
+
+/**
+ * True where the end boards are open, i.e. inside the goal mouth. Uses the
+ * SAME threshold as the scoring test on purpose: if the opening were even
+ * slightly wider than the scoring window, a ball could pass through without
+ * scoring and fly off the map forever.
+ */
+export const inGoalMouth = (z: number): boolean => Math.abs(z) < GOAL_HALF_WIDTH - 0.02;
 
 export type PitchSide = 'home' | 'away';
 
