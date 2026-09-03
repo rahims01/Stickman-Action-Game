@@ -1,6 +1,7 @@
 import { asset } from './assetPath';
 import * as THREE from 'three';
 import { BodySliders } from './characterMorph';
+import { MaterialKey, materialColor } from './proceduralTextures';
 import {
   StatusEffects,
   applyAura,
@@ -125,6 +126,36 @@ export type EnemyType =
   | 'ragdollThrower'
   | 'adaptiveMan'
   | 'strikerMan'
+  | 'rockMan'
+  | 'rockBrute'
+  | 'grassMan'
+  | 'dirtMan'
+  | 'iceMan'
+  | 'badlandsMan'
+  | 'gardenMan'
+  | 'caveMan'
+  | 'burntMan'
+  | 'amethystMan'
+  | 'ironMan'
+  | 'copperMan'
+  | 'goldMan'
+  | 'rainbowMan'
+  | 'blueMan'
+  | 'bloodMan'
+  | 'abyssMan'
+  | 'nightMan'
+  | 'galaxyMan'
+  | 'diamondMan'
+  | 'shadowAssassin'
+  | 'strikerCaptain'
+  | 'platinumMan'
+  | 'glassMan'
+  | 'clearMan'
+  | 'mirageMan'
+  | 'nightmareMan'
+  | 'boneMan'
+  | 'rustMan'
+  | 'civilianDecoy'
   | 'bountyHunter';
 
 export const COMMON_BASIC_ENEMY_TYPES: EnemyType[] = ['fightingDummy', 'runningMan', 'punchMan', 'kickMan', 'greyMan'];
@@ -378,6 +409,10 @@ export interface EnemyConfig {
   // stickman's skin - the material color is forced white so the map shows
   // untinted (config.color still drives blood/minimap/projectile tints).
   skinTexture?: string;
+  // Procedurally generated arena-room material (see proceduralTextures.ts).
+  // Preferred over skinTexture for the room natives: no image files to
+  // source or licence, and the enemy always matches the floor it spawned on.
+  skinMaterial?: MaterialKey;
   // Minion: at spawn, copies the player's strongest helper's maxHealth and
   // punch damage (falls back to this config's level-1-helper stats).
   isMinion?: boolean;
@@ -487,7 +522,107 @@ export const AMBIENT_PARTICLE_CONFIG: Partial<Record<EnemyType, { color: string;
   strikerMan:      { color: '#26c6da', emitY: 1.0, interval: 0.34 },
 };
 
+// ── Arena room natives ─────────────────────────────────────
+// One fighter per room, made of that room's material. Built from a single
+// helper because they differ only in palette and a couple of stats — writing
+// thirty of these by hand would be thirty chances to fat-finger a field.
+const nativeMan = (
+  label: string,
+  material: MaterialKey,
+  o: {
+    hp?: number;
+    dmg?: number;
+    speed?: number;
+    ranged?: boolean;
+    rangedDamage?: number;
+    extra?: Partial<EnemyConfig>;
+  } = {}
+): EnemyConfig => {
+  const base: EnemyConfig = {
+    label,
+    maxHealth: o.hp ?? BASIC_ENEMY_MAX_HEALTH,
+    color: materialColor(material),
+    skinMaterial: material,
+    moveSpeedMultiplier: o.speed ?? 1,
+    attackSpeedMultiplier: 1,
+    isStationary: false,
+    isSpecial: false,
+    canPunch: !o.ranged,
+    canKick: !o.ranged
+  };
+  if (o.ranged) {
+    base.staysAtRange = true;
+    base.specials = [
+      {
+        kind: 'greyProjectile',
+        damage: o.rangedDamage ?? 2,
+        range: 'ranged',
+        projectileColor: materialColor(material)
+      }
+    ];
+    base.specialCooldownOverride = 3.2;
+  } else {
+    base.punch = { damage: o.dmg ?? PUNCH_DAMAGE, range: 'melee' };
+    base.kick = { damage: (o.dmg ?? PUNCH_DAMAGE) + 1, range: 'melee' };
+  }
+  return { ...base, ...o.extra };
+};
+
+const ROOM_NATIVES: Partial<Record<EnemyType, EnemyConfig>> = {
+  // Tier 1
+  rockMan: nativeMan('Rock Man', 'rock', { hp: 14, dmg: 2, speed: 0.9 }),
+  rockBrute: nativeMan('Rock Brute', 'rock', { hp: 26, dmg: 3, speed: 0.6, extra: { sizeMultiplier: 1.5, staggerImmune: true } }),
+  grassMan: nativeMan('Grass Man', 'grass', { hp: 9, dmg: 1, speed: 1.25 }),
+  dirtMan: nativeMan('Dirt Man', 'dirt', { hp: 11, dmg: 2 }),
+  iceMan: nativeMan('Ice Man', 'snow', { hp: 12, dmg: 2, extra: {
+    specials: [{ kind: 'freezePunch', damage: 1, range: 'melee', freezeDuration: DEFAULT_FREEZE_DURATION, auraColor: '#9fd8ff' }]
+  } }),
+  badlandsMan: nativeMan('Badlands Man', 'badlands', { hp: 12, ranged: true, rangedDamage: 2 }),
+  gardenMan: nativeMan('Garden Man', 'garden', { hp: 10, dmg: 2, extra: { isMedic: true, spawnerCooldownOverride: MEDIC_HEAL_INTERVAL } }),
+  // Tier 2
+  caveMan: nativeMan('Cave Man', 'cave', { hp: 15, dmg: 3, speed: 1.1 }),
+  burntMan: nativeMan('Burnt Man', 'burntHouse', { hp: 13, dmg: 2, extra: {
+    punch: { damage: 2, range: 'melee', burnDuration: FIRE_BURN_DURATION, burnDps: 1, auraColor: '#ff9800' }
+  } }),
+  amethystMan: nativeMan('Amethyst Man', 'amethyst', { hp: 16, dmg: 3, extra: { metalness: 0.4, roughness: 0.2 } }),
+  ironMan: nativeMan('Iron Man', 'iron', { hp: 22, dmg: 3, speed: 0.8, extra: { metalness: 0.75, roughness: 0.3, isMagnet: true } }),
+  copperMan: nativeMan('Copper Man', 'copper', { hp: 15, dmg: 2, extra: { metalness: 0.6, roughness: 0.35 } }),
+  // Tier 3
+  goldMan: nativeMan('Gold Man', 'gold', { hp: 20, dmg: 4, extra: { metalness: 0.85, roughness: 0.18 } }),
+  rainbowMan: nativeMan('Rainbow Man', 'rainbow', { hp: 22, dmg: 3, speed: 1.2, extra: {
+    specials: [{ kind: 'emeraldStun', damage: 3, range: 'melee', stunDuration: DEFAULT_STUN_DURATION, auraColor: '#ff4dc3' }]
+  } }),
+  blueMan: nativeMan('Blue Man', 'blue', { hp: 18, ranged: true, rangedDamage: 3 }),
+  bloodMan: nativeMan('Blood Man', 'blood', { hp: 20, dmg: 4, extra: { isVampire: true } }),
+  abyssMan: nativeMan('Abyss Man', 'darkOcean', { hp: 20, dmg: 3, speed: 0.9, extra: { opacity: 0.6 } }),
+  nightMan: nativeMan('Night Man', 'night', { hp: 18, dmg: 3, speed: 1.15, extra: { isAssassin: true } }),
+  galaxyMan: nativeMan('Galaxy Man', 'galaxy', { hp: 24, dmg: 4, extra: {
+    specials: [{ kind: 'greenPull', damage: 2, range: 'ranged', pullDuration: DEFAULT_PULL_DURATION, projectileColor: '#c9a8ff', auraColor: '#c9a8ff' }]
+  } }),
+  // Tier 4
+  diamondMan: nativeMan('Diamond Man', 'diamond', { hp: 34, dmg: 5, speed: 0.85, extra: { metalness: 0.5, roughness: 0.08, staggerImmune: true } }),
+  shadowAssassin: nativeMan('Shadow Assassin', 'assassin', { hp: 16, dmg: 4, speed: 1.35, extra: { isAssassin: true, isPhaser: true, opacity: 0.7 } }),
+  strikerCaptain: nativeMan('Striker Captain', 'pitch', { hp: 22, ranged: true, rangedDamage: 4, extra: {
+    rangedAnim: 'shoot',
+    specials: [{ kind: 'curveShot', damage: 4, range: 'ranged', projectileColor: '#f5f5f5', speed: STRIKER_SHOT_SPEED, curveSpin: STRIKER_SHOT_SPIN * 1.3 }],
+    specialCooldownOverride: STRIKER_SHOT_COOLDOWN * 0.8,
+    canKick: true,
+    kick: { damage: 3, range: 'melee' }
+  } }),
+  platinumMan: nativeMan('Platinum Man', 'platinum', { hp: 30, dmg: 4, speed: 0.85, extra: { metalness: 0.9, roughness: 0.15, isReflector: true } }),
+  glassMan: nativeMan('Glass Man', 'glass', { hp: 12, dmg: 5, extra: { opacity: 0.55, roughness: 0.05, metalness: 0.2 } }),
+  clearMan: nativeMan('Clear Man', 'clear', { hp: 16, dmg: 3, extra: { opacity: 0.28, roughness: 0.04 } }),
+  mirageMan: nativeMan('Mirage Man', 'illusion', { hp: 14, dmg: 3, speed: 1.1, extra: { isPhaser: true, opacity: 0.75 } }),
+  // Tier 5
+  nightmareMan: nativeMan('Nightmare Man', 'nightmare', { hp: 38, dmg: 6, speed: 1.05, extra: { staggerImmune: true, isRageEnemy: true } }),
+  boneMan: nativeMan('Bone Man', 'bone', { hp: 20, dmg: 4, extra: { maxRevives: 1 } }),
+  rustMan: nativeMan('Rust Man', 'rust', { hp: 24, dmg: 3, speed: 0.8, extra: { hasArmourPieces: true } }),
+  // Looks like a bystander, fights like everything else in the room.
+  civilianDecoy: nativeMan('Stranger', 'garden', { hp: 8, dmg: 2, speed: 1.2, extra: { isCoward: true, fleeHealthThreshold: 0.5 } })
+};
+
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
+  ...(ROOM_NATIVES as Record<EnemyType, EnemyConfig>),
   fightingDummy: {
     label: 'Fighting Dummy',
     maxHealth: BASIC_ENEMY_MAX_HEALTH,
@@ -1949,6 +2084,8 @@ STRENGTH_TIER_ORDER.forEach((type, index) => {
   if (config.canPunch && config.punch) config.punch = { ...config.punch, damage: punchDamage };
   if (config.canKick && config.kick) config.kick = { ...config.kick, damage: kickDamage };
 });
+
+
 
 export const pickRandomBasicEnemyColor = (): string => BASIC_ENEMY_COLOR_POOL[Math.floor(Math.random() * BASIC_ENEMY_COLOR_POOL.length)];
 

@@ -9,6 +9,7 @@ import { physicsWorld } from '../world/physicsWorld';
 import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision';
 import { AABB } from '../world/worldObjects';
 import { AMBIENT_PARTICLE_CONFIG, AttackPayload, ENEMY_CONFIGS, EnemyType, SpecialKind } from '../world/enemyConfig';
+import { getMaterialTexture } from '../world/proceduralTextures';
 import { StatusEffects, applyMagnetDrift, isRagdollStunned } from '../world/statusEffects';
 import { ProjectilesHandle } from './Projectiles';
 import { applyBodySliders, cacheBoneTransforms } from '../world/characterMorph';
@@ -328,7 +329,13 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
     const materials: THREE.MeshStandardMaterial[] = [];
     // Textured skins force white so the map shows untinted; the death
     // charring / aura tints still work since color multiplies the map.
-    const skinTex = config.skinTexture ? getSkinTexture(config.skinTexture) : null;
+    // Room natives wear a procedurally generated material rather than an
+    // image file, so a new arena room costs a palette rather than an asset.
+    const skinTex = config.skinMaterial
+      ? getMaterialTexture(config.skinMaterial)
+      : config.skinTexture
+        ? getSkinTexture(config.skinTexture)
+        : null;
     const effectiveColor = skinTex ? '#ffffff' : colorOverride ?? config.color;
     model.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -359,7 +366,7 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
     materialsRef.current = materials;
     rightHandBoneRef.current = model.getObjectByName('mixamorigRightHand') ?? null;
     rightFootBoneRef.current = model.getObjectByName('mixamorigRightFoot') ?? null;
-  }, [model, config.color, config.opacity, config.skinTexture, colorOverride]);
+  }, [model, config.color, config.opacity, config.skinTexture, config.skinMaterial, colorOverride]);
 
   useEffect(() => {
     if (!config.isMedic) return;
