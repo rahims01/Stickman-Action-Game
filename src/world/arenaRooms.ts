@@ -45,6 +45,11 @@ export interface ArenaRoom {
    *  fire things in the snow, water things in the magma. About five per room;
    *  everything else in the pool still turns up. */
   excludes: EnemyType[];
+  /** Arena enemies that existed before the room system and belong to this
+   *  room specifically. They are kept off the common pool — a Lava Minion has
+   *  no business in the snow — so without this list they would exist as types
+   *  and spawn nowhere. */
+  legacy?: EnemyType[];
   /** Flavour line shown on the room card. */
   blurb: string;
   /** Rooms where the only meaningful light is what the player brings. */
@@ -65,7 +70,9 @@ export const ROOM_COMMON_POOL: EnemyType[] = [
   'sniperMan', 'bombMan', 'coward', 'slimeBlock', 'juggernaut',
   'resilientMan', 'shockerCube', 'slowCube', 'smashBall', 'adaptiveMan',
   'magnetMan', 'reflectorMan', 'repulsorMan', 'minionMan', 'ragdollThrower',
-  'strongPunchMan', 'strongKickMan', 'strongRangedMan', 'comboMan',
+  'strongPunchMan', 'strongKickMan', 'strongRangedMan', 'comboMan', 'strongComboMan',
+  'brainMan', 'superResilientMan', 'ragdollSmashBall', 'slowBall', 'splitBall',
+  'giantSlime', 'colossalSlime', 'slimeKing',
   'lavaMan', 'waterMan', 'invisibleMan', 'fireMan', 'weaponMan',
   'purpleMan', 'pinkMan', 'greenMan', 'yellowMan', 'blackMan',
   'tomatoMan', 'snowMan', 'glowingGreenMan', 'magmaMan', 'stormMan'
@@ -76,7 +83,7 @@ export const ARENA_ROOMS: ArenaRoom[] = [
   { id: 'sand', label: 'The Sand Pit', tier: 1, material: 'sand', shape: 'circle',
     ground: '#d9c08a', wall: '#a8905f', sky: '#e6d3a8', fog: '#e6d3a8',
     lightColor: '#fff0cc', lightIntensity: 1.5, ambientIntensity: 0.75, fogNear: 30, fogFar: 110,
-    natives: ['sandNative', 'sandBulwark', 'sandSlinger'], special: 'sandPrime', excludes: ['snowMan', 'lavaMan', 'waterMan', 'slowCube', 'stormMan'],
+    natives: ['sandNative', 'sandBulwark', 'sandSlinger'], special: 'sandPrime', excludes: ['snowMan', 'lavaMan', 'waterMan', 'slowCube', 'stormMan'], legacy: ['sandWarrior', 'sandJuggernaut', 'sandGiant', 'sandThrower'],
     blurb: 'Open, bright, and full of things made of sand.' },
 
   { id: 'rock', label: 'The Rock Quarry', tier: 1, material: 'rock', shape: 'rect',
@@ -125,7 +132,7 @@ export const ARENA_ROOMS: ArenaRoom[] = [
   { id: 'magma', label: 'The Magma Floor', tier: 2, material: 'magma', shape: 'pentagon',
     ground: '#4a1a10', wall: '#2b120c', sky: '#3a1208', fog: '#5c1d0c',
     lightColor: '#ff7043', lightIntensity: 1.5, ambientIntensity: 0.6, fogNear: 18, fogFar: 70,
-    natives: ['magmaNative', 'magmaBulwark', 'magmaSlinger'], special: 'magmaPrime', excludes: ['snowMan', 'waterMan', 'slowCube', 'sandyMan', 'medicMan'],
+    natives: ['magmaNative', 'magmaBulwark', 'magmaSlinger'], special: 'magmaPrime', excludes: ['snowMan', 'waterMan', 'slowCube', 'sandyMan', 'medicMan'], legacy: ['lavaMinion', 'lavaThrower', 'lavaJuggernaut', 'lavaBaby', 'lavaSplitCube'],
     blurb: 'The floor is, in several places, actually lava.' },
 
   { id: 'cave', label: 'The Deep Cave', tier: 2, material: 'cave', shape: 'circle',
@@ -143,7 +150,7 @@ export const ARENA_ROOMS: ArenaRoom[] = [
   { id: 'volcano', label: 'The Caldera', tier: 2, material: 'volcano', shape: 'pentagon',
     ground: '#2e1a15', wall: '#1d100c', sky: '#48180c', fog: '#5e2010',
     lightColor: '#ff5722', lightIntensity: 1.3, ambientIntensity: 0.5, fogNear: 14, fogFar: 58,
-    natives: ['volcanoNative', 'volcanoBulwark', 'volcanoSlinger'], special: 'volcanoPrime', excludes: ['snowMan', 'waterMan', 'slowCube', 'medicMan', 'coward'],
+    natives: ['volcanoNative', 'volcanoBulwark', 'volcanoSlinger'], special: 'volcanoPrime', excludes: ['snowMan', 'waterMan', 'slowCube', 'medicMan', 'coward'], legacy: ['lavaGiant', 'lavaSmashBall', 'lavaBaby'],
     blurb: 'Uphill, downwind, and on fire.' },
 
   { id: 'burntHouse', label: 'The Burnt House', tier: 2, material: 'burntHouse', shape: 'rect',
@@ -229,7 +236,7 @@ export const ARENA_ROOMS: ArenaRoom[] = [
   { id: 'pitchBrawl', label: 'The Great Pitch', tier: 4, material: 'pitch', shape: 'rect',
     ground: '#2f6b3a', wall: '#1f4a27', sky: '#bcd9ea', fog: '#c8e2ef',
     lightColor: '#ffffff', lightIntensity: 1.6, ambientIntensity: 0.85, fogNear: 40, fogFar: 130,
-    natives: ['pitchBrawlNative', 'pitchBrawlBulwark', 'pitchBrawlSlinger'], special: 'pitchBrawlPrime', excludes: ['lavaMan', 'magmaMan', 'charredBrickMan', 'blackMan', 'juggernaut'],
+    natives: ['pitchBrawlNative', 'pitchBrawlBulwark', 'pitchBrawlSlinger'], special: 'pitchBrawlPrime', excludes: ['lavaMan', 'magmaMan', 'charredBrickMan', 'blackMan', 'juggernaut'], legacy: ['strikerMan'],
     blurb: 'The crossover, at scale. Everything here can bend a shot.' },
 
   { id: 'platinum', label: 'The Platinum Vault', tier: 4, material: 'platinum', shape: 'circle',
@@ -325,5 +332,6 @@ export const pickRoom = (tier: RoomTier, avoidId?: string): ArenaRoom => {
 export const poolForRoom = (room: ArenaRoom): EnemyType[] => [
   ...ROOM_COMMON_POOL.filter((t) => !room.excludes.includes(t)),
   ...room.natives,
+  ...(room.legacy ?? []),
   room.special
 ];
