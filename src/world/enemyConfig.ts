@@ -126,36 +126,6 @@ export type EnemyType =
   | 'ragdollThrower'
   | 'adaptiveMan'
   | 'strikerMan'
-  | 'rockMan'
-  | 'rockBrute'
-  | 'grassMan'
-  | 'dirtMan'
-  | 'iceMan'
-  | 'badlandsMan'
-  | 'gardenMan'
-  | 'caveMan'
-  | 'burntMan'
-  | 'amethystMan'
-  | 'ironMan'
-  | 'copperMan'
-  | 'goldMan'
-  | 'rainbowMan'
-  | 'blueMan'
-  | 'bloodMan'
-  | 'abyssMan'
-  | 'nightMan'
-  | 'galaxyMan'
-  | 'diamondMan'
-  | 'shadowAssassin'
-  | 'strikerCaptain'
-  | 'platinumMan'
-  | 'glassMan'
-  | 'clearMan'
-  | 'mirageMan'
-  | 'nightmareMan'
-  | 'boneMan'
-  | 'rustMan'
-  | 'civilianDecoy'
   | 'sandNative'
   | 'sandBulwark'
   | 'sandSlinger'
@@ -704,7 +674,9 @@ const nativeMan = (
   return { ...base, ...o.extra };
 };
 
-const ROOM_NATIVES: Partial<Record<EnemyType, EnemyConfig>> = {
+// Deliberately NOT Partial: a missing room enemy should be a type error, not
+// an undefined lookup at spawn time.
+const ROOM_NATIVES = {
   // Four per room, all wearing that room's own material: a Man to fight, a
   // Brute to wall you in, a Thrower to punish standing still, and one
   // SPECIAL that fields only here. The shared common pool still spawns on
@@ -849,7 +821,7 @@ const ROOM_NATIVES: Partial<Record<EnemyType, EnemyConfig>> = {
 };
 
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
-  ...(ROOM_NATIVES as Record<EnemyType, EnemyConfig>),
+  ...ROOM_NATIVES,
   fightingDummy: {
     label: 'Fighting Dummy',
     maxHealth: BASIC_ENEMY_MAX_HEALTH,
