@@ -24,6 +24,7 @@ import { Turrets } from './Turrets';
 import { Bombs } from './Bombs';
 import { FallingChunks, FallingChunksHandle } from './FallingChunks';
 import { ArenaEnvironment, ArenaPhase } from './ArenaEnvironment';
+import { ArenaRoom, ROOMS_PER_TIER, RoomTier, WAVES_PER_ROOM, pickRoom, poolForRoom } from '../world/arenaRooms';
 import { PhysicsStepper } from './PhysicsStepper';
 import { ViewMode } from '../types/game.types';
 import {
@@ -861,6 +862,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // ── Arena mode state ──────────────────────────────────────────────────
   const [arenaPhase, setArenaPhase] = useState<ArenaPhase>('concrete');
   const [arenaWave, setArenaWave] = useState(0);
+  // Once the scripted tutorial is done (concrete -> brick cage -> the fall ->
+  // sand), the arena stops being a fixed sequence and starts DRAWING rooms
+  // from the table. That is what makes two runs diverge.
+  const [arenaRoom, setArenaRoom] = useState<ArenaRoom | null>(null);
+  const arenaRoomRef = useRef<ArenaRoom | null>(null);
+  arenaRoomRef.current = arenaRoom;
+  const roomsEnteredRef = useRef(0);
   const [arenaBoxHalf, setArenaBoxHalf] = useState(ARENA_BOX_START_HALF);
   const arenaPhaseRef = useRef<ArenaPhase>('concrete');
   arenaPhaseRef.current = arenaPhase;
@@ -1647,18 +1655,34 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       case 14: return { dummies: 0, enemies: [{ type: 'sandGiant' }, { type: randOf(sands) }, { type: randOf(sands) }, { type: 'brickMan' }] };
       case 15: return { dummies: 0, enemies: [{ type: 'sandGiant' }, { type: 'sandJuggernaut' }, { type: 'sandThrower' }, { type: pickRandomSpecialType(), giant: true }] };
       case 16: return { dummies: 0, enemies: [{ type: 'sandGiant' }, { type: 'sandGiant' }, { type: randOf(sands) }, { type: pickRandomSpecialType() }] };
-      // ── Magma wasteland: endless ──
+      // ── Drawn rooms: endless ──
+      // Past the tutorial the roster comes from whichever room you are
+      // standing in — its own family, its own special, its legacy residents,
+      // and the common pool minus the handful that make no sense there.
       default: {
+        const room = arenaRoomRef.current;
         const list: { type: EnemyType; giant?: boolean }[] = [];
         const n = Math.min(3 + Math.floor((wave - 17) / 2), 8);
-        for (let i = 0; i < n; i++) list.push({ type: randOf(lavas) });
-        list.push({ type: 'lavaJuggernaut' });
-        if (wave % 2 === 1) list.push({ type: 'charredBrickMan' });
-        if (wave % 3 === 1) list.push({ type: 'lavaGiant' });
-        if (wave % 3 === 2) list.push({ type: 'magmaMan' });
-        if (wave % 2 === 0) list.push({ type: randOf(rares) });
-        list.push({ type: pickRandomSpecialType(), giant: wave % 3 === 0 });
-        if (wave >= 20 && wave % 4 === 0) list.push({ type: 'lavaGiant', giant: true });
+
+        if (!room) {
+          for (let i = 0; i < n; i++) list.push({ type: randOf(lavas) });
+          list.push({ type: pickRandomSpecialType(), giant: wave % 3 === 0 });
+          return { dummies: 0, enemies: list };
+        }
+
+        const roomPool = poolForRoom(room);
+        for (let i = 0; i < n; i++) list.push({ type: randOf(roomPool) });
+        // The room's own family is guaranteed presence rather than left to
+        // chance, so a room always reads as itself.
+        list.push({ type: room.natives[0] });
+        if (wave % 2 === 1) list.push({ type: room.natives[1] });
+        if (wave % 2 === 0) list.push({ type: room.natives[2] });
+        // Its special headlines every third wave, and goes giant occasionally.
+        if (wave % 3 === 0) list.push({ type: room.special, giant: wave % 6 === 0 });
+        if (room.legacy && room.legacy.length > 0 && wave % 2 === 0) {
+          list.push({ type: randOf(room.legacy) });
+        }
+        list.push({ type: pickRandomSpecialType() });
         return { dummies: 0, enemies: list };
       }
     }
@@ -1779,16 +1803,37 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       onArenaWaveChange?.(clearedWave, 'falling');
       return;
     }
-    if (clearedWave === ARENA_SAND_END_WAVE) {
-      // Sand pit conquered: the magma wasteland opens up - with a permanent
-      // scatter of burning lava tiles across its floor.
-      setArenaPhase('magma');
-      setLavaTiles(makeLavaTiles(ARENA_LAVA_TILE_COUNT));
-      onArenaWaveChange?.(clearedWave, 'magma');
+    // Sand pit conquered: the scripted tutorial ends and the arena starts
+    // drawing rooms, changing every WAVES_PER_ROOM waves from here on.
+    if (
+      clearedWave === ARENA_SAND_END_WAVE ||
+      (clearedWave > ARENA_SAND_END_WAVE && (clearedWave - ARENA_SAND_END_WAVE) % WAVES_PER_ROOM === 0)
+    ) {
+      enterNextRoom(clearedWave);
     }
     arenaTimerRef.current = setTimeout(() => startArenaWave(clearedWave + 1), ARENA_WAVE_BREAK_SECONDS * 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enemies, dummies, isArena]);
+
+  // Draws the next room, advancing a tier every ROOMS_PER_TIER rooms, and maps
+  // its shape onto the existing arena geometry so colliders, minimap bounds
+  // and spawn positions keep working unchanged.
+  const enterNextRoom = useCallback(
+    (clearedWave: number) => {
+      const entered = roomsEnteredRef.current;
+      const tier = Math.min(5, 1 + Math.floor(entered / ROOMS_PER_TIER)) as RoomTier;
+      const room = pickRoom(tier, arenaRoomRef.current?.id);
+      roomsEnteredRef.current = entered + 1;
+      setArenaRoom(room);
+      const phase: ArenaPhase = room.shape === 'rect' ? 'concrete' : room.shape === 'circle' ? 'sand' : 'magma';
+      setArenaPhase(phase);
+      // Only the genuinely molten rooms get a burning floor.
+      const molten = room.material === 'magma' || room.material === 'volcano' || room.material === 'furnace';
+      setLavaTiles(molten ? makeLavaTiles(ARENA_LAVA_TILE_COUNT) : []);
+      onArenaWaveChange?.(clearedWave, phase);
+    },
+    [onArenaWaveChange]
+  );
 
   const handleArenaFellThrough = () => {
     setArenaPhase('sand');
@@ -3072,7 +3117,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           distanceFactor={cameraDistance}
           viewMode={viewMode}
         />
-        {isArena ? <ArenaEnvironment phase={arenaPhase} boxHalf={arenaBoxHalf} /> : <EnvironmentFloor />}
+        {isArena ? <ArenaEnvironment phase={arenaPhase} boxHalf={arenaBoxHalf} room={arenaRoom} /> : <EnvironmentFloor />}
         <WorldObjects crates={crates} hideStatic={isArena} />
         {dummies.map((d) => (
           <DummyActor

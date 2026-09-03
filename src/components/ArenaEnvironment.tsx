@@ -1,6 +1,7 @@
 import { asset } from '../world/assetPath';
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
+import { MaterialKey, getMaterialTexture } from '../world/proceduralTextures';
 import { useTexture } from '@react-three/drei';
 import {
   ARENA_CONCRETE_HALF_X,
@@ -16,6 +17,10 @@ export type ArenaPhase = 'concrete' | 'box' | 'falling' | 'sand' | 'magma';
 interface ArenaEnvironmentProps {
   phase: ArenaPhase;
   boxHalf: number;
+  // Set once the arena starts drawing rooms. Overrides the floor and wall
+  // colours and swaps in that room material, so a circle-shaped room is
+  // not always the sand pit.
+  room?: { ground: string; wall: string; material: MaterialKey } | null;
 }
 
 // Procedural magma floor: dark rock crazed with glowing orange cracks.
@@ -90,7 +95,7 @@ const buildRingSegments = (segments: number, radius: number) => {
 // Arena mode's stage across its four phases: a small concrete starter room,
 // the growing brick/wood box, the circular sand pit after the floor drops,
 // and finally the pentagon magma wasteland.
-export const ArenaEnvironment: React.FC<ArenaEnvironmentProps> = ({ phase, boxHalf }) => {
+export const ArenaEnvironment: React.FC<ArenaEnvironmentProps> = ({ phase, boxHalf, room }) => {
   const [brickTex, woodTex, sandTex] = useTexture([asset('/textures/brick.jpg'), asset('/textures/wood.jpg'), asset('/textures/sand.jpg')]);
   const magmaTex = useMemo(createMagmaTexture, []);
   const concreteTex = useMemo(createConcreteTexture, []);
@@ -105,6 +110,53 @@ export const ArenaEnvironment: React.FC<ArenaEnvironmentProps> = ({ phase, boxHa
 
   const sandWallSegments = useMemo(() => buildRingSegments(ARENA_SAND_WALL_SEGMENTS, ARENA_SAND_RADIUS), []);
   const magmaWallSegments = useMemo(() => buildRingSegments(5, ARENA_MAGMA_RADIUS), []);
+
+  // Drawn rooms take over the visuals entirely: the phase now only decides the
+  // SHAPE (rect / circle / pentagon), while the material and colours come from
+  // the room. Without this a circular room would always look like the sand pit.
+  if (room) {
+    const tex = getMaterialTexture(room.material);
+    const segments = phase === 'magma' ? magmaWallSegments : sandWallSegments;
+    const floorRadius = phase === 'magma' ? ARENA_MAGMA_RADIUS + 4 : ARENA_SAND_RADIUS + 1;
+    const floorSides = phase === 'magma' ? 5 : 64;
+
+    if (phase === 'concrete') {
+      return (
+        <group>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[ARENA_CONCRETE_HALF_X * 2, ARENA_CONCRETE_HALF_Z * 2]} />
+            <meshStandardMaterial map={tex} map-repeat={[10, 10]} color={room.ground} roughness={0.95} />
+          </mesh>
+          {([
+            [0, -ARENA_CONCRETE_HALF_Z, ARENA_CONCRETE_HALF_X * 2, 0],
+            [0, ARENA_CONCRETE_HALF_Z, ARENA_CONCRETE_HALF_X * 2, 0],
+            [-ARENA_CONCRETE_HALF_X, 0, ARENA_CONCRETE_HALF_Z * 2, Math.PI / 2],
+            [ARENA_CONCRETE_HALF_X, 0, ARENA_CONCRETE_HALF_Z * 2, Math.PI / 2]
+          ] as [number, number, number, number][]).map(([x, z, w, r], i) => (
+            <mesh key={i} position={[x, ARENA_WALL_HEIGHT / 2, z]} rotation={[0, r, 0]} castShadow receiveShadow>
+              <boxGeometry args={[w, ARENA_WALL_HEIGHT, 1]} />
+              <meshStandardMaterial map={tex} map-repeat={[Math.round(w / 3), 2]} color={room.wall} roughness={0.95} />
+            </mesh>
+          ))}
+        </group>
+      );
+    }
+
+    return (
+      <group>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <circleGeometry args={[floorRadius, floorSides]} />
+          <meshStandardMaterial map={tex} map-repeat={[12, 12]} color={room.ground} roughness={0.95} />
+        </mesh>
+        {segments.map((s, i) => (
+          <mesh key={i} position={[s.x, ARENA_WALL_HEIGHT / 2 + 0.4, s.z]} rotation={[0, s.rotY, 0]} castShadow receiveShadow>
+            <boxGeometry args={[s.width, ARENA_WALL_HEIGHT + 0.8, 1]} />
+            <meshStandardMaterial map={tex} map-repeat={[Math.max(1, Math.round(s.width / 3)), 2]} color={room.wall} roughness={0.95} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
 
   if (phase === 'magma') {
     return (

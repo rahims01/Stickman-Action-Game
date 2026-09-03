@@ -23,7 +23,7 @@ export type MaterialKey =
   // Tier 4 — hard and rare
   | 'diamond' | 'assassin' | 'pitch' | 'platinum' | 'glass' | 'clear' | 'illusion'
   // Tier 5 — the end
-  | 'nightmare' | 'pitchBlack' | 'bone' | 'rust';
+  | 'nightmare' | 'pitchBlack' | 'bone' | 'rust' | 'rift' | 'blackIce' | 'furnace' | 'hollow';
 
 const SIZE = 256;
 
@@ -157,7 +157,11 @@ const RECIPES: Record<MaterialKey, Recipe> = {
   nightmare: { base: '#160f18', speckle: ['#241628', '#0d090e'], density: 0.6, pass: (ctx, rand) => { blobs(['#3d1030', '#5c1233'], 18, 8, 30, 0.5)(ctx, rand); sparks(['#ff2d55'], 40, 1.4)(ctx, rand); } },
   pitchBlack:{ base: '#08080a', speckle: ['#0d0d10', '#050506'], density: 0.5 },
   bone:      { base: '#ddd4bd', speckle: ['#c9bfa4', '#efe8d6'], density: 0.5, pass: bands(['#b8ad91'], 14, 0.35) },
-  rust:      { base: '#8a4a28', speckle: ['#6d371c', '#a86038'], density: 0.7, pass: blobs(['#4a2413', '#c47a4e'], 24, 4, 15, 0.6) }
+  rust:      { base: '#8a4a28', speckle: ['#6d371c', '#a86038'], density: 0.7, pass: blobs(['#4a2413', '#c47a4e'], 24, 4, 15, 0.6) },
+  rift:      { base: '#0a0616', speckle: ['#150c2b', '#05030d'], density: 0.5, pass: (ctx, rand) => { bands(['#7a2dd6', '#2d1a5c'], 14, 0.45)(ctx, rand); sparks(['#c9a8ff', '#ffffff'], 120, 1.6)(ctx, rand); } },
+  blackIce:  { base: '#0e1a20', speckle: ['#16262e', '#081116'], density: 0.45, pass: facets(['#3f6f80', '#5f9fb5'], 30, 22, 0.5) },
+  furnace:   { base: '#1c0d08', speckle: ['#2e1610', '#0f0705'], density: 0.6, pass: blobs(['#ff3d00', '#ffab40', '#c62828'], 34, 3, 16, 0.75) },
+  hollow:    { base: '#2a2622', speckle: ['#1d1a17', '#3a352f'], density: 0.65, pass: facets(['#141210'], 26, 26, 0.6) }
 };
 
 /**

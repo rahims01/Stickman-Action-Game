@@ -291,6 +291,38 @@ export const ARENA_ROOMS: ArenaRoom[] = [
     blurb: 'The Iron Works, a few centuries later.' }
 ];
 
+// Tier 5 was four rooms against seven or eight elsewhere, so the final tier
+// repeated itself fastest — the opposite of what an endgame should do.
+ARENA_ROOMS.push(
+  { id: 'rift', label: 'The Rift', tier: 5, material: 'rift', shape: 'pentagon',
+    ground: '#0a0616', wall: '#150c2b', sky: '#030109', fog: '#080414',
+    lightColor: '#a86bff', lightIntensity: 0.5, ambientIntensity: 0.22, fogNear: 8, fogFar: 34,
+    natives: ['riftNative', 'riftBulwark', 'riftSlinger'], special: 'riftPrime',
+    excludes: ['sandyMan', 'woodMan', 'brickMan', 'concreteMan', 'coward'],
+    blurb: 'The Galaxy, torn open. Things come through it.' },
+
+  { id: 'blackIce', label: 'Black Ice', tier: 5, material: 'blackIce', shape: 'circle',
+    ground: '#0e1a20', wall: '#081116', sky: '#050d11', fog: '#0a1419',
+    lightColor: '#7fd4ff', lightIntensity: 0.42, ambientIntensity: 0.2, fogNear: 7, fogFar: 30,
+    natives: ['blackIceNative', 'blackIceBulwark', 'blackIceSlinger'], special: 'blackIcePrime',
+    excludes: ['lavaMan', 'fireMan', 'magmaMan', 'charredBrickMan', 'tomatoMan'],
+    blurb: 'The Drift after the sun went out. Everything here freezes.' },
+
+  { id: 'furnace', label: 'The Furnace', tier: 5, material: 'furnace', shape: 'rect',
+    ground: '#1c0d08', wall: '#0f0705', sky: '#2a0d05', fog: '#3d1207',
+    lightColor: '#ff5722', lightIntensity: 1.1, ambientIntensity: 0.4, fogNear: 10, fogFar: 40,
+    natives: ['furnaceNative', 'furnaceBulwark', 'furnaceSlinger'], special: 'furnacePrime',
+    excludes: ['snowMan', 'waterMan', 'slowCube', 'medicMan', 'coward'],
+    blurb: 'Where the Magma Floor is heated. Nothing here is not burning.' },
+
+  { id: 'hollow', label: 'The Hollow', tier: 5, material: 'hollow', shape: 'circle',
+    ground: '#2a2622', wall: '#141210', sky: '#0c0a09', fog: '#12100e',
+    lightColor: '#8a8478', lightIntensity: 0.38, ambientIntensity: 0.18, fogNear: 6, fogFar: 26,
+    natives: ['hollowNative', 'hollowBulwark', 'hollowSlinger'], special: 'hollowPrime',
+    excludes: ['yellowMan', 'pinkMan', 'tomatoMan', 'glowingGreenMan', 'medicMan'],
+    blurb: 'A room with nothing in it, until there is.' }
+);
+
 export const roomsForTier = (tier: RoomTier): ArenaRoom[] => ARENA_ROOMS.filter((r) => r.tier === tier);
 
 export const roomById = (id: string): ArenaRoom | undefined => ARENA_ROOMS.find((r) => r.id === id);
