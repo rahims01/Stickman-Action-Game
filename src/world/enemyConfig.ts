@@ -156,6 +156,142 @@ export type EnemyType =
   | 'boneMan'
   | 'rustMan'
   | 'civilianDecoy'
+  | 'sandNative'
+  | 'sandBulwark'
+  | 'sandSlinger'
+  | 'sandPrime'
+  | 'rockNative'
+  | 'rockBulwark'
+  | 'rockSlinger'
+  | 'rockPrime'
+  | 'grassNative'
+  | 'grassBulwark'
+  | 'grassSlinger'
+  | 'grassPrime'
+  | 'dirtNative'
+  | 'dirtBulwark'
+  | 'dirtSlinger'
+  | 'dirtPrime'
+  | 'waterNative'
+  | 'waterBulwark'
+  | 'waterSlinger'
+  | 'waterPrime'
+  | 'snowNative'
+  | 'snowBulwark'
+  | 'snowSlinger'
+  | 'snowPrime'
+  | 'badlandsNative'
+  | 'badlandsBulwark'
+  | 'badlandsSlinger'
+  | 'badlandsPrime'
+  | 'gardenNative'
+  | 'gardenBulwark'
+  | 'gardenSlinger'
+  | 'gardenPrime'
+  | 'magmaNative'
+  | 'magmaBulwark'
+  | 'magmaSlinger'
+  | 'magmaPrime'
+  | 'caveNative'
+  | 'caveBulwark'
+  | 'caveSlinger'
+  | 'cavePrime'
+  | 'darkConcreteNative'
+  | 'darkConcreteBulwark'
+  | 'darkConcreteSlinger'
+  | 'darkConcretePrime'
+  | 'volcanoNative'
+  | 'volcanoBulwark'
+  | 'volcanoSlinger'
+  | 'volcanoPrime'
+  | 'burntHouseNative'
+  | 'burntHouseBulwark'
+  | 'burntHouseSlinger'
+  | 'burntHousePrime'
+  | 'amethystNative'
+  | 'amethystBulwark'
+  | 'amethystSlinger'
+  | 'amethystPrime'
+  | 'ironNative'
+  | 'ironBulwark'
+  | 'ironSlinger'
+  | 'ironPrime'
+  | 'copperNative'
+  | 'copperBulwark'
+  | 'copperSlinger'
+  | 'copperPrime'
+  | 'goldNative'
+  | 'goldBulwark'
+  | 'goldSlinger'
+  | 'goldPrime'
+  | 'rainbowNative'
+  | 'rainbowBulwark'
+  | 'rainbowSlinger'
+  | 'rainbowPrime'
+  | 'blueNative'
+  | 'blueBulwark'
+  | 'blueSlinger'
+  | 'bluePrime'
+  | 'bloodNative'
+  | 'bloodBulwark'
+  | 'bloodSlinger'
+  | 'bloodPrime'
+  | 'darkOceanNative'
+  | 'darkOceanBulwark'
+  | 'darkOceanSlinger'
+  | 'darkOceanPrime'
+  | 'nightNative'
+  | 'nightBulwark'
+  | 'nightSlinger'
+  | 'nightPrime'
+  | 'galaxyNative'
+  | 'galaxyBulwark'
+  | 'galaxySlinger'
+  | 'galaxyPrime'
+  | 'diamondNative'
+  | 'diamondBulwark'
+  | 'diamondSlinger'
+  | 'diamondPrime'
+  | 'assassinNative'
+  | 'assassinBulwark'
+  | 'assassinSlinger'
+  | 'assassinPrime'
+  | 'pitchBrawlNative'
+  | 'pitchBrawlBulwark'
+  | 'pitchBrawlSlinger'
+  | 'pitchBrawlPrime'
+  | 'platinumNative'
+  | 'platinumBulwark'
+  | 'platinumSlinger'
+  | 'platinumPrime'
+  | 'glassNative'
+  | 'glassBulwark'
+  | 'glassSlinger'
+  | 'glassPrime'
+  | 'clearNative'
+  | 'clearBulwark'
+  | 'clearSlinger'
+  | 'clearPrime'
+  | 'illusionNative'
+  | 'illusionBulwark'
+  | 'illusionSlinger'
+  | 'illusionPrime'
+  | 'nightmareNative'
+  | 'nightmareBulwark'
+  | 'nightmareSlinger'
+  | 'nightmarePrime'
+  | 'pitchBlackNative'
+  | 'pitchBlackBulwark'
+  | 'pitchBlackSlinger'
+  | 'pitchBlackPrime'
+  | 'boneNative'
+  | 'boneBulwark'
+  | 'boneSlinger'
+  | 'bonePrime'
+  | 'rustNative'
+  | 'rustBulwark'
+  | 'rustSlinger'
+  | 'rustPrime'
   | 'bountyHunter';
 
 export const COMMON_BASIC_ENEMY_TYPES: EnemyType[] = ['fightingDummy', 'runningMan', 'punchMan', 'kickMan', 'greyMan'];
@@ -569,56 +705,147 @@ const nativeMan = (
 };
 
 const ROOM_NATIVES: Partial<Record<EnemyType, EnemyConfig>> = {
-  // Tier 1
-  rockMan: nativeMan('Rock Man', 'rock', { hp: 14, dmg: 2, speed: 0.9 }),
-  rockBrute: nativeMan('Rock Brute', 'rock', { hp: 26, dmg: 3, speed: 0.6, extra: { sizeMultiplier: 1.5, staggerImmune: true } }),
-  grassMan: nativeMan('Grass Man', 'grass', { hp: 9, dmg: 1, speed: 1.25 }),
-  dirtMan: nativeMan('Dirt Man', 'dirt', { hp: 11, dmg: 2 }),
-  iceMan: nativeMan('Ice Man', 'snow', { hp: 12, dmg: 2, extra: {
-    specials: [{ kind: 'freezePunch', damage: 1, range: 'melee', freezeDuration: DEFAULT_FREEZE_DURATION, auraColor: '#9fd8ff' }]
-  } }),
-  badlandsMan: nativeMan('Badlands Man', 'badlands', { hp: 12, ranged: true, rangedDamage: 2 }),
-  gardenMan: nativeMan('Garden Man', 'garden', { hp: 10, dmg: 2, extra: { isMedic: true, spawnerCooldownOverride: MEDIC_HEAL_INTERVAL } }),
-  // Tier 2
-  caveMan: nativeMan('Cave Man', 'cave', { hp: 15, dmg: 3, speed: 1.1 }),
-  burntMan: nativeMan('Burnt Man', 'burntHouse', { hp: 13, dmg: 2, extra: {
-    punch: { damage: 2, range: 'melee', burnDuration: FIRE_BURN_DURATION, burnDps: 1, auraColor: '#ff9800' }
-  } }),
-  amethystMan: nativeMan('Amethyst Man', 'amethyst', { hp: 16, dmg: 3, extra: { metalness: 0.4, roughness: 0.2 } }),
-  ironMan: nativeMan('Iron Man', 'iron', { hp: 22, dmg: 3, speed: 0.8, extra: { metalness: 0.75, roughness: 0.3, isMagnet: true } }),
-  copperMan: nativeMan('Copper Man', 'copper', { hp: 15, dmg: 2, extra: { metalness: 0.6, roughness: 0.35 } }),
-  // Tier 3
-  goldMan: nativeMan('Gold Man', 'gold', { hp: 20, dmg: 4, extra: { metalness: 0.85, roughness: 0.18 } }),
-  rainbowMan: nativeMan('Rainbow Man', 'rainbow', { hp: 22, dmg: 3, speed: 1.2, extra: {
-    specials: [{ kind: 'emeraldStun', damage: 3, range: 'melee', stunDuration: DEFAULT_STUN_DURATION, auraColor: '#ff4dc3' }]
-  } }),
-  blueMan: nativeMan('Blue Man', 'blue', { hp: 18, ranged: true, rangedDamage: 3 }),
-  bloodMan: nativeMan('Blood Man', 'blood', { hp: 20, dmg: 4, extra: { isVampire: true } }),
-  abyssMan: nativeMan('Abyss Man', 'darkOcean', { hp: 20, dmg: 3, speed: 0.9, extra: { opacity: 0.6 } }),
-  nightMan: nativeMan('Night Man', 'night', { hp: 18, dmg: 3, speed: 1.15, extra: { isAssassin: true } }),
-  galaxyMan: nativeMan('Galaxy Man', 'galaxy', { hp: 24, dmg: 4, extra: {
-    specials: [{ kind: 'greenPull', damage: 2, range: 'ranged', pullDuration: DEFAULT_PULL_DURATION, projectileColor: '#c9a8ff', auraColor: '#c9a8ff' }]
-  } }),
-  // Tier 4
-  diamondMan: nativeMan('Diamond Man', 'diamond', { hp: 34, dmg: 5, speed: 0.85, extra: { metalness: 0.5, roughness: 0.08, staggerImmune: true } }),
-  shadowAssassin: nativeMan('Shadow Assassin', 'assassin', { hp: 16, dmg: 4, speed: 1.35, extra: { isAssassin: true, isPhaser: true, opacity: 0.7 } }),
-  strikerCaptain: nativeMan('Striker Captain', 'pitch', { hp: 22, ranged: true, rangedDamage: 4, extra: {
-    rangedAnim: 'shoot',
-    specials: [{ kind: 'curveShot', damage: 4, range: 'ranged', projectileColor: '#f5f5f5', speed: STRIKER_SHOT_SPEED, curveSpin: STRIKER_SHOT_SPIN * 1.3 }],
-    specialCooldownOverride: STRIKER_SHOT_COOLDOWN * 0.8,
-    canKick: true,
-    kick: { damage: 3, range: 'melee' }
-  } }),
-  platinumMan: nativeMan('Platinum Man', 'platinum', { hp: 30, dmg: 4, speed: 0.85, extra: { metalness: 0.9, roughness: 0.15, isReflector: true } }),
-  glassMan: nativeMan('Glass Man', 'glass', { hp: 12, dmg: 5, extra: { opacity: 0.55, roughness: 0.05, metalness: 0.2 } }),
-  clearMan: nativeMan('Clear Man', 'clear', { hp: 16, dmg: 3, extra: { opacity: 0.28, roughness: 0.04 } }),
-  mirageMan: nativeMan('Mirage Man', 'illusion', { hp: 14, dmg: 3, speed: 1.1, extra: { isPhaser: true, opacity: 0.75 } }),
-  // Tier 5
-  nightmareMan: nativeMan('Nightmare Man', 'nightmare', { hp: 38, dmg: 6, speed: 1.05, extra: { staggerImmune: true, isRageEnemy: true } }),
-  boneMan: nativeMan('Bone Man', 'bone', { hp: 20, dmg: 4, extra: { maxRevives: 1 } }),
-  rustMan: nativeMan('Rust Man', 'rust', { hp: 24, dmg: 3, speed: 0.8, extra: { hasArmourPieces: true } }),
-  // Looks like a bystander, fights like everything else in the room.
-  civilianDecoy: nativeMan('Stranger', 'garden', { hp: 8, dmg: 2, speed: 1.2, extra: { isCoward: true, fleeHealthThreshold: 0.5 } })
+  // Four per room, all wearing that room's own material: a Man to fight, a
+  // Brute to wall you in, a Thrower to punish standing still, and one
+  // SPECIAL that fields only here. The shared common pool still spawns on
+  // top of these, so a room reads as the usual enemies plus the things that
+  // actually live there.
+  sandNative: nativeMan('Sand Man', 'sand', { hp: 10, dmg: 2 }),
+  sandBulwark: nativeMan('Sand Brute', 'sand', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  sandSlinger: nativeMan('Sand Thrower', 'sand', { hp: 9, ranged: true, rangedDamage: 2 }),
+  sandPrime: nativeMan('Dune Warden', 'sand', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ specials: [{ kind: 'greyProjectile', damage: 4, range: 'ranged', projectileColor: '#d9c08a', speed: 15 }], specialCooldownOverride: 3 }) } }),
+  rockNative: nativeMan('Rock Man', 'rock', { hp: 10, dmg: 2 }),
+  rockBulwark: nativeMan('Rock Brute', 'rock', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  rockSlinger: nativeMan('Rock Thrower', 'rock', { hp: 9, ranged: true, rangedDamage: 2 }),
+  rockPrime: nativeMan('Rock Colossus', 'rock', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ sizeMultiplier: 2.1, staggerImmune: true, moveSpeedMultiplier: 0.5 }) } }),
+  grassNative: nativeMan('Grass Man', 'grass', { hp: 10, dmg: 2 }),
+  grassBulwark: nativeMan('Grass Brute', 'grass', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  grassSlinger: nativeMan('Grass Thrower', 'grass', { hp: 9, ranged: true, rangedDamage: 2 }),
+  grassPrime: nativeMan('Bramble King', 'grass', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ specials: [{ kind: 'greenPull', damage: 2, range: 'ranged', pullDuration: DEFAULT_PULL_DURATION, projectileColor: '#569447', auraColor: '#569447' }] }) } }),
+  dirtNative: nativeMan('Dirt Man', 'dirt', { hp: 10, dmg: 2 }),
+  dirtBulwark: nativeMan('Dirt Brute', 'dirt', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  dirtSlinger: nativeMan('Dirt Thrower', 'dirt', { hp: 9, ranged: true, rangedDamage: 2 }),
+  dirtPrime: nativeMan('Burrower', 'dirt', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ isPhaser: true, moveSpeedMultiplier: 1.3 }) } }),
+  waterNative: nativeMan('Tide Man', 'water', { hp: 10, dmg: 2, extra: { specials: [{ kind: 'slowShot', damage: 1, range: 'ranged', slowDuration: 2.5, slowMultiplier: 0.55, projectileColor: '#4fa3d1' }] } }),
+  waterBulwark: nativeMan('Tide Brute', 'water', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  waterSlinger: nativeMan('Tide Thrower', 'water', { hp: 9, ranged: true, rangedDamage: 2 }),
+  waterPrime: nativeMan('Riptide', 'water', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ specials: [{ kind: 'slowShot', damage: 3, range: 'ranged', slowDuration: 4, slowMultiplier: 0.4, projectileColor: '#4fa3d1' }], staysAtRange: true }) } }),
+  snowNative: nativeMan('Frost Man', 'snow', { hp: 10, dmg: 2, extra: { specials: [{ kind: 'freezePunch', damage: 1, range: 'melee', freezeDuration: DEFAULT_FREEZE_DURATION, auraColor: '#9fd8ff' }] } }),
+  snowBulwark: nativeMan('Frost Brute', 'snow', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  snowSlinger: nativeMan('Frost Thrower', 'snow', { hp: 9, ranged: true, rangedDamage: 2 }),
+  snowPrime: nativeMan('Blizzard Warden', 'snow', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ specials: [{ kind: 'freezePunch', damage: 4, range: 'melee', freezeDuration: DEFAULT_FREEZE_DURATION * 2, auraColor: '#9fd8ff' }] }) } }),
+  badlandsNative: nativeMan('Badlands Man', 'badlands', { hp: 10, dmg: 2 }),
+  badlandsBulwark: nativeMan('Badlands Brute', 'badlands', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  badlandsSlinger: nativeMan('Badlands Thrower', 'badlands', { hp: 9, ranged: true, rangedDamage: 2 }),
+  badlandsPrime: nativeMan('Canyon Sniper', 'badlands', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ isSniper: true, staysAtRange: true }) } }),
+  gardenNative: nativeMan('Garden Man', 'garden', { hp: 10, dmg: 2, extra: { isMedic: true, spawnerCooldownOverride: MEDIC_HEAL_INTERVAL } }),
+  gardenBulwark: nativeMan('Garden Brute', 'garden', { hp: 20, dmg: 3, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  gardenSlinger: nativeMan('Garden Thrower', 'garden', { hp: 9, ranged: true, rangedDamage: 2 }),
+  gardenPrime: nativeMan('Gardener', 'garden', { hp: 26, dmg: 4, extra: { isSpecial: true, ...({ isSpawner: true, spawnerCooldownOverride: BRAIN_SPAWNER_COOLDOWN }) } }),
+  magmaNative: nativeMan('Magma Man', 'magma', { hp: 15, dmg: 3, extra: { punch: { damage: 3, range: 'melee', burnDuration: LAVA_BURN_DURATION, burnDps: 1, auraColor: '#ff5722' } } }),
+  magmaBulwark: nativeMan('Magma Brute', 'magma', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  magmaSlinger: nativeMan('Magma Thrower', 'magma', { hp: 13, ranged: true, rangedDamage: 3 }),
+  magmaPrime: nativeMan('Magma Lord', 'magma', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ sizeMultiplier: 1.8, specials: [{ kind: 'lavaPunch', damage: 2, range: 'ranged', burnDuration: LAVA_BURN_DURATION, burnDps: 2, projectileColor: '#ff5722', trail: true }] }) } }),
+  caveNative: nativeMan('Cave Man', 'cave', { hp: 15, dmg: 3 }),
+  caveBulwark: nativeMan('Cave Brute', 'cave', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  caveSlinger: nativeMan('Cave Thrower', 'cave', { hp: 13, ranged: true, rangedDamage: 3 }),
+  cavePrime: nativeMan('Cave Stalker', 'cave', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isAssassin: true, moveSpeedMultiplier: 1.35 }) } }),
+  darkConcreteNative: nativeMan('Rebar Man', 'darkConcrete', { hp: 15, dmg: 3 }),
+  darkConcreteBulwark: nativeMan('Rebar Brute', 'darkConcrete', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  darkConcreteSlinger: nativeMan('Rebar Thrower', 'darkConcrete', { hp: 13, ranged: true, rangedDamage: 3 }),
+  darkConcretePrime: nativeMan('Foreman', 'darkConcrete', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isEngineer: true }) } }),
+  volcanoNative: nativeMan('Cinder Man', 'volcano', { hp: 15, dmg: 3, extra: { punch: { damage: 3, range: 'melee', burnDuration: FIRE_BURN_DURATION, burnDps: 1, auraColor: '#ff9800' } } }),
+  volcanoBulwark: nativeMan('Cinder Brute', 'volcano', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  volcanoSlinger: nativeMan('Cinder Thrower', 'volcano', { hp: 13, ranged: true, rangedDamage: 3 }),
+  volcanoPrime: nativeMan('Eruption', 'volcano', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isBomber: true, sizeMultiplier: 1.4 }) } }),
+  burntHouseNative: nativeMan('Ash Man', 'burntHouse', { hp: 15, dmg: 3, extra: { isPhaser: true } }),
+  burntHouseBulwark: nativeMan('Ash Brute', 'burntHouse', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  burntHouseSlinger: nativeMan('Ash Thrower', 'burntHouse', { hp: 13, ranged: true, rangedDamage: 3 }),
+  burntHousePrime: nativeMan('Cinder Wraith', 'burntHouse', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isPhaser: true, isVampire: true, opacity: 0.6 }) } }),
+  amethystNative: nativeMan('Amethyst Man', 'amethyst', { hp: 15, dmg: 3, extra: { metalness: 0.4, roughness: 0.2 } }),
+  amethystBulwark: nativeMan('Amethyst Brute', 'amethyst', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  amethystSlinger: nativeMan('Amethyst Thrower', 'amethyst', { hp: 13, ranged: true, rangedDamage: 3 }),
+  amethystPrime: nativeMan('Geode', 'amethyst', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ splitGenerations: 2, metalness: 0.4, specials: [{ kind: 'emeraldStun', damage: 4, range: 'melee', stunDuration: DEFAULT_STUN_DURATION, auraColor: '#a87ae0' }] }) } }),
+  ironNative: nativeMan('Iron Man', 'iron', { hp: 15, dmg: 3, extra: { metalness: 0.75, roughness: 0.3, isMagnet: true } }),
+  ironBulwark: nativeMan('Iron Brute', 'iron', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  ironSlinger: nativeMan('Iron Thrower', 'iron', { hp: 13, ranged: true, rangedDamage: 3 }),
+  ironPrime: nativeMan('Loadstone', 'iron', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isMagnet: true, metalness: 0.9, sizeMultiplier: 1.5, staggerImmune: true }) } }),
+  copperNative: nativeMan('Copper Man', 'copper', { hp: 15, dmg: 3, extra: { metalness: 0.6, roughness: 0.35 } }),
+  copperBulwark: nativeMan('Copper Brute', 'copper', { hp: 28, dmg: 4, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  copperSlinger: nativeMan('Copper Thrower', 'copper', { hp: 13, ranged: true, rangedDamage: 3 }),
+  copperPrime: nativeMan('Live Wire', 'copper', { hp: 38, dmg: 5, extra: { isSpecial: true, ...({ isPulseCube: false, specials: [{ kind: 'shockPunch', damage: 3, range: 'melee', stunDuration: DEFAULT_STUN_DURATION, launch: true, auraColor: '#ffd54f' }] }) } }),
+  goldNative: nativeMan('Gold Man', 'gold', { hp: 20, dmg: 4, extra: { metalness: 0.85, roughness: 0.18 } }),
+  goldBulwark: nativeMan('Gold Brute', 'gold', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  goldSlinger: nativeMan('Gold Thrower', 'gold', { hp: 18, ranged: true, rangedDamage: 3 }),
+  goldPrime: nativeMan('Gilded Champion', 'gold', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ metalness: 0.95, sizeMultiplier: 1.4, maxRevives: 1, staggerImmune: true }) } }),
+  rainbowNative: nativeMan('Prism Man', 'rainbow', { hp: 20, dmg: 4, extra: { specials: [{ kind: 'emeraldStun', damage: 3, range: 'melee', stunDuration: DEFAULT_STUN_DURATION, auraColor: '#ff4dc3' }] } }),
+  rainbowBulwark: nativeMan('Prism Brute', 'rainbow', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  rainbowSlinger: nativeMan('Prism Thrower', 'rainbow', { hp: 18, ranged: true, rangedDamage: 3 }),
+  rainbowPrime: nativeMan('Spectrum', 'rainbow', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ specials: [{ kind: 'pinkArc', damage: 4, range: 'ranged', knockback: true, projectileColor: '#ff4dc3', growing: true }, { kind: 'emeraldPunch', damage: 5, range: 'melee', auraColor: '#4dff77' }] }) } }),
+  blueNative: nativeMan('Cobalt Man', 'blue', { hp: 20, dmg: 4 }),
+  blueBulwark: nativeMan('Cobalt Brute', 'blue', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  blueSlinger: nativeMan('Cobalt Thrower', 'blue', { hp: 18, ranged: true, rangedDamage: 3 }),
+  bluePrime: nativeMan('Deep Cobalt', 'blue', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ specials: [{ kind: 'greyProjectile', damage: 5, range: 'ranged', projectileColor: '#3f6fd6', speed: 17, chainLightning: true }], staysAtRange: true }) } }),
+  bloodNative: nativeMan('Blood Man', 'blood', { hp: 20, dmg: 4, extra: { isVampire: true } }),
+  bloodBulwark: nativeMan('Blood Brute', 'blood', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  bloodSlinger: nativeMan('Blood Thrower', 'blood', { hp: 18, ranged: true, rangedDamage: 3 }),
+  bloodPrime: nativeMan('Exsanguinator', 'blood', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ isVampire: true, isRageEnemy: true, sizeMultiplier: 1.4 }) } }),
+  darkOceanNative: nativeMan('Abyss Man', 'darkOcean', { hp: 20, dmg: 4, extra: { opacity: 0.6, isPhaser: true } }),
+  darkOceanBulwark: nativeMan('Abyss Brute', 'darkOcean', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  darkOceanSlinger: nativeMan('Abyss Thrower', 'darkOcean', { hp: 18, ranged: true, rangedDamage: 3 }),
+  darkOceanPrime: nativeMan('Leviathan', 'darkOcean', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ sizeMultiplier: 2.2, opacity: 0.7, staggerImmune: true, moveSpeedMultiplier: 0.6 }) } }),
+  nightNative: nativeMan('Night Man', 'night', { hp: 20, dmg: 4, extra: { isAssassin: true } }),
+  nightBulwark: nativeMan('Night Brute', 'night', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  nightSlinger: nativeMan('Night Thrower', 'night', { hp: 18, ranged: true, rangedDamage: 3 }),
+  nightPrime: nativeMan('Nightfall', 'night', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ isAssassin: true, selfInvisibility: undefined, specials: [{ kind: 'invisibility', damage: 0, range: 'self', selfInvisibility: true }] }) } }),
+  galaxyNative: nativeMan('Galaxy Man', 'galaxy', { hp: 20, dmg: 4, extra: { specials: [{ kind: 'greenPull', damage: 2, range: 'ranged', pullDuration: DEFAULT_PULL_DURATION, projectileColor: '#c9a8ff', auraColor: '#c9a8ff' }] } }),
+  galaxyBulwark: nativeMan('Galaxy Brute', 'galaxy', { hp: 36, dmg: 5, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  galaxySlinger: nativeMan('Galaxy Thrower', 'galaxy', { hp: 18, ranged: true, rangedDamage: 3 }),
+  galaxyPrime: nativeMan('Singularity', 'galaxy', { hp: 50, dmg: 6, extra: { isSpecial: true, ...({ isMagnet: true, sizeMultiplier: 1.6, specials: [{ kind: 'telekinesis', damage: 3, range: 'ranged', pullDuration: DEFAULT_PULL_DURATION * 2, projectileColor: '#c9a8ff', auraColor: '#c9a8ff' }] }) } }),
+  diamondNative: nativeMan('Diamond Man', 'diamond', { hp: 27, dmg: 5, extra: { metalness: 0.5, roughness: 0.08, staggerImmune: true } }),
+  diamondBulwark: nativeMan('Diamond Brute', 'diamond', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  diamondSlinger: nativeMan('Diamond Thrower', 'diamond', { hp: 24, ranged: true, rangedDamage: 4 }),
+  diamondPrime: nativeMan('Brilliant', 'diamond', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ metalness: 0.6, roughness: 0.05, staggerImmune: true, maxRevives: 2, sizeMultiplier: 1.4 }) } }),
+  assassinNative: nativeMan('Shadow Man', 'assassin', { hp: 27, dmg: 5, extra: { isAssassin: true, isPhaser: true, opacity: 0.7 } }),
+  assassinBulwark: nativeMan('Shadow Brute', 'assassin', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  assassinSlinger: nativeMan('Shadow Thrower', 'assassin', { hp: 24, ranged: true, rangedDamage: 4 }),
+  assassinPrime: nativeMan('Nightblade', 'assassin', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ isAssassin: true, isPhaser: true, opacity: 0.5, moveSpeedMultiplier: 1.5, attackSpeedMultiplier: 1.4 }) } }),
+  pitchBrawlNative: nativeMan('Striker Man', 'pitch', { hp: 27, dmg: 5, extra: { rangedAnim: 'shoot', specials: [{ kind: 'curveShot', damage: 4, range: 'ranged', projectileColor: '#f5f5f5', speed: STRIKER_SHOT_SPEED, curveSpin: STRIKER_SHOT_SPIN * 1.3 }], specialCooldownOverride: STRIKER_SHOT_COOLDOWN * 0.8, staysAtRange: true } }),
+  pitchBrawlBulwark: nativeMan('Striker Brute', 'pitch', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  pitchBrawlSlinger: nativeMan('Striker Thrower', 'pitch', { hp: 24, ranged: true, rangedDamage: 4 }),
+  pitchBrawlPrime: nativeMan('Captain', 'pitch', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ rangedAnim: 'shoot', staysAtRange: true, specials: [{ kind: 'curveShot', damage: 6, range: 'ranged', projectileColor: '#f5f5f5', speed: STRIKER_SHOT_SPEED * 1.2, curveSpin: STRIKER_SHOT_SPIN * 1.7 }], specialCooldownOverride: STRIKER_SHOT_COOLDOWN * 0.6 }) } }),
+  platinumNative: nativeMan('Platinum Man', 'platinum', { hp: 27, dmg: 5, extra: { metalness: 0.9, roughness: 0.15, isReflector: true } }),
+  platinumBulwark: nativeMan('Platinum Brute', 'platinum', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  platinumSlinger: nativeMan('Platinum Thrower', 'platinum', { hp: 24, ranged: true, rangedDamage: 4 }),
+  platinumPrime: nativeMan('Mirrorplate', 'platinum', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ isReflector: true, metalness: 1, roughness: 0.08, staggerImmune: true, sizeMultiplier: 1.3 }) } }),
+  glassNative: nativeMan('Glass Man', 'glass', { hp: 27, dmg: 5, extra: { opacity: 0.55, roughness: 0.05, metalness: 0.2 } }),
+  glassBulwark: nativeMan('Glass Brute', 'glass', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  glassSlinger: nativeMan('Glass Thrower', 'glass', { hp: 24, ranged: true, rangedDamage: 4 }),
+  glassPrime: nativeMan('Shatterpane', 'glass', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ opacity: 0.5, splitGenerations: 3, roughness: 0.05 }) } }),
+  clearNative: nativeMan('Clear Man', 'clear', { hp: 27, dmg: 5, extra: { opacity: 0.28, roughness: 0.04 } }),
+  clearBulwark: nativeMan('Clear Brute', 'clear', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  clearSlinger: nativeMan('Clear Thrower', 'clear', { hp: 24, ranged: true, rangedDamage: 4 }),
+  clearPrime: nativeMan('Ghostpane', 'clear', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ opacity: 0.15, isPhaser: true, moveSpeedMultiplier: 1.25 }) } }),
+  illusionNative: nativeMan('Mirage Man', 'illusion', { hp: 27, dmg: 5, extra: { isPhaser: true, opacity: 0.75 } }),
+  illusionBulwark: nativeMan('Mirage Brute', 'illusion', { hp: 46, dmg: 6, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  illusionSlinger: nativeMan('Mirage Thrower', 'illusion', { hp: 24, ranged: true, rangedDamage: 4 }),
+  illusionPrime: nativeMan('Illusionist', 'illusion', { hp: 64, dmg: 7, extra: { isSpecial: true, ...({ isCopycat: true, isPhaser: true, splitGenerations: 2, opacity: 0.8 }) } }),
+  nightmareNative: nativeMan('Nightmare Man', 'nightmare', { hp: 34, dmg: 6, extra: { staggerImmune: true, isRageEnemy: true } }),
+  nightmareBulwark: nativeMan('Nightmare Brute', 'nightmare', { hp: 58, dmg: 7, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  nightmareSlinger: nativeMan('Nightmare Thrower', 'nightmare', { hp: 30, ranged: true, rangedDamage: 5 }),
+  nightmarePrime: nativeMan('Night Terror', 'nightmare', { hp: 80, dmg: 9, extra: { isSpecial: true, ...({ staggerImmune: true, isRageEnemy: true, isVampire: true, sizeMultiplier: 1.9, maxRevives: 1 }) } }),
+  pitchBlackNative: nativeMan('Void Man', 'pitchBlack', { hp: 34, dmg: 6, extra: { isAssassin: true, isPhaser: true, opacity: 0.55 } }),
+  pitchBlackBulwark: nativeMan('Void Brute', 'pitchBlack', { hp: 58, dmg: 7, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  pitchBlackSlinger: nativeMan('Void Thrower', 'pitchBlack', { hp: 30, ranged: true, rangedDamage: 5 }),
+  pitchBlackPrime: nativeMan('The Unseen', 'pitchBlack', { hp: 80, dmg: 9, extra: { isSpecial: true, ...({ isAssassin: true, opacity: 0.2, moveSpeedMultiplier: 1.4, specials: [{ kind: 'invisibility', damage: 0, range: 'self', selfInvisibility: true }] }) } }),
+  boneNative: nativeMan('Bone Man', 'bone', { hp: 34, dmg: 6, extra: { maxRevives: 1 } }),
+  boneBulwark: nativeMan('Bone Brute', 'bone', { hp: 58, dmg: 7, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  boneSlinger: nativeMan('Bone Thrower', 'bone', { hp: 30, ranged: true, rangedDamage: 5 }),
+  bonePrime: nativeMan('Ossuary King', 'bone', { hp: 80, dmg: 9, extra: { isSpecial: true, ...({ maxRevives: 3, isSpawner: true, spawnerCooldownOverride: BRAIN_SPAWNER_COOLDOWN, sizeMultiplier: 1.6 }) } }),
+  rustNative: nativeMan('Rust Man', 'rust', { hp: 34, dmg: 6, extra: { hasArmourPieces: true } }),
+  rustBulwark: nativeMan('Rust Brute', 'rust', { hp: 58, dmg: 7, speed: 0.62, extra: { sizeMultiplier: 1.55, staggerImmune: true } }),
+  rustSlinger: nativeMan('Rust Thrower', 'rust', { hp: 30, ranged: true, rangedDamage: 5 }),
+  rustPrime: nativeMan('Corroder', 'rust', { hp: 80, dmg: 9, extra: { isSpecial: true, ...({ hasArmourPieces: true, isTrapper: true, sizeMultiplier: 1.5, staggerImmune: true }) } }),
 };
 
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
