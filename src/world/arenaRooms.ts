@@ -331,21 +331,22 @@ export const roomById = (id: string): ArenaRoom | undefined => ARENA_ROOMS.find(
  * How many waves are cleared in each tier before the next unlocks. The
  * tutorial rooms occupy waves 1-4, so tier 1 proper starts at wave 5.
  */
-export const TUTORIAL_WAVES = 4;
-export const WAVES_PER_ROOM = 3;
-export const ROOMS_PER_TIER = 3;
+// A run visits exactly FIVE rooms — one per tier — and stays in each for a
+// long stretch of waves. Cycling several rooms per tier turned the arena into
+// a slideshow: a room needs long enough for its own family and its special to
+// become familiar before it is taken away.
+//
+// The tier-5 room is the last one you ever see. Waves keep escalating there
+// indefinitely, so a run ends where it ends rather than looping.
+export const WAVES_PER_TIER = 8;
+export const FINAL_TIER: RoomTier = 5;
 
-/** Which tier a given wave belongs to, and how far into it. */
-export const tierForWave = (wave: number): RoomTier => {
-  if (wave <= TUTORIAL_WAVES) return 1;
-  const past = wave - TUTORIAL_WAVES - 1;
-  const tier = 1 + Math.floor(past / (WAVES_PER_ROOM * ROOMS_PER_TIER));
-  return Math.min(5, Math.max(1, tier)) as RoomTier;
-};
-
-/** True on the waves where the room should change. */
-export const isRoomChangeWave = (wave: number): boolean =>
-  wave > TUTORIAL_WAVES && (wave - TUTORIAL_WAVES - 1) % WAVES_PER_ROOM === 0;
+/**
+ * How many rooms deep a run is by a given wave, counting from the end of the
+ * scripted tutorial. Caps at FINAL_TIER, because the last room is permanent.
+ */
+export const tierForRoomsEntered = (roomsEntered: number): RoomTier =>
+  Math.min(FINAL_TIER, Math.max(1, roomsEntered + 1)) as RoomTier;
 
 /**
  * Picks the next room, avoiding an immediate repeat. The Nightmare is

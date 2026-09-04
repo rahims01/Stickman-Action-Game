@@ -580,6 +580,10 @@ export interface EnemyState {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   isClear?: boolean;
+  // Illusion room: a duplicate that is not really there. One hit pops it,
+  // its attacks do nothing, and it renders translucent. The point is that
+  // you cannot tell which of the crowd is real until you commit to a swing.
+  isMirage?: boolean;
   // Read by every collision/hit-radius call site (EnemyActor's own
   // movement collision, Player's/HelperActor's incoming hit-test) so a
   // bigger/smaller enemy actually occupies/reaches a different radius,

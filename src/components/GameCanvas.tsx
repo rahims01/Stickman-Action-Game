@@ -24,7 +24,7 @@ import { Turrets } from './Turrets';
 import { Bombs } from './Bombs';
 import { FallingChunks, FallingChunksHandle } from './FallingChunks';
 import { ArenaEnvironment, ArenaPhase } from './ArenaEnvironment';
-import { ArenaRoom, ROOMS_PER_TIER, RoomTier, WAVES_PER_ROOM, pickRoom, poolForRoom } from '../world/arenaRooms';
+import { ArenaRoom, FINAL_TIER, RoomTier, WAVES_PER_TIER, pickRoom, poolForRoom } from '../world/arenaRooms';
 import { PhysicsStepper } from './PhysicsStepper';
 import { ViewMode } from '../types/game.types';
 import {
@@ -1740,6 +1740,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         }
         return st;
       });
+
+      // The Illusion: for every real enemy, a copy that is not there. Same
+      // type, same size, same animations, so the crowd is indistinguishable
+      // until you swing — a mirage pops on the first touch and its own blows
+      // pass straight through you.
+      const room = arenaRoomRef.current;
+      if (room?.mirages) {
+        const fakes = additions
+          .filter(() => Math.random() < 0.6)
+          .map((real) => {
+            const ghost = makeEnemyState(`enemy-${nextEnemyId.current++}`, real.type as EnemyType, randomArenaPos(), 0);
+            ghost.isMirage = true;
+            ghost.sizeMultiplier = real.sizeMultiplier;
+            ghost.maxHealth = 1;
+            ghost.health = 1;
+            return ghost;
+          });
+        additions.push(...fakes);
+      }
+
       setEnemies((prev) => [...prev, ...additions]);
     }
     arenaWaveInProgressRef.current = true;
@@ -1803,11 +1823,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       onArenaWaveChange?.(clearedWave, 'falling');
       return;
     }
-    // Sand pit conquered: the scripted tutorial ends and the arena starts
-    // drawing rooms, changing every WAVES_PER_ROOM waves from here on.
+    // Sand pit conquered: the scripted tutorial ends and the run moves through
+    // one room per tier, WAVES_PER_TIER waves each. Once the tier-5 room is
+    // entered it is never left — waves keep escalating there forever.
     if (
       clearedWave === ARENA_SAND_END_WAVE ||
-      (clearedWave > ARENA_SAND_END_WAVE && (clearedWave - ARENA_SAND_END_WAVE) % WAVES_PER_ROOM === 0)
+      (clearedWave > ARENA_SAND_END_WAVE &&
+        (clearedWave - ARENA_SAND_END_WAVE) % WAVES_PER_TIER === 0 &&
+        roomsEnteredRef.current < FINAL_TIER)
     ) {
       enterNextRoom(clearedWave);
     }
@@ -1815,13 +1838,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enemies, dummies, isArena]);
 
-  // Draws the next room, advancing a tier every ROOMS_PER_TIER rooms, and maps
-  // its shape onto the existing arena geometry so colliders, minimap bounds
-  // and spawn positions keep working unchanged.
+  // Draws the room for the next tier and maps its shape onto the existing
+  // arena geometry, so colliders, minimap bounds and spawn positions keep
+  // working unchanged. Exactly one room per tier: five rooms in a run, each
+  // held for WAVES_PER_TIER waves, and the tier-5 room is never left.
   const enterNextRoom = useCallback(
     (clearedWave: number) => {
       const entered = roomsEnteredRef.current;
-      const tier = Math.min(5, 1 + Math.floor(entered / ROOMS_PER_TIER)) as RoomTier;
+      const tier = Math.min(FINAL_TIER, entered + 1) as RoomTier;
       const room = pickRoom(tier, arenaRoomRef.current?.id);
       roomsEnteredRef.current = entered + 1;
       setArenaRoom(room);
@@ -2354,6 +2378,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const handleAttackOnPlayer = (payload: AttackPayload, attackerPosition: THREE.Vector3, now: number, attackerColor: string, attackerId: string) => {
     if (!playerGroupRef.current) return;
     const nowMs = Date.now();
+
+    // Mirages are not there. They wind up and swing exactly like the real
+    // thing — that is the whole trick — but the blow passes through you.
+    if (attackerId && enemies.some((e) => e.id === attackerId && e.isMirage)) return;
 
     // Dash invincibility: skip all damage while dashing.
     if (nowMs < dashInvincibleRef.current) return;
@@ -3221,7 +3249,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             attackSpeedBonus={statModifiers.enemyAttackSpeedBonus + speedDemonBonus}
             showHealthBar={showEnemyHealthBars}
             hasArmourOverride={!!e.hasArmour}
-            isClear={e.isClear}
+            isClear={e.isClear || e.isMirage}
             isGiant={e.isGiant}
             sizeMultiplier={e.sizeMultiplier}
             colorOverride={e.type === BOUNTY_HUNTER_TYPE ? playerTint : undefined}
