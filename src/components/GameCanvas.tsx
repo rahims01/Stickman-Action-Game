@@ -23,6 +23,7 @@ import { DroneCompanion } from './DroneCompanion';
 import { Turrets } from './Turrets';
 import { Bombs } from './Bombs';
 import { FallingChunks, FallingChunksHandle } from './FallingChunks';
+import { circleCollidesWithBox } from '../world/collision';
 import { ArenaEnvironment, ArenaPhase } from './ArenaEnvironment';
 import { ArenaRoom, ArenaRoomInfo, FINAL_TIER, RoomTier, WAVES_PER_TIER, pickRoom, poolForRoom } from '../world/arenaRooms';
 import { PhysicsStepper } from './PhysicsStepper';
@@ -1115,6 +1116,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     () => [...(isArena ? arenaColliders : [...WALL_COLLIDERS, ...crates.map(getCrateCollider), ...platformColliders]), ...bossRingColliders],
     [isArena, arenaColliders, crates, platformColliders, bossRingColliders]
   );
+  // Read from spawn/unstick checks, which run outside render.
+  const collidersRef = useRef<AABB[]>([]);
+  collidersRef.current = colliders;
 
   // Past DEAD_BODY_LIMIT total dead-but-not-yet-sunk bodies (dummies,
   // enemies, player corpses combined - revived helpers never linger, see
@@ -1587,20 +1591,59 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   }, [isSandbox, isArena]);
 
   // ── Arena wave director ────────────────────────────────────────────────
-  const randomArenaPos = useCallback((): [number, number, number] => {
+  // centreBias 0 spreads uniformly; higher values pull the distribution toward
+  // the middle of the room. Placeables use a bias because scattering turrets
+  // and beacons uniformly puts most of them against the walls — a disc's area
+  // grows with r^2, so uniform sampling is mostly rim.
+  const randomArenaPos = useCallback((centreBias = 0): [number, number, number] => {
     const phase = arenaPhaseRef.current;
+    const pull = (t: number) => (centreBias > 0 ? Math.pow(t, 1 + centreBias) : t);
     if (phase === 'sand' || phase === 'magma') {
       const a = Math.random() * Math.PI * 2;
       // Pentagon inradius ≈ 0.81 × circumradius; stay well inside either ring.
       const maxR = phase === 'magma' ? ARENA_MAGMA_RADIUS * 0.75 : ARENA_SAND_RADIUS - 10;
-      const r = 5 + Math.random() * Math.max(4, maxR - 5);
+      const r = 5 + pull(Math.random()) * Math.max(4, maxR - 5);
       return [Math.cos(a) * r, 0, Math.sin(a) * r];
     }
     if (phase === 'concrete') {
-      return [(Math.random() * 2 - 1) * (ARENA_CONCRETE_HALF_X - 2), 0, (Math.random() * 2 - 1) * (ARENA_CONCRETE_HALF_Z - 2)];
+      const sx = Math.random() < 0.5 ? -1 : 1;
+      const sz = Math.random() < 0.5 ? -1 : 1;
+      return [sx * pull(Math.random()) * (ARENA_CONCRETE_HALF_X - 2), 0, sz * pull(Math.random()) * (ARENA_CONCRETE_HALF_Z - 2)];
     }
     const half = Math.max(4, arenaBoxHalfRef.current - 3);
-    return [(Math.random() * 2 - 1) * half, 0, (Math.random() * 2 - 1) * half];
+    const sx = Math.random() < 0.5 ? -1 : 1;
+    const sz = Math.random() < 0.5 ? -1 : 1;
+    return [sx * pull(Math.random()) * half, 0, sz * pull(Math.random()) * half];
+  }, []);
+
+  // A spawn point that is inside the arena AND not inside a wall or crate.
+  // Rejection-samples rather than nudging, because a nudge out of one box can
+  // land you in the next; after a few tries it falls back to the centre, which
+  // is always open.
+  const freeArenaPos = useCallback((centreBias = 0): [number, number, number] => {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const p = randomArenaPos(centreBias);
+      if (!collidersRef.current.some((box) => circleCollidesWithBox(p[0], p[2], HUMANOID_RADIUS * 1.2, box))) return p;
+    }
+    return [0, 0, 0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [randomArenaPos]);
+
+  // Pulls a point back inside the current arena. Used when a room change
+  // shrinks the bounds — anything left outside would otherwise be stranded
+  // beyond a wall, unreachable and effectively lost.
+  const clampIntoArena = useCallback((x: number, z: number): [number, number] => {
+    const phase = arenaPhaseRef.current;
+    if (phase === 'sand' || phase === 'magma') {
+      const maxR = (phase === 'magma' ? ARENA_MAGMA_RADIUS * 0.75 : ARENA_SAND_RADIUS - 3) - 1.5;
+      const r = Math.hypot(x, z);
+      if (r <= maxR || r === 0) return [x, z];
+      const k = maxR / r;
+      return [x * k, z * k];
+    }
+    const hx = phase === 'concrete' ? ARENA_CONCRETE_HALF_X - 2 : Math.max(4, arenaBoxHalfRef.current - 3);
+    const hz = phase === 'concrete' ? ARENA_CONCRETE_HALF_Z - 2 : hx;
+    return [Math.max(-hx, Math.min(hx, x)), Math.max(-hz, Math.min(hz, z))];
   }, []);
 
   // Anything that ends up outside the playable bounds is snapped back in.
@@ -1612,22 +1655,35 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     return Math.abs(x) < arenaBoxHalfRef.current - 0.3 && Math.abs(z) < arenaBoxHalfRef.current - 0.3;
   }, []);
 
-  // Out-of-bounds patrol: any living enemy outside the arena is immediately
-  // teleported back inside (remounted at a fresh position via a new id).
+  // Out-of-bounds patrol: any living enemy outside the arena — or embedded
+  // INSIDE a wall or crate — is teleported back to open ground (remounted at
+  // a fresh position via a new id).
+  //
+  // The wall check is the important half. Enemies were spawning inside
+  // colliders and then being stuck there permanently, because the collision
+  // resolver only prevents you from ENTERING a box: once your centre is
+  // already inside one, every escape direction reads as a collision and it
+  // pins you in place.
+  const stuckInGeometry = useCallback(
+    (x: number, z: number): boolean => collidersRef.current.some((box) => circleCollidesWithBox(x, z, HUMANOID_RADIUS * 0.6, box)),
+    []
+  );
+
   useEffect(() => {
     if (!isArena) return;
     const intervalId = setInterval(() => {
       if (isPausedRef.current || arenaPhaseRef.current === 'falling') return;
+      const misplaced = (e: EnemyState) =>
+        e.health > 0 && (!arenaContains(e.position.x, e.position.z) || stuckInGeometry(e.position.x, e.position.z));
       setEnemies((prev) => {
-        if (!prev.some((e) => e.health > 0 && !arenaContains(e.position.x, e.position.z))) return prev;
-        return prev.map((e) => {
-          if (e.health <= 0 || arenaContains(e.position.x, e.position.z)) return e;
-          return { ...e, id: `enemy-${nextEnemyId.current++}`, position: new THREE.Vector3(...randomArenaPos()) };
-        });
+        if (!prev.some(misplaced)) return prev;
+        return prev.map((e) =>
+          misplaced(e) ? { ...e, id: `enemy-${nextEnemyId.current++}`, position: new THREE.Vector3(...freeArenaPos()) } : e
+        );
       });
     }, 2000);
     return () => clearInterval(intervalId);
-  }, [isArena, arenaContains, randomArenaPos]);
+  }, [isArena, arenaContains, stuckInGeometry, freeArenaPos]);
 
   // Wave design across the four arenas. The beginner room covers the easy
   // waves; the brick cage ramps hard and fast; the sand pit runs the sand
@@ -1867,9 +1923,38 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Only the genuinely molten rooms get a burning floor.
       const molten = room.material === 'magma' || room.material === 'volcano' || room.material === 'furnace';
       setLavaTiles(molten ? makeLavaTiles(ARENA_LAVA_TILE_COUNT) : []);
+      // A new room can be a lot smaller than the last one. Anything left
+      // outside the new walls is stranded and unreachable, so everything
+      // placed gets pulled back inside rather than lost.
+      //
+      // arenaPhaseRef is written during render, so it still holds the OLD
+      // phase here — clamp on the next tick, once the new bounds are live.
+      setTimeout(() => {
+        setTurrets((prev) =>
+          prev.map((t) => {
+            const [x, z] = clampIntoArena(t.position.x, t.position.z);
+            if (x === t.position.x && z === t.position.z) return t;
+            t.position.set(x, t.position.y, z);
+            return { ...t };
+          })
+        );
+        setLightBlocks((prev) =>
+          prev.map((lb) => {
+            const [x, z] = clampIntoArena(lb.position[0], lb.position[2]);
+            return x === lb.position[0] && z === lb.position[2] ? lb : { ...lb, position: [x, lb.position[1], z] as [number, number, number] };
+          })
+        );
+        setMedkits((prev) =>
+          prev.map((m) => {
+            const [x, z] = clampIntoArena(m.position[0], m.position[2]);
+            return x === m.position[0] && z === m.position[2] ? m : { ...m, position: [x, m.position[1], z] as [number, number, number] };
+          })
+        );
+      }, 0);
+
       onArenaWaveChange?.(clearedWave, phase, roomInfoFor(clearedWave, room));
     },
-    [onArenaWaveChange, roomInfoFor]
+    [onArenaWaveChange, roomInfoFor, clampIntoArena]
   );
 
   const handleArenaFellThrough = () => {
@@ -2607,12 +2692,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   }, []);
 
   const spawnPlayerTurret = () => {
+    // In the arena the overworld spawner has no idea where the walls are, so
+    // a turret could land outside them entirely — on a small room, often did.
+    const pos: [number, number, number] = isArena ? randomArenaPos(1.2) : generateEnemySpawnPosition();
     setTurrets((prev) => [
       ...prev,
       {
         id: `turret-${nextTurretId.current++}`,
         owner: 'player',
-        position: new THREE.Vector3(...generateEnemySpawnPosition()),
+        position: new THREE.Vector3(...pos),
         health: 1,
         maxHealth: 1
       }
@@ -2853,7 +2941,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       setLightBlocks(prev => {
         const spawnCount = prev.length === 0 ? 1 : 2;
         const additions: LightBlockDef[] = [];
-        for (let i = 0; i < spawnCount; i++) additions.push(generateLightBlockDef(`lightblock-${nextLightBlockId.current++}`));
+        for (let i = 0; i < spawnCount; i++) {
+          const def = generateLightBlockDef(`lightblock-${nextLightBlockId.current++}`);
+          // Same problem as turrets: the overworld generator uses MAP_RADIUS,
+          // which is far outside any arena room's walls.
+          if (isArena) def.position = randomArenaPos(1.2);
+          additions.push(def);
+        }
         return [...prev, ...additions];
       });
     } else if (option === 'enemyHealth') {
