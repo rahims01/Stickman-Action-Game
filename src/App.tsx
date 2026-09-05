@@ -180,6 +180,9 @@ export const App: React.FC = () => {
   const [runSlots, setRunSlots] = useState<RunSlot[]>(loadRunSlots);
   const [arenaWave, setArenaWave] = useState(0);
   const [arenaPhase, setArenaPhase] = useState<'concrete' | 'box' | 'falling' | 'sand' | 'magma'>('concrete');
+  // The real room, once the run leaves the scripted tutorial. phase only
+  // encodes shape now, so it cannot name the room on its own.
+  const [arenaRoomInfo, setArenaRoomInfo] = useState<{ label: string; tier: number; wavesUntilNext: number | null } | null>(null);
   const [waveBanner, setWaveBanner] = useState<string | null>(null);
   const waveBannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [spawnCallout, setSpawnCallout] = useState<string | null>(null);
@@ -230,8 +233,9 @@ export const App: React.FC = () => {
 
   const patchModifiers = (patch: Partial<GameModifiers>) => setModifiers((prev) => ({ ...prev, ...patch }));
 
-  const handleArenaWaveChange = useCallback((wave: number, phase: 'concrete' | 'box' | 'falling' | 'sand' | 'magma') => {
+  const handleArenaWaveChange = useCallback((wave: number, phase: 'concrete' | 'box' | 'falling' | 'sand' | 'magma', roomInfo?: { label: string; tier: number; wavesUntilNext: number | null }) => {
     setArenaWave(wave);
+    setArenaRoomInfo(roomInfo ?? null);
     setArenaPhase((prevPhase) => {
       let label = `WAVE ${wave}`;
       if (phase === 'falling') label = 'THE FLOOR GIVES WAY…';
@@ -1164,9 +1168,18 @@ export const App: React.FC = () => {
             {gameMode === 'arena' && (
               <>
                 <div style={{ color: '#ff7043', fontWeight: 'bold' }}>⚔ Wave: {arenaWave}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
-                  {arenaPhase === 'magma' ? 'Magma Wasteland' : arenaPhase === 'sand' ? 'Sand Pit' : arenaPhase === 'falling' ? 'Falling…' : arenaPhase === 'concrete' ? 'Concrete Room' : 'Brick Cage'}
+                <div style={{ fontSize: '12px', color: arenaRoomInfo ? '#a6e22e' : 'rgba(255,255,255,0.6)' }}>
+                  {arenaRoomInfo
+                    ? arenaRoomInfo.label
+                    : arenaPhase === 'magma' ? 'Magma Wasteland' : arenaPhase === 'sand' ? 'Sand Pit' : arenaPhase === 'falling' ? 'Falling…' : arenaPhase === 'concrete' ? 'Concrete Room' : 'Brick Cage'}
                 </div>
+                {arenaRoomInfo && (
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>
+                    {arenaRoomInfo.wavesUntilNext === null
+                      ? `TIER ${arenaRoomInfo.tier} · FINAL ROOM`
+                      : `TIER ${arenaRoomInfo.tier} · ${arenaRoomInfo.wavesUntilNext} wave${arenaRoomInfo.wavesUntilNext === 1 ? '' : 's'} to next room`}
+                  </div>
+                )}
                 <div>Time: {levelTimeLabel}</div>
               </>
             )}

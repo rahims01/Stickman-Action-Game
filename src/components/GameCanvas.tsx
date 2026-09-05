@@ -24,7 +24,7 @@ import { Turrets } from './Turrets';
 import { Bombs } from './Bombs';
 import { FallingChunks, FallingChunksHandle } from './FallingChunks';
 import { ArenaEnvironment, ArenaPhase } from './ArenaEnvironment';
-import { ArenaRoom, FINAL_TIER, RoomTier, WAVES_PER_TIER, pickRoom, poolForRoom } from '../world/arenaRooms';
+import { ArenaRoom, ArenaRoomInfo, FINAL_TIER, RoomTier, WAVES_PER_TIER, pickRoom, poolForRoom } from '../world/arenaRooms';
 import { PhysicsStepper } from './PhysicsStepper';
 import { ViewMode } from '../types/game.types';
 import {
@@ -277,7 +277,11 @@ interface GameCanvasProps {
   onIronmanDeath?: () => void;
   // Arena mode.
   isArena?: boolean;
-  onArenaWaveChange?: (wave: number, phase: ArenaPhase) => void;
+  // roomInfo is undefined during the scripted tutorial and set once the
+  // run starts drawing rooms. The HUD needs the real room name because
+  // phase only encodes SHAPE now — every pentagon room would otherwise
+  // display as the Magma Wasteland.
+  onArenaWaveChange?: (wave: number, phase: ArenaPhase, roomInfo?: ArenaRoomInfo) => void;
   // Live entity counts for the sandbox HUD readout.
   onEntityCountsChange?: (counts: { enemies: number; dummies: number; civilians: number; helpers: number; turrets: number }) => void;
   // First-appearance banner for specials/rares ("A Lava Man appears!").
@@ -1704,7 +1708,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const startArenaWave = (wave: number) => {
     setArenaWave(wave);
     statsRecordArenaWave(wave);
-    onArenaWaveChange?.(wave, arenaPhaseRef.current);
+    onArenaWaveChange?.(wave, arenaPhaseRef.current, roomInfoFor(wave, arenaRoomRef.current));
     if (arenaPhaseRef.current === 'box') {
       setArenaBoxHalf(Math.min(ARENA_BOX_START_HALF + (wave - 1) * ARENA_BOX_GROWTH_PER_WAVE, ARENA_BOX_MAX_HALF));
     }
@@ -1838,6 +1842,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enemies, dummies, isArena]);
 
+  // Room name + countdown for the HUD. Undefined during the tutorial.
+  const roomInfoFor = useCallback((wave: number, room: ArenaRoom | null): ArenaRoomInfo | undefined => {
+    if (!room) return undefined;
+    const entered = roomsEnteredRef.current;
+    if (entered >= FINAL_TIER) return { label: room.label, tier: room.tier, wavesUntilNext: null };
+    const nextChangeWave = ARENA_SAND_END_WAVE + entered * WAVES_PER_TIER;
+    return { label: room.label, tier: room.tier, wavesUntilNext: Math.max(0, nextChangeWave - wave) };
+  }, []);
+
   // Draws the room for the next tier and maps its shape onto the existing
   // arena geometry, so colliders, minimap bounds and spawn positions keep
   // working unchanged. Exactly one room per tier: five rooms in a run, each
@@ -1854,9 +1867,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Only the genuinely molten rooms get a burning floor.
       const molten = room.material === 'magma' || room.material === 'volcano' || room.material === 'furnace';
       setLavaTiles(molten ? makeLavaTiles(ARENA_LAVA_TILE_COUNT) : []);
-      onArenaWaveChange?.(clearedWave, phase);
+      onArenaWaveChange?.(clearedWave, phase, roomInfoFor(clearedWave, room));
     },
-    [onArenaWaveChange]
+    [onArenaWaveChange, roomInfoFor]
   );
 
   const handleArenaFellThrough = () => {

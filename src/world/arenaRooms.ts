@@ -341,6 +341,14 @@ export const roomById = (id: string): ArenaRoom | undefined => ARENA_ROOMS.find(
 export const WAVES_PER_TIER = 8;
 export const FINAL_TIER: RoomTier = 5;
 
+/** What the HUD needs to name the room and count down to the next one. */
+export interface ArenaRoomInfo {
+  label: string;
+  tier: RoomTier;
+  /** null once the run is in its final room, which it never leaves. */
+  wavesUntilNext: number | null;
+}
+
 /**
  * How many rooms deep a run is by a given wave, counting from the end of the
  * scripted tutorial. Caps at FINAL_TIER, because the last room is permanent.
