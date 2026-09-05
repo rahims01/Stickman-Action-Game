@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX, Html } from '@react-three/drei';
@@ -269,6 +270,9 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
   const kickHitTargetsRef = useRef<Set<string>>(new Set());
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load;
+  // shared geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseFbx);
   const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
   const walkAnim = useFBX(asset('/anims/walk.fbx'));
   // Cowards flee with the goofy-run clip instead of the normal walk.

@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
@@ -347,6 +348,9 @@ export const Player: React.FC<PlayerProps> = ({
   const lastReportedStaminaRef = useRef(-1);
 
   const baseModel = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load; shared
+  // geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseModel);
   // A small variety pool per reaction tier, loaded separately from the
   // fixed AnimationState-driven `anims` map below since they aren't their
   // own distinct states - one is picked at random each time hit/bigHit

@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
@@ -56,6 +57,9 @@ export const DummyActor: React.FC<DummyActorProps> = ({ position, velocity, heal
   const ragdollRef = useRef<RagdollHandle | null>(null);
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load;
+  // shared geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseFbx);
   const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
   const hitAnim = useFBX(asset('/anims/hit-to-body.fbx'));
   const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));

@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
@@ -83,6 +84,9 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   const inputs = useInputs();
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load;
+  // shared geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseFbx);
   const idleFbx = useFBX(asset('/anims/fighting-idle.fbx'));
   const walkFbx = useFBX(asset('/anims/walk.fbx'));
   const punchFbx = useFBX(asset('/anims/punch.fbx'));

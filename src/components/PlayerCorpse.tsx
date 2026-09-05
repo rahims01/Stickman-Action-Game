@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX, Html } from '@react-three/drei';
@@ -33,6 +34,9 @@ export const PlayerCorpse: React.FC<PlayerCorpseProps> = ({ position, rotationY,
   const sunkNotifiedRef = useRef(false);
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load;
+  // shared geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseFbx);
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
   useEffect(() => {

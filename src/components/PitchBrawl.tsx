@@ -1,4 +1,5 @@
 import { asset } from '../world/assetPath';
+import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
@@ -150,6 +151,9 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
   const inputs = useInputs();
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
+  // Repair the >4-influence weights three silently truncates on load;
+  // shared geometry means this runs once no matter how many actors mount.
+  normalizeSkinWeights(baseFbx);
   const idleFbx = useFBX(asset('/anims/idle.fbx'));
   const walkFbx = useFBX(asset('/anims/walk.fbx'));
   const runFbx = useFBX(asset('/anims/run.fbx'));
