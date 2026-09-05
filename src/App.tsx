@@ -2,6 +2,7 @@ import { asset } from './world/assetPath';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PitchBrawl } from './components/PitchBrawl';
 import { CupRun } from './components/CupRun';
+import { ArenaVersus } from './components/ArenaVersus';
 import { GameCanvas, FlagGuideInfo, SandboxActions } from './components/GameCanvas';
 import { ViewMode } from './types/game.types';
 import { GameModifiers, LOW_HEALTH_FRACTION_THRESHOLD, PLAYER_MAX_HEALTH, PLAYER_MAX_STAMINA, SavedHelper, StatModifiers, createDefaultModifiers, createStatModifiers } from './world/gameState';
@@ -125,7 +126,7 @@ function saveProgress(data: SavedProgress) {
   }
 }
 
-type GameMode = 'normal' | 'sandbox' | 'arena' | 'pitchbrawl' | 'cuprun';
+type GameMode = 'normal' | 'sandbox' | 'arena' | 'pitchbrawl' | 'cuprun' | 'versus';
 
 // Randomized once at module load - the rising ember particles on the menu.
 const MENU_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
@@ -778,6 +779,14 @@ export const App: React.FC = () => {
           >
             🏆 CUP RUN
           </button>
+          <button
+            className="menu-btn"
+            onClick={() => setGameMode('versus')}
+            title="Split screen against an AI. One life each, separate runs — you will not get the same rooms or the same waves. Last one standing wins."
+            style={{ padding: '18px 42px', fontSize: '19px', fontWeight: 700, borderRadius: '12px', border: '2px solid #ff4fa3', background: 'linear-gradient(180deg, rgba(255,79,163,0.16), rgba(255,79,163,0.05))', color: '#ff4fa3', cursor: 'pointer', letterSpacing: '2px' }}
+          >
+            ⚔ VS AI
+          </button>
         </div>
         <div style={{ display: 'flex', gap: '14px', zIndex: 1 }}>
           <button
@@ -1032,6 +1041,7 @@ export const App: React.FC = () => {
   // rules — none of GameCanvas's world, progression or entity systems apply.
   if (gameMode === 'pitchbrawl') return <PitchBrawl onExit={() => setGameMode(null)} />;
   if (gameMode === 'cuprun') return <CupRun playerTint={stickmanColor} onExit={() => setGameMode(null)} />;
+  if (gameMode === 'versus') return <ArenaVersus playerTint={stickmanColor} onExit={() => setGameMode(null)} />;
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
