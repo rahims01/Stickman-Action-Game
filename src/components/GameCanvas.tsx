@@ -229,6 +229,7 @@ export interface SandboxActions {
   patchStatMods: (patch: Partial<StatModifiers>) => void;
   resetStats: () => void;
   upgradeHelper: (id: string, option: 'helperMoveSpeed' | 'helperAttackSpeed' | 'helperLevelUp2') => void;
+  reviveHelper: (id: string) => void;
   setTimeOfDay: (t: 'day' | 'night' | null) => void;
   setEnemiesIgnorePlayer: (ignore: boolean) => void;
 }
@@ -1116,6 +1117,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     () => [...(isArena ? arenaColliders : [...WALL_COLLIDERS, ...crates.map(getCrateCollider), ...platformColliders]), ...bossRingColliders],
     [isArena, arenaColliders, crates, platformColliders, bossRingColliders]
   );
+  // The sandbox action table is built once with [] deps, so it reaches the
+  // current revive through a ref rather than a stale closure.
+  const revivedHelperRef = useRef<(h: HelperState) => HelperState>((h) => h);
   // Read from spawn/unstick checks, which run outside render.
   const collidersRef = useRef<AABB[]>([]);
   collidersRef.current = colliders;
@@ -1472,9 +1476,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           overrideType: type
         }]);
       },
+      reviveHelper: (id) => {
+        setHelpers((prev) => prev.map((h) => (h.id === id && h.health <= 0 ? revivedHelperRef.current(h) : h)));
+      },
       upgradeHelper: (id, option) => {
-        setHelpers((prev) => prev.map((h) => {
-          if (h.id !== id) return h;
+        setHelpers((prev) => prev.map((dead) => {
+          if (dead.id !== id) return dead;
+          const h = dead.health <= 0 ? revivedHelperRef.current(dead) : dead;
           if (option === 'helperMoveSpeed') return { ...h, moveSpeedMultiplier: h.moveSpeedMultiplier + SPEED_BONUS_PER_PICK };
           if (option === 'helperAttackSpeed') return { ...h, attackSpeedMultiplier: h.attackSpeedMultiplier + SPEED_BONUS_PER_PICK };
           if (option === 'helperLevelUp2') {
@@ -2068,8 +2076,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Shield bearers block frontal punch attacks - kicks bypass the shield.
     let effectiveDamage = roundDamage(rawDamage);
     if (ENEMY_CONFIGS[target.type as EnemyType]?.hasShield && attackKind === 'punch') {
-      effectiveDamage = Math.max(0, Math.round(rawDamage * 0.2));
+      effectiveDamage = Math.round(rawDamage * 0.2);
     }
+    // A landed hit never reads as 0. The arena starts you on a blank stat
+    // sheet, so a bare punch is PUNCH_DAMAGE (1) - and 1 x 0.2 rounds to
+    // nothing, which showed up in play as "my damage turned to 0". Chip
+    // damage is the intent of a shield, not immunity.
+    if (rawDamage > 0 && effectiveDamage < 1) effectiveDamage = 1;
     // One-Hit modifier: any real hit is lethal, shields included.
     if (modifiers.oneHit && rawDamage > 0) effectiveDamage = target.health;
 
@@ -2894,6 +2907,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     return p;
   };
 
+  /**
+   * Bring a fallen helper back for real.
+   *
+   * Health alone is NOT enough. HelperActor latches an internal frozenRef the
+   * moment health hits 0 and only ever clears it by remounting, so a dead
+   * helper "healed" to 2 HP by a level-up pick stayed alive in state while its
+   * body remained a sunk, invisible ragdoll - the helper that vanishes forever
+   * and the revive that does nothing were the same bug. Bumping instanceKey is
+   * what forces the remount; it is the whole reason the field exists, and
+   * until now nothing ever incremented it.
+   */
+  const revivedHelper = (h: HelperState): HelperState => ({
+    ...h,
+    instanceKey: h.instanceKey + 1,
+    health: h.maxHealth,
+    position: spawnHelperNearPlayer(),
+    velocity: new THREE.Vector3(),
+    statusEffects: createStatusEffects()
+  });
+
+  /** Any helper-targeted upgrade revives first, then upgrades the live body. */
+  const asLiveHelper = (h: HelperState): HelperState => (h.health <= 0 ? revivedHelper(h) : h);
+  revivedHelperRef.current = revivedHelper;
+
   const createNewHelper = (): HelperState => ({
     id: `helper-${nextHelperId.current++}`,
     instanceKey: 0,
@@ -3050,8 +3087,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       spawnPlayerTurret();
     } else if (option === 'helperLevelUp2') {
       setHelpers((prev) =>
-        prev.map((h) => {
-          if (h.id !== helperTarget) return h;
+        prev.map((dead) => {
+          if (dead.id !== helperTarget) return dead;
+          const h = asLiveHelper(dead);
           const nextMaxHealth = h.maxHealth + HELPER_LEVEL_UP_2_AMOUNT;
           return {
             ...h,
@@ -3063,15 +3101,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         })
       );
     } else if (option === 'helper') {
-      // A dead helper is auto-replaced the instant it dies (see
-      // handleHelperHit) and never offered as a dropdown target again, so
-      // every reachable helperTarget here is guaranteed to be alive.
+      // A fallen helper IS still offered as a target - the picker says
+      // "Fallen - will be revived" - so this has to actually revive it
+      // rather than add health to a corpse.
       if (helperTarget === 'new' || !helperTarget || helpers.length === 0) {
         setHelpers((prev) => [...prev, createNewHelper()]);
       } else {
         setHelpers((prev) =>
-          prev.map((h) => {
-            if (h.id !== helperTarget) return h;
+          prev.map((dead) => {
+            if (dead.id !== helperTarget) return dead;
+            const h = asLiveHelper(dead);
             const newPickCount = h.pickCount + 1;
             const shouldUpgrade = newPickCount % HELPER_PICKS_PER_UPGRADE === 0;
             const bump = shouldUpgrade ? HELPER_UPGRADE_AMOUNT : 0;
@@ -3089,8 +3128,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     } else if (option === 'helperMoveSpeed' || option === 'helperAttackSpeed') {
       setHelpers((prev) =>
-        prev.map((h) => {
-          if (h.id !== helperTarget) return h;
+        prev.map((dead) => {
+          if (dead.id !== helperTarget) return dead;
+          const h = asLiveHelper(dead);
           return {
             ...h,
             moveSpeedMultiplier: option === 'helperMoveSpeed' ? h.moveSpeedMultiplier + HELPER_SPEED_UPGRADE_AMOUNT : h.moveSpeedMultiplier,
@@ -3100,7 +3140,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     } else if (option === 'helperRanged') {
       // Converts the chosen helper into a kiting ranged fighter.
-      setHelpers((prev) => prev.map((h) => (h.id === helperTarget ? { ...h, isRanged: true } : h)));
+      setHelpers((prev) => prev.map((h) => (h.id === helperTarget ? { ...asLiveHelper(h), isRanged: true } : h)));
     } else if (option === 'thorns') {
       setStatModifiers((prev) => ({ ...prev, thornsPicks: prev.thornsPicks + 1 }));
     } else if (option === 'dash') {

@@ -308,9 +308,30 @@ export interface LightBlockDef {
 
 const LIGHT_BLOCK_COLORS = ['#4fc3f7', '#a6e22e', '#f92672', '#fd971f', '#ffffff', '#b362e0'];
 
+/**
+ * Light beacons are the one generator that deliberately does NOT use the
+ * seeded world stream.
+ *
+ * Everything else in this file is reproducible on purpose, but that also
+ * means the draws are in a fixed order: INITIAL_CRATE_DEFS and
+ * INITIAL_WALL_DEFS consume a fixed prefix at module load, so the first
+ * beacon of every single session came out of the same two rng() values and
+ * landed on the same patch of map, every run. Beacons are a placed tool
+ * rather than part of the world layout, so they draw from Math.random.
+ *
+ * Biased toward the middle: t^1.9 pulls most of the distribution inward, so
+ * a beacon usually lands somewhere you are actually going to fight instead
+ * of out on the rim where its light is wasted.
+ */
 export const generateLightBlockDef = (id: string): LightBlockDef => {
-  const [x, z] = randomPointInRing(SPAWN_EXCLUSION_RADIUS, MAP_RADIUS * 0.85);
-  return { id, position: [x, 0, z], color: LIGHT_BLOCK_COLORS[Math.floor(rng() * LIGHT_BLOCK_COLORS.length)] };
+  const angle = Math.random() * Math.PI * 2;
+  const t = Math.pow(Math.random(), 1.9);
+  const distance = SPAWN_EXCLUSION_RADIUS + t * (MAP_RADIUS * 0.85 - SPAWN_EXCLUSION_RADIUS);
+  return {
+    id,
+    position: [Math.cos(angle) * distance, 0, Math.sin(angle) * distance],
+    color: LIGHT_BLOCK_COLORS[Math.floor(Math.random() * LIGHT_BLOCK_COLORS.length)]
+  };
 };
 
 export const INITIAL_CRATE_DEFS: CrateDef[] = Array.from({ length: INITIAL_CRATE_COUNT }, (_, i) => generateCrateDef(`crate-${i}`));

@@ -11,6 +11,8 @@ import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision'
 import { AABB, MAP_RADIUS, MedkitDef } from '../world/worldObjects';
 import {
   ARMY_CHASE_SPEED,
+  ARMY_KITE_SPEED,
+  ARMY_RANGED_MIN_RANGE,
   ARMY_MELEE_COOLDOWN,
   ARMY_MELEE_DAMAGE,
   ARMY_RANGED_COOLDOWN,
@@ -546,14 +548,26 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
         const heading = Math.atan2(dx, dz);
         const isRanged = role === 'armyRanged';
         const attackRange = isRanged ? ENEMY_RANGED_ATTACK_RANGE * 0.8 : ENEMY_ATTACK_RANGE;
+        // Too close to throw safely: break away and keep throwing on the run.
+        // The projectile is aimed from a from/to pair rather than from the
+        // body's facing, so backing off costs him nothing but the distance.
+        const tooClose = isRanged && dist < ARMY_RANGED_MIN_RANGE;
         if (dist > attackRange) {
           const safe = pickOpenHeading(pos, heading, colliders, HUMANOID_RADIUS);
           rotateTowardAngle(groupRef.current, safe, 10, actualDelta);
           transitionTo('walk', 0.15);
           groupRef.current.translateZ(ARMY_CHASE_SPEED * slowFactor * actualDelta);
-        } else {
+        } else if (tooClose) {
+          const away = pickOpenHeading(pos, heading + Math.PI, colliders, HUMANOID_RADIUS);
+          rotateTowardAngle(groupRef.current, away, 11, actualDelta);
+          transitionTo('flee', 0.15);
+          groupRef.current.translateZ(ARMY_KITE_SPEED * slowFactor * actualDelta);
+        }
+        if (dist <= attackRange && !tooClose) {
           rotateTowardAngle(groupRef.current, heading, 10, actualDelta);
           transitionTo('idle', 0.2);
+        }
+        if (dist <= attackRange) {
           if (attackCooldownRef.current <= 0) {
             if (isRanged) {
               attackCooldownRef.current = ARMY_RANGED_COOLDOWN;

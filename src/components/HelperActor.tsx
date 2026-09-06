@@ -268,6 +268,21 @@ export const HelperActor: React.FC<HelperActorProps> = ({
       }
     }
 
+    // Healed back from the dead by any route at all - a level-up revive, the
+    // sandbox button, anything future. The death latch below is one-way, so
+    // without this the helper stays a sunk invisible ragdoll while its health
+    // bar says it is fine.
+    if (frozenRef.current && health > 0) {
+      frozenRef.current = false;
+      deadTimeRef.current = 0;
+      sunkNotifiedRef.current = false;
+      ragdollRef.current?.dispose();
+      groupRef.current.visible = true;
+      groupRef.current.position.copy(position);
+      groupRef.current.position.y = frozenBaseYRef.current;
+      transitionTo('idle', 0.1);
+    }
+
     if (frozenRef.current) {
       if (velocity.lengthSq() > 0.0001) {
         ragdollRef.current?.applyImpulseToHips(velocity);

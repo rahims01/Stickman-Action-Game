@@ -361,6 +361,11 @@ export const ARMY_RANGED_DAMAGE = 1.5;
 export const ARMY_MELEE_COOLDOWN = 1.8;
 export const ARMY_RANGED_COOLDOWN = 3;
 export const ARMY_CHASE_SPEED = 3.4;
+// A thrower that lets something walk into its face is a dead thrower. Inside
+// this radius it gives ground instead of standing still and reloading - the
+// same kiting the ranged ENEMIES have always done (GREY_MAN_MIN_DISTANCE).
+export const ARMY_RANGED_MIN_RANGE = 6.5;
+export const ARMY_KITE_SPEED = 4.6;
 export const ARMY_MAX_HEALTH = 16;
 export const BODYGUARD_MAX_HEALTH = 15;
 export const BODYGUARD_FOLLOW_DISTANCE = 2.0;

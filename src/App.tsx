@@ -179,6 +179,9 @@ export const App: React.FC = () => {
   const [showMenuSettings, setShowMenuSettings] = useState(false);
   const [modifiers, setModifiers] = useState<GameModifiers>(loadModifiers);
   const [runSlots, setRunSlots] = useState<RunSlot[]>(loadRunSlots);
+  // Slot id that just got written, so "+ Save current run" visibly does
+  // something instead of silently appending a row you may not be looking at.
+  const [saveFlash, setSaveFlash] = useState<string | null>(null);
   const [arenaWave, setArenaWave] = useState(0);
   const [arenaPhase, setArenaPhase] = useState<'concrete' | 'box' | 'falling' | 'sand' | 'magma'>('concrete');
   // The real room, once the run leaves the scripted tutorial. phase only
@@ -265,11 +268,20 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSaveCurrentRun = () => {
-    const progress = loadProgress();
+    // In normal mode snapshot the LIVE run; anywhere else (menu, arena,
+    // sandbox) the only meaningful run is the one on disk, which the other
+    // modes no longer touch.
+    const progress = gameMode === 'normal' ? currentProgress() : loadProgress();
     if (!progress) return;
+    // Numbered off the highest existing slot so deleting one never produces
+    // two "Run 3"s.
+    const nextNumber = runSlots.reduce((max, s) => {
+      const n = Number(/^Run (d+)$/.exec(s.name)?.[1] ?? 0);
+      return n > max ? n : max;
+    }, 0) + 1;
     const slot: RunSlot = {
       id: `run-${Date.now()}`,
-      name: `Run ${runSlots.length + 1}`,
+      name: `Run ${nextNumber}`,
       savedAt: Date.now(),
       progress,
       modifiers
@@ -277,9 +289,15 @@ export const App: React.FC = () => {
     const next = [...runSlots, slot].slice(-6);
     setRunSlots(next);
     saveRunSlots(next);
+    setSaveFlash(slot.id);
+    window.setTimeout(() => setSaveFlash((cur) => (cur === slot.id ? null : cur)), 1800);
   };
 
   const handleLoadRun = (slot: RunSlot) => {
+    // Leave the running mode before writing, so the normal-mode persist
+    // effect cannot fire once more on the old state and clobber the slot we
+    // are restoring on the way to the reload.
+    setGameMode(null);
     saveProgress(slot.progress);
     try {
       localStorage.setItem(MODIFIERS_KEY, JSON.stringify(slot.modifiers));
@@ -292,6 +310,45 @@ export const App: React.FC = () => {
     const next = runSlots.filter((s) => s.id !== id);
     setRunSlots(next);
     saveRunSlots(next);
+  };
+
+  // Save slots, rendered in BOTH the in-game settings panel and the main
+  // menu's. Loading a run from the menu is the only moment you actually want
+  // it, and until now the panel only existed once you were already in a run.
+  const savedRunsPanel = (compact: boolean) => {
+    const fs1 = compact ? '11px' : '12px';
+    return (
+      <>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <div style={{ fontWeight: 'bold', fontSize: fs1, color: '#ffcc80' }}>SAVED RUNS</div>
+          <button onClick={handleSaveCurrentRun}
+            title={gameMode === 'normal' ? 'Snapshot this run into a slot' : 'Snapshot the stored campaign run into a slot'}
+            style={{ padding: '4px 8px', borderRadius: '5px', border: '1px solid rgba(255,204,128,0.5)', background: 'rgba(255,204,128,0.08)', color: '#ffcc80', cursor: 'pointer', fontSize: '10px' }}>
+            + Save current run
+          </button>
+        </div>
+        {runSlots.length === 0 && (
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>No saved runs yet - snapshot your progress above.</div>
+        )}
+        {runSlots.map((slot) => (
+          <div key={slot.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '6px', padding: '6px 8px', borderRadius: '5px', border: saveFlash === slot.id ? '1px solid rgba(166,226,46,0.7)' : '1px solid rgba(255,255,255,0.1)', background: saveFlash === slot.id ? 'rgba(166,226,46,0.12)' : 'rgba(255,255,255,0.04)' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#ffcc80' }}>{slot.name} - Lvl {slot.progress.level}</div>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
+                {slot.progress.score} pts · {slot.progress.kills} kills · {new Date(slot.savedAt).toLocaleDateString()} {new Date(slot.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+              <button onClick={() => handleLoadRun(slot)}
+                title="Restore this run and reload"
+                style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(166,226,46,0.4)', background: 'rgba(166,226,46,0.08)', color: '#a6e22e', cursor: 'pointer', fontSize: '10px' }}>Load</button>
+              <button onClick={() => handleDeleteRun(slot.id)} title="Delete this saved run"
+                style={{ padding: '3px 7px', borderRadius: '4px', border: '1px solid rgba(231,76,60,0.4)', background: 'rgba(231,76,60,0.08)', color: '#e74c3c', cursor: 'pointer', fontSize: '10px' }}>X</button>
+            </div>
+          </div>
+        ))}
+      </>
+    );
   };
 
   const handleScoreAdd = (amount: number) => setScore((prev) => prev + amount);
@@ -323,6 +380,10 @@ export const App: React.FC = () => {
   const [sbTimeOfDay, setSbTimeOfDay] = useState<'day' | 'night' | null>(null);
   const [sbEnemiesIgnore, setSbEnemiesIgnore] = useState(false);
   const [spawnAsHelperMode, setSpawnAsHelperMode] = useState(false);
+  // One-time helper: recruit exactly one, then drop straight back to spawning
+  // enemies. Without it you have to remember to untick "Spawn as helper"
+  // again, and the next thing you spawn joins your side by accident.
+  const [spawnHelperOnce, setSpawnHelperOnce] = useState(false);
   // Bottom quick-spawn bar can be tucked away to reclaim the screen.
   const [spawnBarMinimized, setSpawnBarMinimized] = useState(false);
   // Sandbox spawn options applied to every enemy spawned from the pickers.
@@ -350,16 +411,58 @@ export const App: React.FC = () => {
     sandboxActionsRef.current = actions;
   }, []);
 
+  // The live snapshot of the NORMAL run, in the shape a save slot wants.
+  const currentProgress = useCallback((): SavedProgress => ({
+    level, statModifiers: latestStatModifiers, deaths, specialKills,
+    score, kills, color: stickmanColor,
+    helpers: savedHelpersRef.current,
+    droneLevel: savedDroneLevelRef.current,
+    turretLevel: savedTurretLevelRef.current
+  }), [level, latestStatModifiers, deaths, specialKills, score, kills, stickmanColor]);
+
   // Persist all progress whenever key fields change.
+  //
+  // ONLY in normal mode, and that gate is the whole point. Arena, sandbox and
+  // the versus modes mount the same GameCanvas with a deliberately blank slate
+  // (level 1, no stat modifiers, no helpers, no drone, no turrets), and its
+  // onLevelChange / onStatModifiersChange / onHelpersChange callbacks all fire
+  // on mount. Without this gate, opening the Arena once wrote that blank slate
+  // straight over a real save: level back to 1, every upgrade gone, damage
+  // bonus zeroed. That is both the "saving is broken" report and the "damage
+  // turns to 0 in the arena" one.
   useEffect(() => {
-    saveProgress({
-      level, statModifiers: latestStatModifiers, deaths, specialKills,
-      score, kills, color: stickmanColor,
-      helpers: savedHelpersRef.current,
-      droneLevel: savedDroneLevelRef.current,
-      turretLevel: savedTurretLevelRef.current
-    });
-  }, [level, latestStatModifiers, deaths, specialKills, score, kills, stickmanColor]);
+    if (gameMode !== 'normal') return;
+    saveProgress(currentProgress());
+  }, [gameMode, currentProgress]);
+
+  // Stickman colour is a preference rather than run progress, so it follows
+  // you out of whichever mode you changed it in - patched into the stored blob
+  // without touching anything else in it.
+  useEffect(() => {
+    const stored = loadProgress();
+    if (!stored || stored.color === stickmanColor) return;
+    saveProgress({ ...stored, color: stickmanColor });
+  }, [stickmanColor]);
+
+  // Pull App state back in line with what is actually on disk. Called when a
+  // non-normal mode is left, so its throwaway level/upgrades never leak into
+  // the next normal run or the menu chips.
+  const restoreFromSave = useCallback(() => {
+    const p = loadProgress();
+    saved.current = p;
+    savedHelpersRef.current = p?.helpers ?? [];
+    savedDroneLevelRef.current = p?.droneLevel ?? 0;
+    savedTurretLevelRef.current = p?.turretLevel ?? 0;
+    setLevel(p?.level ?? 1);
+    setScore(p?.score ?? 0);
+    setKills(p?.kills ?? 0);
+    setDeaths(p?.deaths ?? 0);
+    setSpecialKills(p?.specialKills ?? 0);
+    setLatestStatModifiers(p?.statModifiers ?? createStatModifiers());
+    setLatestHelpers(p?.helpers ?? []);
+    setLatestDroneLevel(p?.droneLevel ?? 0);
+    setLatestTurretLevel(p?.turretLevel ?? 0);
+  }, []);
 
   const handleSettingsToggle = () => {
     const nowMinimized = !settingsMinimized;
@@ -388,7 +491,7 @@ export const App: React.FC = () => {
   // just unmounts the game; re-reading storage keeps the menu chips (and the
   // CONTINUE state a future session resumes from) fresh.
   const handleGoToMainMenu = () => {
-    saved.current = loadProgress();
+    restoreFromSave();
     // Snapshot the run's recap before the GameCanvas unmounts.
     setLastRunRecap(getRunRecap());
     setGameMode(null);
@@ -479,6 +582,13 @@ export const App: React.FC = () => {
   ];
 
   const sb = (fn: (a: SandboxActions) => void) => { if (sandboxActionsRef.current) fn(sandboxActionsRef.current); };
+
+  // Every "spawn this as a helper" click goes through here so the one-time
+  // checkbox has a single place to disarm itself.
+  const sbHelper = (fn: (a: SandboxActions) => void) => {
+    sb(fn);
+    if (spawnHelperOnce) setSpawnAsHelperMode(false);
+  };
 
   // Stickman menu paging: sandbox has its tool pages; every mode ends with
   // the accessibility & modifiers page.
@@ -1027,6 +1137,8 @@ export const App: React.FC = () => {
                   />
                 </label>
               ))}
+              <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '16px 0 12px' }} />
+              {savedRunsPanel(true)}
               <div style={{ marginTop: '16px', fontSize: '12px', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
                 Saved automatically · applies in-game immediately
               </div>
@@ -1522,6 +1634,11 @@ export const App: React.FC = () => {
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                          {h.health <= 0 && (
+                            <button onClick={() => sb(a => a.reviveHelper(h.id))}
+                              title="Bring this helper back at full health, next to you"
+                              style={{ padding: '3px 7px', borderRadius: '4px', border: '1px solid rgba(79,195,247,0.6)', background: 'rgba(79,195,247,0.14)', color: '#4fc3f7', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}>Revive</button>
+                          )}
                           <button onClick={() => sb(a => a.upgradeHelper(h.id, 'helperLevelUp2'))}
                             style={{ padding: '3px 7px', borderRadius: '4px', border: '1px solid rgba(166,226,46,0.4)', background: 'rgba(166,226,46,0.08)', color: '#a6e22e', cursor: 'pointer', fontSize: '10px' }}>+Lvl</button>
                           <button onClick={() => sb(a => a.upgradeHelper(h.id, 'helperMoveSpeed'))}
@@ -1562,6 +1679,11 @@ export const App: React.FC = () => {
                         <input type="checkbox" checked={spawnAsHelperMode} onChange={e => setSpawnAsHelperMode(e.target.checked)} style={{ cursor: 'pointer' }} />
                         Spawn as helper
                       </label>
+                      <label title="Recruit one helper, then switch straight back to spawning enemies"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '11px', color: spawnHelperOnce ? '#ffd54f' : '#aaa' }}>
+                        <input type="checkbox" checked={spawnHelperOnce} onChange={e => setSpawnHelperOnce(e.target.checked)} style={{ cursor: 'pointer' }} />
+                        One-time
+                      </label>
                     </div>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '11px', color: spawnClear ? '#d0eeff' : '#aaa' }} title="Translucent Clear variant: 75% health">
@@ -1586,7 +1708,7 @@ export const App: React.FC = () => {
                             return (
                               <button key={type} disabled={dummyAsHelper}
                                 title={dummyAsHelper ? "Dummies can't be helpers" : undefined}
-                                onClick={() => spawnAsHelperMode ? sb(a => a.spawnAsHelper(type)) : sb(a => a.spawnEnemy(type, spawnOpts))}
+                                onClick={() => spawnAsHelperMode ? sbHelper(a => a.spawnAsHelper(type)) : sb(a => a.spawnEnemy(type, spawnOpts))}
                                 style={{ padding: '4px 8px', borderRadius: '4px', border: spawnAsHelperMode ? '1px solid rgba(79,195,247,0.5)' : '1px solid rgba(255,255,255,0.2)', background: spawnAsHelperMode ? 'rgba(79,195,247,0.08)' : '#1e1e1e', color: spawnAsHelperMode ? '#4fc3f7' : '#ddd', cursor: dummyAsHelper ? 'not-allowed' : 'pointer', opacity: dummyAsHelper ? 0.35 : 1, fontSize: '11px' }}>
                                 {ENEMY_LABELS[type] ?? type}
                               </button>
@@ -1598,7 +1720,7 @@ export const App: React.FC = () => {
                     <div style={{ marginBottom: '12px' }}>
                       <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '5px' }}>Units</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                        <button onClick={() => spawnAsHelperMode ? sb(a => a.spawnCivilianHelper()) : sb(a => a.spawnCivilian())}
+                        <button onClick={() => spawnAsHelperMode ? sbHelper(a => a.spawnCivilianHelper()) : sb(a => a.spawnCivilian())}
                           title={spawnAsHelperMode ? 'Recruits a civilian helper: 10 HP, deals no damage' : 'A harmless wanderer that flees from enemies'}
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(232,216,195,0.5)', background: 'rgba(232,216,195,0.08)', color: '#e8d8c3', cursor: 'pointer', fontSize: '11px' }}>
                           🚶 Civilian
@@ -1770,32 +1892,7 @@ export const App: React.FC = () => {
                     ))}
 
                     <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '12px 0' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#ffcc80' }}>💾 SAVED RUNS</div>
-                      <button onClick={handleSaveCurrentRun}
-                        style={{ padding: '4px 8px', borderRadius: '5px', border: '1px solid rgba(255,204,128,0.5)', background: 'rgba(255,204,128,0.08)', color: '#ffcc80', cursor: 'pointer', fontSize: '10px' }}>
-                        + Save current run
-                      </button>
-                    </div>
-                    {runSlots.length === 0 && (
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>No saved runs yet — snapshot your progress above.</div>
-                    )}
-                    {runSlots.map((s) => (
-                      <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', marginBottom: '6px', padding: '6px 8px', borderRadius: '5px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#ffcc80' }}>{s.name} — Lvl {s.progress.level}</div>
-                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-                            🏆 {s.progress.score} · {new Date(s.savedAt).toLocaleDateString()} {new Date(s.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                          <button onClick={() => handleLoadRun(s)}
-                            style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(166,226,46,0.4)', background: 'rgba(166,226,46,0.08)', color: '#a6e22e', cursor: 'pointer', fontSize: '10px' }}>Load</button>
-                          <button onClick={() => handleDeleteRun(s.id)} title="Delete this saved run"
-                            style={{ padding: '3px 7px', borderRadius: '4px', border: '1px solid rgba(231,76,60,0.4)', background: 'rgba(231,76,60,0.08)', color: '#e74c3c', cursor: 'pointer', fontSize: '10px' }}>✕</button>
-                        </div>
-                      </div>
-                    ))}
+                    {savedRunsPanel(false)}
                   </>
                 )}
 
@@ -1823,6 +1920,11 @@ export const App: React.FC = () => {
                   <input type="checkbox" checked={spawnAsHelperMode} onChange={e => setSpawnAsHelperMode(e.target.checked)} style={{ cursor: 'pointer' }} />
                   Spawn as helper
                 </label>
+                <label title="Recruit one helper, then switch straight back to spawning enemies"
+                  style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '10px', color: spawnHelperOnce ? '#ffd54f' : 'rgba(255,255,255,0.5)' }}>
+                  <input type="checkbox" checked={spawnHelperOnce} onChange={e => setSpawnHelperOnce(e.target.checked)} style={{ cursor: 'pointer' }} />
+                  One-time
+                </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '10px', color: spawnClear ? '#d0eeff' : 'rgba(255,255,255,0.5)' }}>
                   <input type="checkbox" checked={spawnClear} onChange={e => setSpawnClear(e.target.checked)} style={{ cursor: 'pointer' }} />
                   🫧 Clear
@@ -1848,7 +1950,7 @@ export const App: React.FC = () => {
                         return (
                           <button key={type} disabled={dummyAsHelper}
                             title={dummyAsHelper ? "Dummies can't be helpers" : undefined}
-                            onClick={() => spawnAsHelperMode ? sb(a => a.spawnAsHelper(type)) : sb(a => a.spawnEnemy(type, spawnOpts))}
+                            onClick={() => spawnAsHelperMode ? sbHelper(a => a.spawnAsHelper(type)) : sb(a => a.spawnEnemy(type, spawnOpts))}
                             style={{ padding: '3px 7px', borderRadius: '4px', border: spawnAsHelperMode ? '1px solid rgba(79,195,247,0.4)' : '1px solid rgba(255,255,255,0.15)', background: spawnAsHelperMode ? 'rgba(79,195,247,0.1)' : '#1a1a1a', color: spawnAsHelperMode ? '#4fc3f7' : '#ddd', cursor: dummyAsHelper ? 'not-allowed' : 'pointer', opacity: dummyAsHelper ? 0.35 : 1, fontSize: '10px', whiteSpace: 'nowrap' }}>
                             {ENEMY_LABELS[type] ?? type}
                           </button>
@@ -1860,7 +1962,7 @@ export const App: React.FC = () => {
                 <div style={{ flexShrink: 0 }}>
                   <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '4px' }}>Units</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <button onClick={() => spawnAsHelperMode ? sb(a => a.spawnCivilianHelper()) : sb(a => a.spawnCivilian())}
+                    <button onClick={() => spawnAsHelperMode ? sbHelper(a => a.spawnCivilianHelper()) : sb(a => a.spawnCivilian())}
                       title={spawnAsHelperMode ? 'Recruits a civilian helper: 10 HP, deals no damage' : 'A harmless wanderer that flees from enemies'}
                       style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(232,216,195,0.45)', background: 'rgba(232,216,195,0.1)', color: '#e8d8c3', cursor: 'pointer', fontSize: '10px', whiteSpace: 'nowrap' }}>
                       🚶 Civilian
