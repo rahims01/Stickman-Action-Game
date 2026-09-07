@@ -1745,6 +1745,26 @@ export const App: React.FC = () => {
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(232,241,228,0.55)', background: 'rgba(232,241,228,0.12)', color: '#dcefd8', cursor: 'pointer', fontSize: '11px' }}>
                           ⛑ Army (Medic)
                         </button>
+                        <button onClick={() => sb(a => a.spawnArmyMan('sergeant'))}
+                          title="Squad leader. Hits hardest of anyone in the army, and every soldier within 16 units hits 40% harder, swings 25% faster and stops breaking off to hunt medkits mid-firefight."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(255,202,40,0.6)', background: 'rgba(255,202,40,0.12)', color: '#ffca28', cursor: 'pointer', fontSize: '11px' }}>
+                          🎖 Army (Sergeant)
+                        </button>
+                        <button onClick={() => sb(a => a.spawnArmyMan('shield'))}
+                          title="A wall that walks. 62 HP, slow, low damage - but enemies pick him over the men behind him from twice the distance, and bolts do 35% damage to him."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(174,213,129,0.6)', background: 'rgba(174,213,129,0.12)', color: '#aed581', cursor: 'pointer', fontSize: '11px' }}>
+                          🛡 Army (Shield)
+                        </button>
+                        <button onClick={() => sb(a => a.spawnArmyMan('radio'))}
+                          title="Fights badly, wins fights. While his side is outnumbered nearby he calls in two more soldiers every 26 seconds. Kill him before the call goes out."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(77,208,225,0.6)', background: 'rgba(77,208,225,0.12)', color: '#4dd0e1', cursor: 'pointer', fontSize: '11px' }}>
+                          📻 Army (Radio)
+                        </button>
+                        <button onClick={() => sb(a => a.spawnArmySquad())}
+                          title="A whole fireteam in formation: shield up front, sergeant and two troopers on the line, rifleman off the shoulder, medic and radio behind."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(139,195,74,0.85)', background: 'rgba(139,195,74,0.22)', color: '#dcedc8', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>
+                          🪖 FULL SQUAD
+                        </button>
                         <button onClick={() => sb(a => a.spawnBodyguard())}
                           title="Not a helper: just follows you and retaliates against whatever hurts you. Dies for good."
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(96,125,139,0.6)', background: 'rgba(96,125,139,0.12)', color: '#b0bec5', cursor: 'pointer', fontSize: '11px' }}>
@@ -1991,6 +2011,11 @@ export const App: React.FC = () => {
                       title="Passive medic: never attacks. Runs from anything hostile, otherwise treats the worst-hurt soldier he can reach. Kill him to stop a squad healing itself."
                       style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(232,241,228,0.5)', background: 'rgba(232,241,228,0.14)', color: '#dcefd8', cursor: 'pointer', fontSize: '10px', whiteSpace: 'nowrap' }}>
                       ⛑ Army (Med)
+                    </button>
+                    <button onClick={() => sb(a => a.spawnArmySquad())}
+                      title="A whole fireteam in formation: shield up front, sergeant and two troopers on the line, rifleman off the shoulder, medic and radio behind."
+                      style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(139,195,74,0.8)', background: 'rgba(139,195,74,0.24)', color: '#dcedc8', cursor: 'pointer', fontSize: '10px', whiteSpace: 'nowrap', fontWeight: 'bold' }}>
+                      🪖 Squad
                     </button>
                     <button onClick={() => sb(a => a.spawnBodyguard())}
                       title="Not a helper: follows you and retaliates against whatever hurts you"

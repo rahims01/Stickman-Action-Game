@@ -45,6 +45,8 @@ import {
   GIANT_INSTANCE_DAMAGE_MULTIPLIER,
   GIANT_INSTANCE_SPEED_MULTIPLIER,
   GREY_MAN_MIN_DISTANCE,
+  ARMY_SHIELD_TAUNT_RADIUS,
+  ARMY_SHIELD_TAUNT_WEIGHT,
   HUMANOID_RADIUS,
   HelperState,
   HIT_REACTION_LOCK_DURATION,
@@ -908,8 +910,15 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
             civilians.forEach((c) => {
               if (c.health <= 0) return;
               const d = Math.hypot(c.position.x - groupRef.current!.position.x, c.position.z - groupRef.current!.position.z);
-              if (d < bestDist) {
-                bestDist = d;
+              // Shield Troopers taunt. Weighting the distance rather than
+              // hard-locking aggro means an enemy will cross to him from up
+              // to ~2.2x further away than anything else, so he really does
+              // pull fire off the riflemen behind him - but something stood
+              // right on top of you still gets hit.
+              const weighted =
+                c.role === 'armyShield' && d <= ARMY_SHIELD_TAUNT_RADIUS ? d * ARMY_SHIELD_TAUNT_WEIGHT : d;
+              if (weighted < bestDist) {
+                bestDist = weighted;
                 target = { kind: 'civilian', civilianId: c.id, position: c.position };
               }
             });

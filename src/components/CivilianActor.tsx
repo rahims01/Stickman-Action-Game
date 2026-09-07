@@ -11,6 +11,12 @@ import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision'
 import { AABB, MAP_RADIUS, MedkitDef } from '../world/worldObjects';
 import {
   ARMY_CHASE_SPEED,
+  ARMY_FOCUS_DISTANCE_WEIGHT,
+  ARMY_RADIO_COOLDOWN,
+  ARMY_RADIO_SCAN_RADIUS,
+  ARMY_SERGEANT_ATTACK_SPEED_BONUS,
+  ARMY_SERGEANT_AURA_RADIUS,
+  ARMY_SERGEANT_DAMAGE_BONUS,
   ARMY_KITE_SPEED,
   ARMY_MEDIC_ESCORT_DISTANCE,
   ARMY_MEDIC_FLEE_RADIUS,
@@ -19,10 +25,6 @@ import {
   ARMY_MEDIC_HEAL_RADIUS,
   ARMY_MEDIC_SEEK_RADIUS,
   ARMY_RANGED_MIN_RANGE,
-  ARMY_MELEE_COOLDOWN,
-  ARMY_MELEE_DAMAGE,
-  ARMY_RANGED_COOLDOWN,
-  ARMY_RANGED_DAMAGE,
   ARMY_SIGHT_RADIUS,
   BODYGUARD_FOLLOW_DISTANCE,
   CIVILIAN_FLEE_SPEED,
@@ -46,6 +48,7 @@ import {
   CIVILIAN_SEEK_ARMY_RADIUS,
   CivilianState,
   MEDKIT_PICKUP_RADIUS,
+  armyLoadoutFor,
   isArmyRole,
   isFightingArmyRole
 } from '../world/gameState';
@@ -104,6 +107,8 @@ interface CivilianActorProps {
   onTakeMedkit?: (civilianId: string, medkitId: string) => void;
   // Medic Soldier patching up a comrade.
   onMedicHeal?: (targetCivilianId: string, amount: number) => void;
+  // Radioman calling in more soldiers.
+  onCallReinforcements?: (near: THREE.Vector3) => void;
   onSunk: (id: string) => void;
 }
 
@@ -131,6 +136,13 @@ const ROLE_COLORS: Record<Exclude<CivilianRole, 'civilian'>, string> = {
   // Field white rather than fatigue green - you are meant to be able to pick
   // him out of a squad at a glance, because he is the one worth killing first.
   armyMedic: '#e8f1e4',
+  // Officer khaki: lighter and warmer than the line, so he reads as the one
+  // giving orders.
+  armySergeant: '#8d7b3f',
+  // Heavy plate grey-green.
+  armyShield: '#5d6b52',
+  // Signals blue-green, with the pack on his back doing the rest.
+  armyRadio: '#3f6b5c',
   bodyguard: '#263238',
   // The VIP reads as somebody important: pale suit, stands out in a crowd.
   vip: '#ffd54f'
@@ -173,6 +185,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   medkits,
   onTakeMedkit,
   onMedicHeal,
+  onCallReinforcements,
   onSunk
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -197,6 +210,9 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   const oneShotTimerRef = useRef<number | null>(null);
   const attackCooldownRef = useRef(0.5 + Math.random());
   const healCooldownRef = useRef(Math.random());
+  const radioCooldownRef = useRef(4 + Math.random() * 4);
+  // Damage of the swing currently in the air (see the melee branch below).
+  const meleeDamageRef = useRef(0);
   const pendingMeleeRef = useRef<{ impactIn: number; target: { kind: 'player' } | { kind: 'enemy'; id: string } } | null>(null);
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
@@ -422,11 +438,11 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
             pendingMeleeRef.current = null;
             if (t.kind === 'player') {
               const d = Math.hypot(playerPos.x - pos.x, playerPos.z - pos.z);
-              if (d <= ENEMY_ATTACK_RANGE + 0.3) onArmyAttackPlayer?.(ARMY_MELEE_DAMAGE, pos.clone(), now, id);
+              if (d <= ENEMY_ATTACK_RANGE + 0.3) onArmyAttackPlayer?.(meleeDamageRef.current, pos.clone(), now, id);
             } else {
               const enemy = enemies.find((e) => e.id === t.id && e.health > 0);
               if (enemy && Math.hypot(enemy.position.x - pos.x, enemy.position.z - pos.z) <= ENEMY_ATTACK_RANGE + 0.3) {
-                onArmyAttackEnemy?.(t.id, ARMY_MELEE_DAMAGE);
+                onArmyAttackEnemy?.(t.id, meleeDamageRef.current);
               }
             }
           }
@@ -446,6 +462,24 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       // is what aggroPlayer records.
       const aggroValid = Date.now() < aggroUntilMs;
       const healthFrac = maxHealth > 0 ? health / maxHealth : 1;
+      const loadout = armyLoadoutFor(role);
+
+      // A sergeant in earshot is worth more than any single upgrade: the men
+      // around him hit harder, swing faster, and stop breaking off to look
+      // for a medkit while there is still shooting.
+      let sergeantNear = false;
+      if (role !== 'armySergeant') {
+        for (const c of civilians) {
+          if (c.health <= 0 || c.role !== 'armySergeant') continue;
+          if (Math.hypot(c.position.x - pos.x, c.position.z - pos.z) <= ARMY_SERGEANT_AURA_RADIUS) {
+            sergeantNear = true;
+            break;
+          }
+        }
+      }
+      const meleeDamage = loadout.meleeDamage * (sergeantNear ? 1 + ARMY_SERGEANT_DAMAGE_BONUS : 1);
+      const rangedDamage = loadout.rangedDamage * (sergeantNear ? 1 + ARMY_SERGEANT_DAMAGE_BONUS : 1);
+      const cooldownScale = sergeantNear ? 1 / (1 + ARMY_SERGEANT_ATTACK_SPEED_BONUS) : 1;
 
       let nearestEnemy: EnemyState | undefined;
       let nearestEnemyDist = Infinity;
@@ -457,14 +491,34 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
           nearestEnemy = e;
         }
       }
-      const sightedEnemy = nearestEnemyDist <= ARMY_SIGHT_RADIUS ? nearestEnemy : undefined;
+      // Focus fire. Not "the nearest one" - the one the squad should be
+      // finishing. Every soldier scores the same way from the same roster, so
+      // they converge on the same target without any coordination between
+      // them, and wounded enemies actually die instead of five men each
+      // chipping a different full-health body.
+      let sightedEnemy: EnemyState | undefined;
+      {
+        let bestScore = Infinity;
+        for (const e of enemies) {
+          if (e.health <= 0) continue;
+          const d = Math.hypot(e.position.x - pos.x, e.position.z - pos.z);
+          if (d > ARMY_SIGHT_RADIUS) continue;
+          const score = e.health + d * ARMY_FOCUS_DISTANCE_WEIGHT;
+          if (score < bestScore) {
+            bestScore = score;
+            sightedEnemy = e;
+          }
+        }
+      }
 
       // Self-preservation. Critically hurt, he breaks off mid-fight to heal;
       // merely hurt, he waits until the shooting stops.
       const wantsMedkit =
         medkits.length > 0 &&
         (healthFrac < ARMY_MEDKIT_URGENT_FRACTION ||
-          (healthFrac < ARMY_MEDKIT_SEEK_FRACTION && !sightedEnemy));
+          // With a sergeant on the field nobody wanders off mid-firefight to
+          // look for a medkit; you go when the shooting stops.
+          (healthFrac < ARMY_MEDKIT_SEEK_FRACTION && !sightedEnemy && !sergeantNear));
 
       let medkitGoal: { id: string; x: number; z: number } | undefined;
       if (wantsMedkit) {
@@ -474,6 +528,38 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
           if (d < best) {
             best = d;
             medkitGoal = { id: m.id, x: m.position[0], z: m.position[2] };
+          }
+        }
+      }
+
+      // ── Radioman ───────────────────────────────────────────────────────
+      // He fights like anyone else; what makes him worth killing is that when
+      // his side is losing on numbers he simply asks for more. Runs before
+      // the rest of his behaviour so a call goes out even while he is
+      // swinging.
+      if (role === 'armyRadio') {
+        radioCooldownRef.current = Math.max(0, radioCooldownRef.current - actualDelta);
+        if (radioCooldownRef.current <= 0 && sightedEnemy) {
+          let hostiles = 0;
+          for (const e of enemies) {
+            if (e.health <= 0) continue;
+            if (Math.hypot(e.position.x - pos.x, e.position.z - pos.z) <= ARMY_RADIO_SCAN_RADIUS) hostiles++;
+          }
+          let friends = 0;
+          for (const c of civilians) {
+            if (c.health <= 0 || !isFightingArmyRole(c.role)) continue;
+            if (Math.hypot(c.position.x - pos.x, c.position.z - pos.z) <= ARMY_RADIO_SCAN_RADIUS) friends++;
+          }
+          if (hostiles > friends) {
+            radioCooldownRef.current = ARMY_RADIO_COOLDOWN;
+            onCallReinforcements?.(pos.clone());
+            for (let i = 0; i < 10; i++) {
+              const q = pos.clone();
+              q.x += (Math.random() - 0.5) * 0.9;
+              q.y += 1.4 + Math.random() * 1.4;
+              q.z += (Math.random() - 0.5) * 0.9;
+              projectilesRef?.current?.spawnAmbientParticle(q, '#4dd0e1');
+            }
           }
         }
       }
@@ -668,7 +754,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
           rotateTowardAngle(groupRef.current, heading, 9, actualDelta);
           transitionTo(medkitGoal ? 'flee' : 'walk', 0.2);
           groupRef.current.translateZ(
-            (medkitGoal ? CIVILIAN_FLEE_SPEED : ARMY_CHASE_SPEED) * slowFactor * actualDelta
+            (medkitGoal ? CIVILIAN_FLEE_SPEED : loadout.chaseSpeed) * slowFactor * actualDelta
           );
         }
         const resolvedGoal = resolveCircleVsBoxes(prevXa, prevZa, pos.x, pos.z, HUMANOID_RADIUS, colliders);
@@ -693,7 +779,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
           const safe = pickOpenHeading(pos, heading, colliders, HUMANOID_RADIUS);
           rotateTowardAngle(groupRef.current, safe, 10, actualDelta);
           transitionTo('walk', 0.15);
-          groupRef.current.translateZ(ARMY_CHASE_SPEED * slowFactor * actualDelta);
+          groupRef.current.translateZ(loadout.chaseSpeed * slowFactor * actualDelta);
         } else if (tooClose) {
           const away = pickOpenHeading(pos, heading + Math.PI, colliders, HUMANOID_RADIUS);
           rotateTowardAngle(groupRef.current, away, 11, actualDelta);
@@ -707,7 +793,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
         if (dist <= attackRange) {
           if (attackCooldownRef.current <= 0) {
             if (isRanged) {
-              attackCooldownRef.current = ARMY_RANGED_COOLDOWN;
+              attackCooldownRef.current = loadout.rangedCooldown * cooldownScale;
               playOneShot('throw');
               const from = pos.clone().add(new THREE.Vector3(0, 1.2, 0));
               const to = targetPos.clone().add(new THREE.Vector3(0, 1.0, 0));
@@ -715,15 +801,19 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
                 from,
                 to,
                 color: '#8bc34a',
-                payload: { damage: ARMY_RANGED_DAMAGE, range: 'ranged', isProjectile: true },
+                payload: { damage: rangedDamage, range: 'ranged', isProjectile: true },
                 attackerId: id,
                 // Army bullets aimed at an enemy fly on the helper team;
                 // aimed at the player, on the enemy team.
                 shooterTeam: targetKind.kind === 'enemy' ? 'helper' : 'enemy'
               });
             } else {
-              attackCooldownRef.current = ARMY_MELEE_COOLDOWN;
+              attackCooldownRef.current = loadout.meleeCooldown * cooldownScale;
               playOneShot('punch');
+              // The damage is locked in at the swing, not at the impact: the
+              // sergeant could die in the 0.35s the fist is in the air, and
+              // the punch that was already thrown should still land as thrown.
+              meleeDamageRef.current = meleeDamage;
               pendingMeleeRef.current = { impactIn: 0.35, target: targetKind };
             }
           }

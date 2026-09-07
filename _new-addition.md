@@ -30,13 +30,46 @@
 - **Sand Wraith** — sand-pit arena rare that collapses into a gust of sand to reposition behind you every few seconds; only solid (hittable) while attacking. The sand pit's Cloaked Assassin.
 - **Echo Man** — remembers the last attack that HIT him (punch, kick, even a drone zap) and throws the same payload back at you as his next attack. Fight him with your weakest move.
 
+### The neutral army (the faction that fights the enemies for you)
+
+*Built 2026-09-07 — a squad of six roles, rebalanced from "victims in uniform" into the one faction on the map that is genuinely good at fighting. Per-role loadouts live in `ARMY_LOADOUTS` / `armyLoadoutFor()` in `gameState.ts`; behaviour is all in the army branch of `CivilianActor.tsx`.*
+
+| Role | HP | Damage | Cadence | What makes it worth fielding |
+| --- | --- | --- | --- | --- |
+| **Trooper** (`armyMelee`) | 30 | 5 | 1.05s | The line. The yardstick everything else is set against. |
+| **Rifleman** (`armyRanged`) | 26 | 4 ranged | 1.6s | Fires across the room; kites out when something closes inside 6.5 units. |
+| **Sergeant** (`armySergeant`) | 38 | 7 | 0.95s | Aura, 16 units: +40% damage, +25% attack speed, and nobody breaks off to hunt a medkit mid-firefight. |
+| **Shield Trooper** (`armyShield`) | 62 | 4 | 1.4s | Taunts — enemies pick him from ~2.2× further than anyone else — and takes 35% damage from projectiles. |
+| **Medic** (`armyMedic`) | 12 | — | — | Never attacks. Runs from anything hostile, otherwise heals the worst-hurt soldier he can reach (+4 / 3.5s). |
+| **Radioman** (`armyRadio`) | 24 | 3 | 1.4s | While outnumbered within 22 units, calls in 2 more soldiers every 26s. |
+
+Two squad-wide changes matter as much as the roles do:
+
+- **Focus fire.** Soldiers no longer each chip a different enemy. Every man scores targets as `health + distance × 1.5` from the same roster, so they independently converge on the same wounded body and it actually dies. This is the single change that makes them read as a unit.
+- **Sight radius 10 → 17.** A soldier who only notices trouble at ten metres walks past most of it.
+
+`🪖 FULL SQUAD` spawns all seven in formation — shield up front, sergeant and two troopers on the line, rifleman off the shoulder, medic and radio behind.
+
+**Still to build for this faction:**
+- **Army in normal mode** — the whole neutral faction (civilians, army, VIP, bodyguards) currently only exists via the four sandbox spawn actions; `civilians` starts as `[]` in every mode. Wiring civilians into world generation with a chance of an army escort would put all of this AI in front of players who never open the sandbox. The single highest-value item on this list.
+- **Flag Bearer** — plants a destructible standard; soldiers near it heal slowly and never flee. A sergeant you can shoot.
+- **Army Sniper** — very long range, slow fire, always kites; targets the *highest-health* enemy rather than the nearest, so the squad's focus fire and his priorities deliberately disagree.
+- **Grenadier** — `isBomber` AOE that hurts his own side too, so he refuses to throw into a melee his squad is already in.
+- **Army Engineer** — deploys a friendly turret mid-fight on a long cooldown; the turret plumbing already exists on both sides.
+- **Deserter** — flees from everything, his own squad included. Save him and he permanently joins you as a helper.
+- **Prisoner** — starts held inside an enemy group; free him and a three-man squad spawns loyal to you.
+- **Veteran** — one per map, double health, uses the *enemy* special system (a real ability, not a punch). The soldier who is genuinely dangerous to fight.
+- **Mutineer** — an army man who turns hostile to everyone, his own side included, below a health threshold.
+- **Dog handler** — fast, low-HP animal that closes and staggers; the handler hangs back and never engages.
+- **Squad kill order UI** — a small callout naming the highest-value target in a spotted squad ("SERGEANT", "MEDIC"), teaching the player that these roles have a correct order to shoot them in.
+
 ### Neutral units & world life
-- **Medic civilian** — a white-tinted wanderer who patches up hurt civilians (and the player, slowly) when things are calm; enemies prioritize him.
+- **Medic civilian** — a white-tinted wanderer who patches up hurt CIVILIANS (and the player, slowly) when things are calm; enemies prioritize him. Distinct from the shipped Medic Soldier, who only treats soldiers.
 - **Police response** — hurting too many civilians in one session flags you WANTED: an army squad (2 melee + 1 ranged) spawns hunting specifically you until the heat decays. Builds directly on the witness/aggro system.
 - **Merchant wanderer** — a neutral stall/walker who trades score for a medkit or one-shot buff; killing him locks the shop for the rest of the run.
 - **Stray dog** — follows whoever feeds it (medkit crumbs?), barks at cloaked/invisible enemies to reveal them — utility pet, no combat.
 
-*(Shipped 2026-07-10/11/12: Sniper, Cloaked Assassin, Engineer, Vampire, Phase, Split, Copycat, Bomb Man, Armour Man, Sentry Turret upgrade, Coward, Slime Block, Arena mode (4 phases + 8 arena enemies), Loadout Draft, enemy health bars, minimap threat colors + shapes, spawn callouts, run modifiers, saved runs; 2026-07-12 later: SFX system, civilians take status effects, Juggernaut, Trapper Man, Resilient/Super Resilient, Shocker/Slow Cubes, Smash Balls, Lava Giant, Army Man, Bodyguard, health bars everywhere; 2026-07-14: neutral army/bodyguard faction, enemy bodyguard, enemy turret button, resilient invincibility, textured material men (concrete/wood/brick/sandy/magma/charred + lava baby + sand thrower), Minion, Ragdoll Thrower, Adaptive Man, Ragdoll/Slow/Split Balls, Giant + Colossal Slimes, civilian bystander panic, minimizable spawn menu, encyclopedia neutral tier + Helper/Turret/Player entries; 2026-07-15: Slime King, Magnet Man, Reflector, Ranged Helpers upgrade, blood-color rule (red for all stickmen), lava tiles + arena hazard waves, mines hurt enemies, destructible cover, sandbox Boss Flag, Stormy Weather modifier, portal pairs, lifetime stats screen, run recap, live entity counter, camera follow-distance slider; 2026-07-17: Achievements (20 medals + reset with baseline), Repulsor, Storm Man (weather-exclusive, chain lightning).)*
+*(Shipped 2026-07-10/11/12: Sniper, Cloaked Assassin, Engineer, Vampire, Phase, Split, Copycat, Bomb Man, Armour Man, Sentry Turret upgrade, Coward, Slime Block, Arena mode (4 phases + 8 arena enemies), Loadout Draft, enemy health bars, minimap threat colors + shapes, spawn callouts, run modifiers, saved runs; 2026-07-12 later: SFX system, civilians take status effects, Juggernaut, Trapper Man, Resilient/Super Resilient, Shocker/Slow Cubes, Smash Balls, Lava Giant, Army Man, Bodyguard, health bars everywhere; 2026-07-14: neutral army/bodyguard faction, enemy bodyguard, enemy turret button, resilient invincibility, textured material men (concrete/wood/brick/sandy/magma/charred + lava baby + sand thrower), Minion, Ragdoll Thrower, Adaptive Man, Ragdoll/Slow/Split Balls, Giant + Colossal Slimes, civilian bystander panic, minimizable spawn menu, encyclopedia neutral tier + Helper/Turret/Player entries; 2026-07-15: Slime King, Magnet Man, Reflector, Ranged Helpers upgrade, blood-color rule (red for all stickmen), lava tiles + arena hazard waves, mines hurt enemies, destructible cover, sandbox Boss Flag, Stormy Weather modifier, portal pairs, lifetime stats screen, run recap, live entity counter, camera follow-distance slider; 2026-07-17: Achievements (20 medals + reset with baseline), Repulsor, Storm Man (weather-exclusive, chain lightning); 2026-09-07: army faction overhaul — Medic Soldier, Sergeant, Shield Trooper, Radioman, per-role loadouts, squad focus fire, longer sight radius, FULL SQUAD spawn.)*
 
 ### Player abilities
 - **Magnet Gauntlet** — the player-side mirror of Magnet Man: an upgrade that passively drags nearby LIGHT enemies (babies, minis, mites) toward you, feeding your melee. Reuses the new magnet-drift plumbing in reverse.

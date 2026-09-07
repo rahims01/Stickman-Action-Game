@@ -354,18 +354,92 @@ export const PULSE_STUN_DURATION = 1.5;
 // armymen wander passively and only turn hostile when they see a civilian
 // or fellow armyman attacked (by an enemy OR by the player); bodyguards
 // shadow the player and retaliate against whatever hurts him.
-export const ARMY_SIGHT_RADIUS = 10;
+// A soldier who only notices trouble at ten metres walks past most of it.
+export const ARMY_SIGHT_RADIUS = 17;
 export const ARMY_AGGRO_MS = 20000;
-export const ARMY_MELEE_DAMAGE = 2;
-export const ARMY_RANGED_DAMAGE = 1.5;
-export const ARMY_MELEE_COOLDOWN = 1.8;
-export const ARMY_RANGED_COOLDOWN = 3;
+// Per-role now - see ARMY_LOADOUTS / armyLoadoutFor below.
 export const ARMY_CHASE_SPEED = 3.4;
+/**
+ * Focus fire. Soldiers score targets as health + distance x this, so the
+ * whole squad independently converges on the same wounded enemy instead of
+ * each man chipping a different one. It is the single change that makes them
+ * read as a unit rather than as five people who happen to be nearby.
+ */
+export const ARMY_FOCUS_DISTANCE_WEIGHT = 1.5;
 // A thrower that lets something walk into its face is a dead thrower. Inside
 // this radius it gives ground instead of standing still and reloading - the
 // same kiting the ranged ENEMIES have always done (GREY_MAN_MIN_DISTANCE).
 export const ARMY_RANGED_MIN_RANGE = 6.5;
 export const ARMY_KITE_SPEED = 4.6;
+
+/**
+ * Per-role combat numbers.
+ *
+ * The old flat values (16 HP, 2 damage on a 1.8s swing) meant a soldier
+ * needed five punches and nine seconds to put down the weakest enemy in the
+ * game, while taking 3-9 a hit himself. They read as victims in uniform. The
+ * army is supposed to be the one faction on the map that is genuinely good at
+ * this, so these are set so a trooper beats a basic enemy roughly two-for-one
+ * and a squad reliably clears a wave - while still losing to a Juggernaut on
+ * its own, because a squad should have to be a squad.
+ */
+export interface ArmyLoadout {
+  maxHealth: number;
+  meleeDamage: number;
+  meleeCooldown: number;
+  rangedDamage: number;
+  rangedCooldown: number;
+  chaseSpeed: number;
+}
+
+const ARMY_LOADOUTS: Record<string, ArmyLoadout> = {
+  // The line trooper. The yardstick everything else is set against.
+  armyMelee:    { maxHealth: 30, meleeDamage: 5, meleeCooldown: 1.05, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 4.4 },
+  // Rifleman: less health, hits from across the room, kites when crowded.
+  armyRanged:   { maxHealth: 26, meleeDamage: 3, meleeCooldown: 1.3, rangedDamage: 4, rangedCooldown: 1.6, chaseSpeed: 4 },
+  // Unarmed. Never uses any of this.
+  armyMedic:    { maxHealth: 12, meleeDamage: 0, meleeCooldown: 99, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 4 },
+  // Sergeant: the best individual fighter, and the reason the others are
+  // better than they look.
+  armySergeant: { maxHealth: 38, meleeDamage: 7, meleeCooldown: 0.95, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 4.4 },
+  // Shield trooper: a wall that walks. Low damage on purpose - his job is to
+  // be the one being hit.
+  armyShield:   { maxHealth: 62, meleeDamage: 4, meleeCooldown: 1.4, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 3 },
+  // Radioman: fights badly, wins wars.
+  armyRadio:    { maxHealth: 24, meleeDamage: 3, meleeCooldown: 1.4, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 4.4 },
+  bodyguard:    { maxHealth: 30, meleeDamage: 5, meleeCooldown: 1.05, rangedDamage: 0, rangedCooldown: 0, chaseSpeed: 4.4 }
+};
+
+const ARMY_DEFAULT_LOADOUT: ArmyLoadout = ARMY_LOADOUTS.armyMelee;
+
+export const armyLoadoutFor = (role?: CivilianRole): ArmyLoadout =>
+  (role && ARMY_LOADOUTS[role]) || ARMY_DEFAULT_LOADOUT;
+
+// ── Sergeant ──────────────────────────────────────────────────────────────
+// No special attack of his own beyond hitting hard. What he does is make the
+// four men around him fight like they mean it, and stop them wandering off
+// to find a medkit in the middle of a firefight. Kill him and the squad does
+// not break - it just gets noticeably worse, which is the point.
+export const ARMY_SERGEANT_AURA_RADIUS = 16;
+export const ARMY_SERGEANT_DAMAGE_BONUS = 0.4;
+export const ARMY_SERGEANT_ATTACK_SPEED_BONUS = 0.25;
+
+// ── Shield Trooper ────────────────────────────────────────────────────────
+// Enemies within this radius pick him over anyone else at up to ~2.2x the
+// distance, so he genuinely pulls fire off the riflemen behind him instead of
+// merely standing in front of them.
+export const ARMY_SHIELD_TAUNT_WEIGHT = 0.45;
+export const ARMY_SHIELD_TAUNT_RADIUS = 22;
+/** Projectiles mostly bounce off the shield; melee comes in unreduced. */
+export const ARMY_SHIELD_RANGED_RESIST = 0.35;
+
+// ── Radioman ──────────────────────────────────────────────────────────────
+// Calls in two more soldiers when the squad is outnumbered. Long cooldown,
+// and it only fires while he can actually see the fight - so the counter is
+// to kill him before the second wave of HIS side arrives.
+export const ARMY_RADIO_COOLDOWN = 26;
+export const ARMY_RADIO_SCAN_RADIUS = 22;
+export const ARMY_RADIO_REINFORCEMENTS = 2;
 
 // ── Medic Soldier ─────────────────────────────────────────────────────────
 // The one soldier who never throws a punch. He carries no weapon at all: he
@@ -383,6 +457,7 @@ export const ARMY_MEDIC_HEAL_AMOUNT = 4;
 export const ARMY_MEDIC_HEAL_COOLDOWN = 3.5;
 /** With nobody to treat, he tucks in behind the squad rather than wandering. */
 export const ARMY_MEDIC_ESCORT_DISTANCE = 6;
+// Superseded by ARMY_LOADOUTS below; kept only as the historic baseline.
 export const ARMY_MAX_HEALTH = 16;
 export const BODYGUARD_MAX_HEALTH = 15;
 export const BODYGUARD_FOLLOW_DISTANCE = 2.0;
@@ -650,10 +725,37 @@ export interface EnemyState {
 
 // The civilian FAMILY: plain civilians plus the armed neutral units that
 // share their plumbing (enemy targeting, status effects, hit-tests, bars).
-export type CivilianRole = 'civilian' | 'armyMelee' | 'armyRanged' | 'armyMedic' | 'bodyguard' | 'vip';
+export type CivilianRole =
+  | 'civilian'
+  | 'armyMelee'
+  | 'armyRanged'
+  | 'armyMedic'
+  | 'armySergeant'
+  | 'armyShield'
+  | 'armyRadio'
+  | 'bodyguard'
+  | 'vip';
+
+/** Everything the sandbox can field as a soldier, in squad order. */
+export type ArmyKind = 'melee' | 'ranged' | 'medic' | 'sergeant' | 'shield' | 'radio';
+
+export const ARMY_KIND_ROLE: Record<ArmyKind, CivilianRole> = {
+  melee: 'armyMelee',
+  ranged: 'armyRanged',
+  medic: 'armyMedic',
+  sergeant: 'armySergeant',
+  shield: 'armyShield',
+  radio: 'armyRadio'
+};
 
 export const isArmyRole = (role?: CivilianRole): boolean =>
-  role === 'armyMelee' || role === 'armyRanged' || role === 'armyMedic' || role === 'bodyguard';
+  role === 'armyMelee' ||
+  role === 'armyRanged' ||
+  role === 'armyMedic' ||
+  role === 'armySergeant' ||
+  role === 'armyShield' ||
+  role === 'armyRadio' ||
+  role === 'bodyguard';
 
 /** Army roles that will actually fight. The medic is the exception. */
 export const isFightingArmyRole = (role?: CivilianRole): boolean =>

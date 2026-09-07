@@ -122,10 +122,12 @@ import {
   STORM_MAN_WEATHER_CHANCE,
   MineState,
   ARMY_AGGRO_MS,
-  ARMY_MAX_HEALTH,
   ARMY_SIGHT_RADIUS,
-  ARMY_MEDIC_MAX_HEALTH,
+  ARMY_KIND_ROLE,
+  ARMY_SHIELD_RANGED_RESIST,
   ARMY_SPAWN_WITH_CIVILIAN_CHANCE,
+  ArmyKind,
+  armyLoadoutFor,
   BODYGUARD_MAX_HEALTH,
   ENEMY_GUARD_ATTACH_CHANCE,
   GUARD_ALERT_MS,
@@ -219,7 +221,8 @@ export interface SandboxActions {
   spawnDummy: () => void;
   spawnCivilian: () => void;
   spawnCivilianHelper: () => void;
-  spawnArmyMan: (kind: 'melee' | 'ranged' | 'medic') => void;
+  spawnArmyMan: (kind: ArmyKind) => void;
+  spawnArmySquad: () => void;
   spawnBodyguard: () => void;
   spawnVip: () => void;
   spawnEnemyBodyguard: () => void;
@@ -534,6 +537,9 @@ const MinimapDriver: React.FC<MinimapDriverProps> = ({ canvasRef, playerRef, ene
       // bodyguards steel grey.
       const color =
         c.role === 'armyMedic' ? '#e0f2e0' :
+        c.role === 'armySergeant' ? '#ffca28' :
+        c.role === 'armyShield' ? '#aed581' :
+        c.role === 'armyRadio' ? '#4dd0e1' :
         c.role === 'armyMelee' || c.role === 'armyRanged' ? '#8bc34a' :
         c.role === 'bodyguard' ? '#90a4ae' : '#f5f0e6';
       dot(c.position.x, c.position.z, color, 1.8);
@@ -1343,6 +1349,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // civilian or fellow armyman attacked - by an enemy OR by the player.
       spawnArmyMan: (kind) => {
         setCivilians((prev) => [...prev, makeArmyUnit(kind, generateEnemySpawnPosition())]);
+      },
+      // A whole fireteam in one click, in formation: the shield up front, the
+      // sergeant and troopers on the line, the rifleman off the shoulder, the
+      // medic and the radio behind. One soldier is a curiosity; six of these
+      // in the right shape is the faction actually working.
+      spawnArmySquad: () => {
+        const [ox, , oz] = generateEnemySpawnPosition();
+        const formation: [ArmyKind, number, number][] = [
+          ['shield', 0, 2.4],
+          ['sergeant', -1.4, 0.6],
+          ['melee', 1.4, 0.8],
+          ['melee', 2.6, -0.4],
+          ['ranged', -2.6, -1.4],
+          ['medic', 0.4, -2.6],
+          ['radio', -0.9, -3.2]
+        ];
+        setCivilians((prev) => [
+          ...prev,
+          ...formation.map(([kind, dx, dz]) => makeArmyUnit(kind, [ox + dx, 0, oz + dz]))
+        ]);
       },
       // VIP: a high-value civilian who never travels alone. Flees like any
       // civilian, but arrives with a permanent escort of three bodyguards
@@ -2325,17 +2351,31 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     );
   };
 
-  const makeArmyUnit = (kind: 'melee' | 'ranged' | 'medic', pos: [number, number, number]): CivilianState => ({
-    id: `civilian-${nextCivilianId.current++}`,
-    role: kind === 'melee' ? 'armyMelee' : kind === 'ranged' ? 'armyRanged' : 'armyMedic',
-    // The medic is softer than a rifleman - he is support, and he is meant to
-    // die quickly if you get to him.
-    health: kind === 'medic' ? ARMY_MEDIC_MAX_HEALTH : ARMY_MAX_HEALTH,
-    maxHealth: kind === 'medic' ? ARMY_MEDIC_MAX_HEALTH : ARMY_MAX_HEALTH,
-    position: new THREE.Vector3(...pos),
-    velocity: new THREE.Vector3(),
-    statusEffects: createStatusEffects()
-  });
+  const makeArmyUnit = (kind: ArmyKind, pos: [number, number, number]): CivilianState => {
+    const role = ARMY_KIND_ROLE[kind];
+    const loadout = armyLoadoutFor(role);
+    return {
+      id: `civilian-${nextCivilianId.current++}`,
+      role,
+      health: loadout.maxHealth,
+      maxHealth: loadout.maxHealth,
+      position: new THREE.Vector3(...pos),
+      velocity: new THREE.Vector3(),
+      statusEffects: createStatusEffects()
+    };
+  };
+
+  // Radioman's call. Two more soldiers, dropped in beside him rather than at
+  // a map edge, because the point is that they arrive in the fight he is
+  // losing - not that they set off walking toward it.
+  const handleCallReinforcements = (near: THREE.Vector3) => {
+    setCivilians((prev) => [
+      ...prev,
+      makeArmyUnit('melee', [near.x + 1.6, 0, near.z + 1.2]),
+      makeArmyUnit('ranged', [near.x - 1.6, 0, near.z - 1.2])
+    ]);
+    onSpawnCallout?.('RADIO: REINFORCEMENTS INBOUND');
+  };
 
   // Any armyman within sight of an attacked civilian/armyman turns hostile
   // toward the attacker - enemy AND player alike. Plain civilians who
@@ -2346,7 +2386,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         if (c.health <= 0) return c;
         const inSight = Math.hypot(c.position.x - aroundPos.x, c.position.z - aroundPos.z) <= ARMY_SIGHT_RADIUS;
         if (!inSight) return c;
-        if (c.role === 'armyMelee' || c.role === 'armyRanged' || c.role === 'armyMedic') {
+        if (c.role !== 'bodyguard' && c.role !== 'vip' && c.role !== 'civilian' && c.role !== undefined) {
           return {
             ...c,
             aggroPlayer: attacker.kind === 'player',
@@ -2459,7 +2499,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const handleAttackCivilian = (civilianId: string, payload: AttackPayload, now: number, attackerColor: string, attackerId?: string) => {
     const target = civilians.find((c) => c.id === civilianId);
     if (!target || target.health <= 0) return;
-    const damage = modifiers.oneHit && payload.damage > 0 ? target.health : roundDamage(payload.damage);
+    // The shield is a shield: bolts mostly come off it, fists do not. This is
+    // what makes standing him in front of the riflemen worth doing rather
+    // than just costing him his own health bar faster.
+    const shielded = target.role === 'armyShield' && payload.isProjectile;
+    const raw = shielded ? payload.damage * ARMY_SHIELD_RANGED_RESIST : payload.damage;
+    const damage = modifiers.oneHit && payload.damage > 0 ? target.health : roundDamage(raw);
     const hitPos = new THREE.Vector3(target.position.x, target.position.y + 1.3, target.position.z);
     spawnDamageNumber(hitPos, damage, attackerColor);
     if (damage > 0) spawnBlood(hitPos);
@@ -3436,6 +3481,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             medkits={medkits}
             onTakeMedkit={handleCivilianTakeMedkit}
             onMedicHeal={handleMedicHeal}
+            onCallReinforcements={handleCallReinforcements}
             health={c.health}
             maxHealth={c.maxHealth}
             position={c.position}
