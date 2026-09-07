@@ -567,9 +567,9 @@ ENEMIES.push(
     skinMaterial: 'sand',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Sand Pit', 'Tier 1 room enemy', '2 DMG melee'],
-    description: 'Sand Man is the body count of The Sand Pit: packed sand on two legs, walking out of an open bowl with nowhere to stand that is not exposed. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks. Open, bright, and full of things made of sand.',
+    description: 'Sand holds a shape for exactly as long as nothing hits it. Sand Man is what the Pit scrapes together between waves — ten points of health with no trick behind them, sent out in numbers because numbers are all he has.',
     traits: ['The Sand Pit', '10 HP', '2 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['If these are the only things left standing, the wave is basically over.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -577,9 +577,9 @@ ENEMIES.push(
     skinMaterial: 'sand',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Sand Pit', 'Tier 1 room enemy', '3 DMG melee', 'Armour plates'],
-    description: 'Sand Bulwark is what The Sand Pit puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of packed sand. The plating has to come off before the body under it starts losing real health. Open, bright, and full of things made of sand.',
+    description: 'Somebody packed the Pit floor into a slab and bolted plate over the front of it. The Bulwark is two-thirds walking speed and half again as wide as a Man, and until the plating comes off you are hitting cladding, not him.',
     traits: ['The Sand Pit', '20 HP', '3 DMG', 'Armour plates', '1.55x size'],
-    tips: ['Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Circle to his flank; the plate is on the front and he turns like a door.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -587,9 +587,9 @@ ENEMIES.push(
     skinMaterial: 'sand',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Sand Pit', 'Tier 1 room enemy', '2 DMG ranged', 'Slowing shots'],
-    description: 'Sand Slinger works The Sand Pit from the back of it, throwing 2 damage a shot while the melee walks you down. Its shots slow you down, and slow in here means caught. Open, bright, and full of things made of sand.',
+    description: 'He never closes. He stands at the far side of the bowl and throws grit that clogs your legs, and the slow is the actual attack — the two damage is just the delivery.',
     traits: ['The Sand Pit', '9 HP', 'Ranged only', 'Slowing shots'],
-    tips: ['Take the slow far from the melee, never inside it.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Nine health. If you can reach him at all, one exchange ends him.', 'Take the slow far from the melee, never inside it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -597,9 +597,9 @@ ENEMIES.push(
     skinMaterial: 'sand',
     hp: 26, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Sand Pit', 'Tier 1 room enemy', '4 DMG melee', 'Fast projectile'],
-    description: 'Dune Warden fields in The Sand Pit and nowhere else in the game - one per room, 26 HP, 4 damage a swing. Its shots travel fast enough that reacting to the throw is not a plan. Clear the rest of The Sand Pit before you commit to it.',
+    description: 'The Dune Warden is what The Sand Pit has instead of a boss, and he does not fight like the rest of his room. He throws hard and fast — speed-15 bolts on a 2.6 second cycle — and then walks in to finish what the bolts started.',
     traits: ['The Sand Pit', '26 HP', '4 DMG', 'Fast projectile'],
-    tips: ['Read the wind-up, not the projectile.', 'The fight of The Sand Pit; everything else in the wave is supporting cast.'],
+    tips: ['His shot is quick enough that reacting to the throw does not work. Watch the wind-up.', 'Read the wind-up, not the projectile.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -607,9 +607,9 @@ ENEMIES.push(
     skinMaterial: 'rock',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Rock Quarry', 'Tier 1 room enemy', '2 DMG melee'],
-    description: 'Rock Man is the body count of The Rock Quarry: quarried stone on two legs, walking out of a squared-off pit of cut stone. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks. Grey, hard, and it hits back.',
+    description: 'Cut stone, roughly man-shaped, wandering a quarry that has clearly been mined for something. No armour, no gimmick, ten health — the Quarry\'s way of finding out how hard you hit before it sends anything that matters.',
     traits: ['The Rock Quarry', '10 HP', '2 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['Use them to check your damage: if a Rock Man takes more than two swings, the room is going to hurt.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -617,9 +617,9 @@ ENEMIES.push(
     skinMaterial: 'rock',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Rock Quarry', 'Tier 1 room enemy', '3 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Rock Brute is what The Rock Quarry puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of quarried stone. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. Grey, hard, and it hits back.',
+    description: 'The Brute is quarry stone that was never cut down to size. Plated, immovable and completely unflinching — no hit you own makes him break stride, which means every exchange is one where he swings last.',
     traits: ['The Rock Quarry', '20 HP', '3 DMG', 'Stagger-immune', 'Armour plates', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Never trade with him. He does not stagger, so \'trading\' means you take the hit and he does not.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -627,9 +627,9 @@ ENEMIES.push(
     skinMaterial: 'rock',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Rock Quarry', 'Tier 1 room enemy', '2 DMG ranged', 'Stuns on hit'],
-    description: 'Rock Slinger works The Rock Quarry from the back of it, throwing 2 damage a shot while the melee walks you down. It stuns on connect, which in a full wave is the same as dying. Grey, hard, and it hits back.',
+    description: 'He prises pieces off the walls and throws them, and a rock to the head stuns. Three damage is survivable; the half-second on your back afterwards, in a room with a Brute in it, usually is not.',
     traits: ['The Rock Quarry', '9 HP', 'Ranged only', 'Stuns on hit'],
-    tips: ['Never let it land first while the rest are closing.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['The stun is what kills you, not the rock. Never eat one with anything else closing.', 'Never let it land first while the rest are closing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -637,9 +637,9 @@ ENEMIES.push(
     skinMaterial: 'rock',
     hp: 26, speed: '50% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Rock Quarry', 'Tier 1 room enemy', '4 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Rock Colossus fields in The Rock Quarry and nowhere else in the game - one per room, 26 HP, 4 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. Clear the rest of The Rock Quarry before you commit to it.',
+    description: 'The Colossus is over twice a Man\'s size and moves at half his speed, plated, unflinching, and native to nowhere but The Rock Quarry. He is less a fight than a piece of terrain that wants you dead — and terrain can be walked around.',
     traits: ['The Rock Quarry', '26 HP', '4 DMG', 'Stagger-immune', 'Armour plates', '2.1x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'The fight of The Rock Quarry; everything else in the wave is supporting cast.'],
+    tips: ['Half speed is the whole counterplay. Keep moving and he will never land anything.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 2.1, weightMod: 0
   },
   {
@@ -647,9 +647,9 @@ ENEMIES.push(
     skinMaterial: 'grass',
     hp: 10, speed: '125% (fast)', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Meadow', 'Tier 1 room enemy', '2 DMG melee'],
-    description: 'Grass Man is the body count of The Meadow: turf and root on two legs, walking out of the one room in the run that looks pleasant. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'The Meadow looks like the one room in the run that means you no harm. Grass Man is the correction: quicker than anything else at this tier, no armour, no ranged option, just a green thing that closes faster than you expect.',
     traits: ['The Meadow', '10 HP', '2 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['He is 25% faster than he looks. Do not back up expecting to outwalk him.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -657,9 +657,9 @@ ENEMIES.push(
     skinMaterial: 'grass',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Meadow', 'Tier 1 room enemy', '3 DMG melee', 'Pulls you in'],
-    description: 'Thicket is what The Meadow puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of turf and root. It hauls you off your feet and toward it.',
+    description: 'The Thicket does not chase. It waits, and when you drift near it puts out roots and hauls you in — a wall that reels you toward itself instead of walking to you.',
     traits: ['The Meadow', '20 HP', '3 DMG', 'Pulls you in', '1.55x size'],
-    tips: ['The moment the pull starts, break line of sight.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['The moment the pull starts, put something solid between you and it.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -667,9 +667,9 @@ ENEMIES.push(
     skinMaterial: 'grass',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Meadow', 'Tier 1 room enemy', '2 DMG ranged', 'Spawner'],
-    description: 'Seed Slinger works The Meadow from the back of it, throwing 2 damage a shot while the melee walks you down. It keeps producing more of the room while you deal with what is already out.',
+    description: 'The Seed Slinger\'s bolts are almost beside the point. What he is really doing is seeding the room: left alone long enough, he will have doubled the wave you are already fighting.',
     traits: ['The Meadow', '9 HP', 'Ranged only', 'Spawner'],
-    tips: ['The wave does not end until this does.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Kill him first. Everything else in the room is a fixed problem; he is a growing one.', 'The wave does not end until this does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -677,9 +677,9 @@ ENEMIES.push(
     skinMaterial: 'grass',
     hp: 26, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Meadow', 'Tier 1 room enemy', '4 DMG melee', 'Pulls you in'],
-    description: 'Bramble King fields in The Meadow and nowhere else in the game - one per room, 26 HP, 4 damage a swing. It hauls you off your feet and toward it. Clear the rest of The Meadow before you commit to it.',
+    description: 'The Bramble King\'s pull lasts twice as long as his Thicket\'s, and he wears the aura to advertise it. He drags you into the middle of the Meadow and lets the rest of the room arrive.',
     traits: ['The Meadow', '26 HP', '4 DMG', 'Pulls you in'],
-    tips: ['The moment the pull starts, break line of sight.', 'The fight of The Meadow; everything else in the wave is supporting cast.'],
+    tips: ['Fight him near the wall. Getting dragged toward open ground is how the whole room reaches you at once.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -687,9 +687,9 @@ ENEMIES.push(
     skinMaterial: 'dirt',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Dust Bowl', 'Tier 1 room enemy', '2 DMG melee'],
-    description: 'Dirt Man is the body count of The Dust Bowl: wet-packed earth on two legs, walking out of a filthy rectangle of churned ground. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Wet earth packed into a body and sent out to churn up the Bowl. Dirt Man has nothing on him at all — the room\'s contribution is filth and volume, and he is both.',
     traits: ['The Dust Bowl', '10 HP', '2 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['Nothing to play around. Just do not let the numbers close on you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -697,9 +697,9 @@ ENEMIES.push(
     skinMaterial: 'dirt',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Dust Bowl', 'Tier 1 room enemy', '3 DMG melee', 'Magnetic pull'],
-    description: 'Mudpacked is what The Dust Bowl puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of wet-packed earth. It drags you in, so the gap you think you are holding is not the gap you have.',
+    description: 'Mudpacked is a slow, heavy slab that pulls. You do not walk into his reach so much as get walked into it, which is a very different problem from a wall that merely stands there.',
     traits: ['The Dust Bowl', '20 HP', '3 DMG', 'Magnetic pull', '1.55x size'],
-    tips: ['Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Approach at a sprint or not at all — drifting near him means arriving in melee whether you meant to or not.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -707,9 +707,9 @@ ENEMIES.push(
     skinMaterial: 'dirt',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Dust Bowl', 'Tier 1 room enemy', '2 DMG ranged', 'Bomber'],
-    description: 'Clod Thrower works The Dust Bowl from the back of it, throwing 2 damage a shot while the melee walks you down. It lobs explosives rather than bolts, so the threat is where you will be, not where you are.',
+    description: 'The Clod Thrower lobs rather than shoots. What he throws lands and goes off, so the danger is not the thing in the air, it is the patch of ground you were about to stand on.',
     traits: ['The Dust Bowl', '9 HP', 'Ranged only', 'Bomber'],
-    tips: ['Keep moving through the arc - the blast is what hits you, not the throw.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Never stop moving in his arc. The blast is what hits you; the throw never does.', 'Keep moving through the arc - the blast is what hits you, not the throw.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -717,9 +717,9 @@ ENEMIES.push(
     skinMaterial: 'dirt',
     hp: 26, speed: '130% (fast)', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Dust Bowl', 'Tier 1 room enemy', '4 DMG melee', 'Phases out', 'Flanker'],
-    description: 'Burrower fields in The Dust Bowl and nowhere else in the game - one per room, 26 HP, 4 damage a swing. It goes intangible in bursts and swings pass straight through it, and it comes in fast and from behind rather than walking at you from the front. Clear the rest of The Dust Bowl before you commit to it.',
+    description: 'The Burrower goes into the Bowl\'s floor and comes out somewhere behind you, faster than a Man and intangible on the way through. The Dust Bowl\'s one exclusive is the reason you do not fight this room with your back to open ground.',
     traits: ['The Dust Bowl', '26 HP', '4 DMG', 'Phases out', 'Flanker'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'The fight of The Dust Bowl; everything else in the wave is supporting cast.'],
+    tips: ['Swinging at him mid-phase wastes the whole animation. Wait for him to be solid.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -727,9 +727,9 @@ ENEMIES.push(
     skinMaterial: 'water',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Shallows', 'Tier 1 room enemy', '2 DMG melee', 'Slowing shots'],
-    description: 'Tide Man is the body count of The Shallows: standing water on two legs, walking out of ankle-deep water that drags at every step. Its shots slow you down, and slow in here means caught. Ankle-deep and slippery underfoot.',
+    description: 'Everything in The Shallows is slower than it should be, and Tide Man is why — his touch drags at your legs like the water does. He is a ten-health enemy whose real damage is the two seconds afterwards.',
     traits: ['The Shallows', '10 HP', '2 DMG', 'Slowing shots'],
-    tips: ['Take the slow far from the melee, never inside it.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Take his hits away from the crowd. Slowed in the middle of a wave is how this room ends runs.', 'Take the slow far from the melee, never inside it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -737,9 +737,9 @@ ENEMIES.push(
     skinMaterial: 'water',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Shallows', 'Tier 1 room enemy', '3 DMG melee', 'Stagger-immune', 'Magnetic pull'],
-    description: 'Undertow is what The Shallows puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of standing water. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. Ankle-deep and slippery underfoot.',
+    description: 'The Undertow is the room\'s name made literal: a stagger-immune mass that pulls you toward it and does not flinch when you object. Water this shallow should not be able to do that.',
     traits: ['The Shallows', '20 HP', '3 DMG', 'Stagger-immune', 'Magnetic pull', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Fight him with your back to open floor, never to a wall — the pull plus a wall is a corner.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -747,9 +747,9 @@ ENEMIES.push(
     skinMaterial: 'water',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Shallows', 'Tier 1 room enemy', '2 DMG ranged', 'Slowing shots'],
-    description: 'Spray works The Shallows from the back of it, throwing 2 damage a shot while the melee walks you down. Its shots slow you down, and slow in here means caught. Ankle-deep and slippery underfoot.',
+    description: 'Spray hits you to half speed for three full seconds. That is the longest slow in the tier, and in a room where the Undertow is already reeling you in, three seconds is a very long time.',
     traits: ['The Shallows', '9 HP', 'Ranged only', 'Slowing shots'],
-    tips: ['Take the slow far from the melee, never inside it.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Kill Spray before you commit to the Undertow, or you will be walking to it at half pace.', 'Take the slow far from the melee, never inside it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -757,9 +757,9 @@ ENEMIES.push(
     skinMaterial: 'water',
     hp: 26, speed: 'Kiting', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Shallows', 'Tier 1 room enemy', '4 DMG melee', 'Holds its distance', 'Slowing shots'],
-    description: 'Riptide fields in The Shallows and nowhere else in the game - one per room, 26 HP, 4 damage a swing. It refuses melee entirely, backing off as fast as you close, and its shots slow you down, and slow in here means caught. Clear the rest of The Shallows before you commit to it.',
+    description: 'The Riptide never lets you reach him. He backs off as fast as you close, and every four seconds he cuts your speed to 40% — which is how something that refuses to fight kills you anyway.',
     traits: ['The Shallows', '26 HP', '4 DMG', 'Holds its distance', 'Slowing shots'],
-    tips: ['Corner it against a wall or you will chase it for the whole wave.', 'Take the slow far from the melee, never inside it.', 'The fight of The Shallows; everything else in the wave is supporting cast.'],
+    tips: ['Corner him against the wall. Chasing him across open water is exactly what he wants.', 'Corner it against a wall or you will chase it for the whole wave.', 'Take the slow far from the melee, never inside it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -767,9 +767,9 @@ ENEMIES.push(
     skinMaterial: 'snow',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Drift', 'Tier 1 room enemy', '2 DMG melee', 'Freezes on hit'],
-    description: 'Ice Man is the body count of The Drift: compacted snow on two legs, walking out of cold, white, and half-hidden by its own fog. Its hits freeze you where you stand. Cold enough that the fog does half the work.',
+    description: 'Ice Man does not do much damage. He freezes you where you stand, and The Drift\'s fog means you rarely see the second one coming while you are locked in place.',
     traits: ['The Drift', '10 HP', '2 DMG', 'Freezes on hit'],
-    tips: ['Being frozen beside it is how the wave ends - never fight it inside a crowd.', 'The baseline the rest of the room is measured against.'],
+    tips: ['One is a nuisance. Two, in fog, is the whole run — never fight him without knowing what else is out there.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -777,9 +777,9 @@ ENEMIES.push(
     skinMaterial: 'snow',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Drift', 'Tier 1 room enemy', '3 DMG melee', 'Stagger-immune', 'Splits x1'],
-    description: 'Snowpack is what The Drift puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of compacted snow. Nothing you land makes it flinch, so every exchange is one you finish second, and killing it splits it into smaller copies, 1 generation deep. Cold enough that the fog does half the work.',
+    description: 'Snowpack is a drift shovelled into a body: oversized, unflinching, and when it finally comes apart it comes apart into smaller ones that are still moving.',
     traits: ['The Drift', '20 HP', '3 DMG', 'Stagger-immune', 'Splits x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Break him with room around you. The pieces land exactly where you were standing.', 'It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -787,9 +787,9 @@ ENEMIES.push(
     skinMaterial: 'snow',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Drift', 'Tier 1 room enemy', '2 DMG ranged', 'Freezes on hit'],
-    description: 'Hailer works The Drift from the back of it, throwing 2 damage a shot while the melee walks you down. Its hits freeze you where you stand. Cold enough that the fog does half the work.',
+    description: 'The Hailer throws the freeze rather than punching it, which turns Ice Man\'s melee problem into a room-wide one. Nothing in The Drift needs to touch you to stop you moving.',
     traits: ['The Drift', '9 HP', 'Ranged only', 'Freezes on hit'],
-    tips: ['Being frozen beside it is how the wave ends - never fight it inside a crowd.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Break line of sight and close. You cannot dodge what you cannot see coming through the fog.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -797,9 +797,9 @@ ENEMIES.push(
     skinMaterial: 'snow',
     hp: 26, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Drift', 'Tier 1 room enemy', '4 DMG melee', 'Freezes on hit'],
-    description: 'Blizzard Warden fields in The Drift and nowhere else in the game - one per room, 26 HP, 4 damage a swing. Its hits freeze you where you stand. Clear the rest of The Drift before you commit to it.',
+    description: 'The Blizzard Warden freezes for twice as long as anything else in the room, and he does it in melee, at four damage a hit. Being locked up next to him is not a setback; it is the end of the fight.',
     traits: ['The Drift', '26 HP', '4 DMG', 'Freezes on hit'],
-    tips: ['Being frozen beside it is how the wave ends - never fight it inside a crowd.', 'The fight of The Drift; everything else in the wave is supporting cast.'],
+    tips: ['Never let him land the first one. Everything after it happens while you are watching.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -807,9 +807,9 @@ ENEMIES.push(
     skinMaterial: 'badlands',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Badlands', 'Tier 1 room enemy', '2 DMG melee'],
-    description: 'Badlands Man is the body count of The Badlands: layered red rock on two legs, walking out of long sightlines across a five-sided mesa. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Layered red rock walking a five-sided mesa with sightlines that go on forever. Badlands Man himself is unremarkable — his job is to make you stand still long enough for the things on the ridge to work.',
     traits: ['The Badlands', '10 HP', '2 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['Do not let him hold you in place. In this room, standing still is the mistake.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -817,9 +817,9 @@ ENEMIES.push(
     skinMaterial: 'badlands',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Badlands', 'Tier 1 room enemy', '3 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Mesa is what The Badlands puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of layered red rock. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health.',
+    description: 'A Mesa is a slab of strata that will not flinch and will not stop, and it is plated on top of that. Fighting it in the open, in the one room built entirely of open, is a choice.',
     traits: ['The Badlands', '20 HP', '3 DMG', 'Stagger-immune', 'Armour plates', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Put him between you and the snipers. He is cover that happens to be trying to kill you.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -827,9 +827,9 @@ ENEMIES.push(
     skinMaterial: 'badlands',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Badlands', 'Tier 1 room enemy', '2 DMG ranged', 'Sniper'],
-    description: 'Ridge Shot works The Badlands from the back of it, throwing 2 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot.',
+    description: 'The Ridge Shot fires from the far end of the mesa and leads his shots. He is the reason The Badlands has the longest sightlines in tier 1 — the room is built to let him work.',
     traits: ['The Badlands', '9 HP', 'Ranged only', 'Sniper'],
-    tips: ['Never hold a straight line while it has sight of you.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Never run in a straight line while he has an angle on you.', 'Never hold a straight line while it has sight of you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -837,9 +837,9 @@ ENEMIES.push(
     skinMaterial: 'badlands',
     hp: 26, speed: 'Kiting, 120%', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Badlands', 'Tier 1 room enemy', '4 DMG melee', 'Sniper', 'Holds its distance'],
-    description: 'Canyon Sniper fields in The Badlands and nowhere else in the game - one per room, 26 HP, 4 damage a swing. It fires from clear across the room and leads the shot, and it refuses melee entirely, backing off as fast as you close. Clear the rest of The Badlands before you commit to it.',
+    description: 'The Canyon Sniper refuses to be closed on. He is faster than a Man, he backs off as you advance, and he leads every shot across the length of the room — the only enemy at this tier that can lose you a fight from thirty units away.',
     traits: ['The Badlands', '26 HP', '4 DMG', 'Sniper', 'Holds its distance'],
-    tips: ['Never hold a straight line while it has sight of you.', 'Corner it against a wall or you will chase it for the whole wave.', 'The fight of The Badlands; everything else in the wave is supporting cast.'],
+    tips: ['He is faster than you and will not close. Corner him or accept the chip damage and clear the room first.', 'Never hold a straight line while it has sight of you.', 'Corner it against a wall or you will chase it for the whole wave.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -847,9 +847,9 @@ ENEMIES.push(
     skinMaterial: 'garden',
     hp: 10, speed: 'Normal', punchDmg: 2, kickDmg: 3,
     specials: ['Native to The Garden', 'Tier 1 room enemy', '2 DMG melee', 'Field medic'],
-    description: 'Garden Man is the body count of The Garden: hedge and flower on two legs, walking out of a walled garden somebody clearly cared about once. It heals the rest of the wave faster than you can chip them down.',
+    description: 'Somebody once cared about this place, and Garden Man is still doing the rounds. He fights badly and heals everything around him, which makes the weakest enemy in the room the one that decides how long it lasts.',
     traits: ['The Garden', '10 HP', '2 DMG', 'Field medic'],
-    tips: ['Kill it first. Nothing else in the room dies while it is up.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Kill him first. Nothing else here dies while he is on his feet.', 'Kill it first. Nothing else in the room dies while it is up.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -857,9 +857,9 @@ ENEMIES.push(
     skinMaterial: 'garden',
     hp: 20, speed: '62% (heavy)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Garden', 'Tier 1 room enemy', '3 DMG melee', 'Stagger-immune', 'Field medic'],
-    description: 'Hedge is what The Garden puts in your way - 1.55x the size of its Man, 62% of the speed, 20 HP of hedge and flower. Nothing you land makes it flinch, so every exchange is one you finish second, and it heals the rest of the wave faster than you can chip them down.',
+    description: 'The Hedge is a wall that also mends the things behind it. Twenty health of unflinching greenery, topping up the whole room while you try to get through it — the worst possible order to have to fight things in.',
     traits: ['The Garden', '20 HP', '3 DMG', 'Stagger-immune', 'Field medic', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Kill it first. Nothing else in the room dies while it is up.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['You cannot out-damage a healer through its own wall. Go around him or go through him fast.', 'It never flinches - go around it, never trade with it.', 'Kill it first. Nothing else in the room dies while it is up.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -867,9 +867,9 @@ ENEMIES.push(
     skinMaterial: 'garden',
     hp: 9, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Garden', 'Tier 1 room enemy', '2 DMG ranged', 'Pulls you in'],
-    description: 'Pollen works The Garden from the back of it, throwing 2 damage a shot while the melee walks you down. It hauls you off your feet and toward it.',
+    description: 'Pollen drifts. It pulls you a step at a time toward whatever else the Garden has growing, and its one damage a shot is a rounding error next to where it puts you.',
     traits: ['The Garden', '9 HP', 'Ranged only', 'Pulls you in'],
-    tips: ['The moment the pull starts, break line of sight.', '9 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Ignore the damage; watch where the pull is taking you.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -877,9 +877,9 @@ ENEMIES.push(
     skinMaterial: 'garden',
     hp: 26, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Only ever spawns in The Garden', 'Tier 1 room enemy', '4 DMG melee', 'Field medic', 'Spawner'],
-    description: 'Gardener fields in The Garden and nowhere else in the game - one per room, 26 HP, 4 damage a swing. It heals the rest of the wave faster than you can chip them down, and it keeps producing more of the room while you deal with what is already out. Clear the rest of The Garden before you commit to it.',
+    description: 'The Gardener both plants and tends: he keeps producing new bodies and heals the ones already out. He is the only enemy in tier 1 that can make a wave get bigger and healthier at the same time.',
     traits: ['The Garden', '26 HP', '4 DMG', 'Field medic', 'Spawner'],
-    tips: ['Kill it first. Nothing else in the room dies while it is up.', 'The wave does not end until this does.', 'The fight of The Garden; everything else in the wave is supporting cast.'],
+    tips: ['This wave does not end until he does. Nothing else you kill counts for much.', 'Kill it first. Nothing else in the room dies while it is up.', 'The wave does not end until this does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -887,9 +887,9 @@ ENEMIES.push(
     skinMaterial: 'magma',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Magma Floor', 'Tier 2 room enemy', '3 DMG melee', 'Burn damage'],
-    description: 'Magma Man is the body count of The Magma Floor: cooling magma on two legs, walking out of a pentagon with live lava still in the floor. It sets you burning, and the burn keeps ticking long after it is dead. The floor is, in several places, actually lava.',
+    description: 'Fifteen health of cooling magma with the heat still in it. Magma Man\'s punch is only three, but it leaves you burning, and the burn keeps working long after he has stopped.',
     traits: ['The Magma Floor', '15 HP', '3 DMG', 'Burn damage'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Kill him and walk. The burn does not care whether he is still alive.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -897,9 +897,9 @@ ENEMIES.push(
     skinMaterial: 'magma',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Magma Floor', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Burn damage'],
-    description: 'Slagheap is what The Magma Floor puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of cooling magma. Nothing you land makes it flinch, so every exchange is one you finish second, and it sets you burning, and the burn keeps ticking long after it is dead. The floor is, in several places, actually lava.',
+    description: 'A Slagheap is the runoff of the room piled up and set walking. It will not flinch, it will not hurry, and its burn ticks at twice the rate of anything else on the floor.',
     traits: ['The Magma Floor', '28 HP', '4 DMG', 'Stagger-immune', 'Burn damage', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Kill it and walk - the burn runs whether or not it does.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Every exchange with him costs you the hit and then the burn. Do not trade — go around.', 'It never flinches - go around it, never trade with it.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -907,9 +907,9 @@ ENEMIES.push(
     skinMaterial: 'magma',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Magma Floor', 'Tier 2 room enemy', '3 DMG ranged', 'Burn damage', 'Burning trail'],
-    description: 'Ember Thrower works The Magma Floor from the back of it, throwing 3 damage a shot while the melee walks you down. It sets you burning, and the burn keeps ticking long after it is dead, and the shot leaves a burning trail behind it. The floor is, in several places, actually lava.',
+    description: 'The Ember Thrower\'s bolts leave a burning line behind them. He is not really aiming at you; he is drawing lanes across the floor that you then have to not walk down.',
     traits: ['The Magma Floor', '13 HP', 'Ranged only', 'Burn damage', 'Burning trail'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Do not chase him along the path he just fired down — the trail is still there.', 'Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -917,9 +917,9 @@ ENEMIES.push(
     skinMaterial: 'magma',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Magma Floor', 'Tier 2 room enemy', '5 DMG melee', 'Burn damage', 'Burning trail'],
-    description: 'Magma Lord fields in The Magma Floor and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It sets you burning, and the burn keeps ticking long after it is dead, and the shot leaves a burning trail behind it. Clear the rest of The Magma Floor before you commit to it.',
+    description: 'The Magma Lord is nearly twice the size of the men around him and throws burning trails from range instead of closing. On a floor that is already partly lava, he is the enemy that decides which parts of it you are allowed to stand on.',
     traits: ['The Magma Floor', '38 HP', '5 DMG', 'Burn damage', 'Burning trail', '1.8x size'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.', 'The fight of The Magma Floor; everything else in the wave is supporting cast.'],
+    tips: ['He turns the floor into the fight. Clear a lane before you commit to him.', 'Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.'],
     bodyScale: 1.8, weightMod: 0
   },
   {
@@ -927,9 +927,9 @@ ENEMIES.push(
     skinMaterial: 'cave',
     hp: 15, speed: '110% (fast)', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Deep Cave', 'Tier 2 room enemy', '3 DMG melee'],
-    description: 'Cave Man is the body count of The Deep Cave: cave rock on two legs, walking out of a round chamber where sound arrives well before sight. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks. You can hear more than you can see.',
+    description: 'In a chamber where you hear things well before you see them, Cave Man is the one that gets to you first — a shade quicker than a Man and carrying nothing at all beyond that.',
     traits: ['The Deep Cave', '15 HP', '3 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['He is the sound you heard. Whatever made the other noise is still coming.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -937,9 +937,9 @@ ENEMIES.push(
     skinMaterial: 'cave',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Deep Cave', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Stalagmite is what The Deep Cave puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of cave rock. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. You can hear more than you can see.',
+    description: 'A Stalagmite that got up. Plated, unflinching, twenty-eight health, and it does not need to be fast in a round room where the walls are never far away.',
     traits: ['The Deep Cave', '28 HP', '4 DMG', 'Stagger-immune', 'Armour plates', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Break the plates first, and do it somewhere you have room to back out of.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -947,9 +947,9 @@ ENEMIES.push(
     skinMaterial: 'cave',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Deep Cave', 'Tier 2 room enemy', '3 DMG ranged', 'Stuns on hit'],
-    description: 'Rock Lobber works The Deep Cave from the back of it, throwing 3 damage a shot while the melee walks you down. It stuns on connect, which in a full wave is the same as dying. You can hear more than you can see.',
+    description: 'The Rock Lobber throws stone hard enough to put you down for a moment. In a room where you cannot see what else is closing, a stun is a much worse thing than three damage.',
     traits: ['The Deep Cave', '13 HP', 'Ranged only', 'Stuns on hit'],
-    tips: ['Never let it land first while the rest are closing.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Take his hits in the open, never in a corner where you cannot hear what arrives next.', 'Never let it land first while the rest are closing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -957,9 +957,9 @@ ENEMIES.push(
     skinMaterial: 'cave',
     hp: 38, speed: '135% (fast)', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Deep Cave', 'Tier 2 room enemy', '5 DMG melee', 'Phases out', 'Flanker'],
-    description: 'Cave Stalker fields in The Deep Cave and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It goes intangible in bursts and swings pass straight through it, and it comes in fast and from behind rather than walking at you from the front. Clear the rest of The Deep Cave before you commit to it.',
+    description: 'The Cave Stalker is faster than anything else in the tier, comes from behind, and passes through your swings when it suits him. The Deep Cave\'s exclusive is built entirely around the fact that you cannot see him coming.',
     traits: ['The Deep Cave', '38 HP', '5 DMG', 'Phases out', 'Flanker'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'The fight of The Deep Cave; everything else in the wave is supporting cast.'],
+    tips: ['Back to a wall, always. Everything he does depends on being behind you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -967,9 +967,9 @@ ENEMIES.push(
     skinMaterial: 'darkConcrete',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Long Corridor', 'Tier 2 room enemy', '3 DMG melee'],
-    description: 'Rebar Man is the body count of The Long Corridor: poured concrete and rebar on two legs, walking out of the beginner room, grown up and gone wrong. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'The beginner room grew up into a corridor and this is what it staffs itself with — poured concrete with the rebar still sticking out. Fifteen health, three damage, no ideas.',
     traits: ['The Long Corridor', '15 HP', '3 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['The corridor is narrow. Do not let two of them share a doorway with you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -977,9 +977,9 @@ ENEMIES.push(
     skinMaterial: 'darkConcrete',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Long Corridor', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Armour plates', 'Reflects projectiles'],
-    description: 'Pillar is what The Long Corridor puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of poured concrete and rebar. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. Projectiles come back off it, which makes ranged pressure actively worse than none.',
+    description: 'The Pillar holds the corridor shut. Plated and unflinching is the expected half; the surprise is that it throws your own projectiles back down the corridor at you.',
     traits: ['The Long Corridor', '28 HP', '4 DMG', 'Stagger-immune', 'Armour plates', 'Reflects projectiles', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Melee only. Your own shots come home.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Melee only. In a corridor, a reflected shot has nowhere to go except back into you.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -987,9 +987,9 @@ ENEMIES.push(
     skinMaterial: 'darkConcrete',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Long Corridor', 'Tier 2 room enemy', '3 DMG ranged', 'Sniper'],
-    description: 'Rivet Gun works The Long Corridor from the back of it, throwing 3 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot.',
+    description: 'A Rivet Gun at one end of a long straight room is close to the worst possible arrangement. He leads his shots and the corridor gives him the whole length of it.',
     traits: ['The Long Corridor', '13 HP', 'Ranged only', 'Sniper'],
-    tips: ['Never hold a straight line while it has sight of you.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Hug one wall and close. The middle of this room belongs to him.', 'Never hold a straight line while it has sight of you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -997,9 +997,9 @@ ENEMIES.push(
     skinMaterial: 'darkConcrete',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Long Corridor', 'Tier 2 room enemy', '5 DMG melee', 'Lays traps', 'Builds turrets'],
-    description: 'Foreman fields in The Long Corridor and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It leaves traps behind it, so ground you already cleared stops being cleared, and it builds turrets mid-fight and lets them do the shooting. Clear the rest of The Long Corridor before you commit to it.',
+    description: 'The Foreman does not fight so much as renovate. He builds turrets mid-fight and leaves traps in the ground behind him, so the corridor you already cleared stops being cleared the moment you turn around.',
     traits: ['The Long Corridor', '38 HP', '5 DMG', 'Lays traps', 'Builds turrets'],
-    tips: ['Track where it has been, not only where it is.', 'Kill the builder, not the buildings.', 'The fight of The Long Corridor; everything else in the wave is supporting cast.'],
+    tips: ['Kill the builder, not the buildings — and watch the floor where he has already been.', 'Track where it has been, not only where it is.', 'Kill the builder, not the buildings.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1007,9 +1007,9 @@ ENEMIES.push(
     skinMaterial: 'volcano',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Caldera', 'Tier 2 room enemy', '3 DMG melee', 'Burn damage'],
-    description: 'Cinder Man is the body count of The Caldera: black basalt on two legs, walking out of a caldera that is uphill and on fire in every direction. It sets you burning, and the burn keeps ticking long after it is dead.',
+    description: 'Cinder Man is basalt with a fire still in it, walking uphill in a room that is uphill in every direction. He burns on contact, and the Caldera gives you nowhere flat to back off to.',
     traits: ['The Caldera', '15 HP', '3 DMG', 'Burn damage'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Fight him downhill of nothing. This room has no safe direction to retreat in.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1017,9 +1017,9 @@ ENEMIES.push(
     skinMaterial: 'volcano',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Caldera', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Enrages when hurt'],
-    description: 'Basalt is what The Caldera puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of black basalt. Nothing you land makes it flinch, so every exchange is one you finish second, and hurt it and it speeds up, so its last third of health is its most dangerous.',
+    description: 'Basalt is a wall that gets angry. Hurt him and he speeds up instead of slowing down, which makes the last third of his twenty-eight health the part that actually threatens you.',
     traits: ['The Caldera', '28 HP', '4 DMG', 'Stagger-immune', 'Enrages when hurt', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Do not leave him on a sliver and turn away. That is when he is fastest.', 'It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1027,9 +1027,9 @@ ENEMIES.push(
     skinMaterial: 'volcano',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Caldera', 'Tier 2 room enemy', '3 DMG ranged', 'Bomber'],
-    description: 'Firebomb works The Caldera from the back of it, throwing 3 damage a shot while the melee walks you down. It lobs explosives rather than bolts, so the threat is where you will be, not where you are.',
+    description: 'The Firebomb throws explosives into a bowl-shaped room, which is exactly as bad an idea for you as it sounds. Everything he lobs rolls back toward the middle, where you probably are.',
     traits: ['The Caldera', '13 HP', 'Ranged only', 'Bomber'],
-    tips: ['Keep moving through the arc - the blast is what hits you, not the throw.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['The Caldera funnels his throws inward. Fight from the rim, not the floor.', 'Keep moving through the arc - the blast is what hits you, not the throw.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1037,9 +1037,9 @@ ENEMIES.push(
     skinMaterial: 'volcano',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Caldera', 'Tier 2 room enemy', '5 DMG melee', 'Bomber', 'Splits x1'],
-    description: 'Eruption fields in The Caldera and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It lobs explosives rather than bolts, so the threat is where you will be, not where you are, and killing it splits it into smaller copies, 1 generation deep. Clear the rest of The Caldera before you commit to it.',
+    description: 'Eruption is a bomber the size of a Bulwark, and killing him does not stop the bombing — he comes apart into smaller ones that carry on throwing.',
     traits: ['The Caldera', '38 HP', '5 DMG', 'Bomber', 'Splits x1', '1.4x size'],
-    tips: ['Keep moving through the arc - the blast is what hits you, not the throw.', 'Pop it with room around you, or the splits land where you were standing.', 'The fight of The Caldera; everything else in the wave is supporting cast.'],
+    tips: ['Pop him with distance and space. The pieces inherit the explosives.', 'Keep moving through the arc - the blast is what hits you, not the throw.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1.4, weightMod: 0
   },
   {
@@ -1047,9 +1047,9 @@ ENEMIES.push(
     skinMaterial: 'burntHouse',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Burnt House', 'Tier 2 room enemy', '3 DMG melee', 'Phases out'],
-    description: 'Ash Man is the body count of The Burnt House: ash and charred timber on two legs, walking out of the shell of a house that burned with something in it. It goes intangible in bursts and swings pass straight through it.',
+    description: 'Ash Man is what is left of somebody who was in here when it went up. He phases in and out of solidity, so half your swings pass through the space he is occupying without touching him.',
     traits: ['The Burnt House', '15 HP', '3 DMG', 'Phases out'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Wait out the phase. Swinging into it burns the whole animation for nothing.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1057,9 +1057,9 @@ ENEMIES.push(
     skinMaterial: 'burntHouse',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Burnt House', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Burn damage'],
-    description: 'Charred Frame is what The Burnt House puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of ash and charred timber. Nothing you land makes it flinch, so every exchange is one you finish second, and it sets you burning, and the burn keeps ticking long after it is dead.',
+    description: 'The Charred Frame is a load-bearing beam that never came down. Unflinching, four damage a swing, and every one of those swings sets you alight in a building already made of ash.',
     traits: ['The Burnt House', '28 HP', '4 DMG', 'Stagger-immune', 'Burn damage', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Kill it and walk - the burn runs whether or not it does.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['You cannot interrupt him and you cannot out-trade the burn. Break contact.', 'It never flinches - go around it, never trade with it.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1067,9 +1067,9 @@ ENEMIES.push(
     skinMaterial: 'burntHouse',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Burnt House', 'Tier 2 room enemy', '3 DMG ranged', 'Burn damage'],
-    description: 'Ember Spit works The Burnt House from the back of it, throwing 3 damage a shot while the melee walks you down. It sets you burning, and the burn keeps ticking long after it is dead.',
+    description: 'Ember Spit throws what the fire left over. Two damage that keeps going — and in a room this cramped there is not much floor that has not been fired across already.',
     traits: ['The Burnt House', '13 HP', 'Ranged only', 'Burn damage'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Keep to the parts of the room he has not been shooting into.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1077,9 +1077,9 @@ ENEMIES.push(
     skinMaterial: 'burntHouse',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Burnt House', 'Tier 2 room enemy', '5 DMG melee', 'Phases out', 'Lifesteal'],
-    description: 'Cinder Wraith fields in The Burnt House and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It goes intangible in bursts and swings pass straight through it, and every hit it lands heals it, so a slow fight is one you are quietly losing. Clear the rest of The Burnt House before you commit to it.',
+    description: 'The Cinder Wraith is barely there, drifts through your swings, and heals itself off every hit it lands. Something happened in this house, and this is the part of it that stayed.',
     traits: ['The Burnt House', '38 HP', '5 DMG', 'Phases out', 'Lifesteal'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Burst it down - let it feed and your progress resets.', 'The fight of The Burnt House; everything else in the wave is supporting cast.'],
+    tips: ['It feeds while you flail at the phase. Burst it in a solid window or leave it alone.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Burst it down - let it feed and your progress resets.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1087,9 +1087,9 @@ ENEMIES.push(
     skinMaterial: 'amethyst',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Amethyst Vault', 'Tier 2 room enemy', '3 DMG melee'],
-    description: 'Amethyst Man is the body count of The Amethyst Vault: amethyst crystal on two legs, walking out of a beautiful vault made almost entirely of edges. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Amethyst Man is a walking crystal in a vault made of edges. Nothing but fifteen health and three damage, and a surface that catches the light while you are trying to look past it.',
     traits: ['The Amethyst Vault', '15 HP', '3 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['Straightforward, in a room where nothing else is. Take the free kill.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1097,9 +1097,9 @@ ENEMIES.push(
     skinMaterial: 'amethyst',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Amethyst Vault', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Splits x1'],
-    description: 'Cluster is what The Amethyst Vault puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of amethyst crystal. Nothing you land makes it flinch, so every exchange is one you finish second, and killing it splits it into smaller copies, 1 generation deep.',
+    description: 'The Cluster is what happens when the vault grows too much in one place. Unflinching and oversized, and killing it just yields two smaller clusters that are still growing.',
     traits: ['The Amethyst Vault', '28 HP', '4 DMG', 'Stagger-immune', 'Splits x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Space first, damage second. Popping him in a corner surrounds you with the pieces.', 'It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1107,9 +1107,9 @@ ENEMIES.push(
     skinMaterial: 'amethyst',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Amethyst Vault', 'Tier 2 room enemy', '3 DMG ranged', 'Stuns on hit'],
-    description: 'Shard Slinger works The Amethyst Vault from the back of it, throwing 3 damage a shot while the melee walks you down. It stuns on connect, which in a full wave is the same as dying.',
+    description: 'The Shard Slinger throws crystal that stuns on contact. In a vault lined with Clusters, a stun is not three damage — it is however much damage the rest of the room can fit into the window.',
     traits: ['The Amethyst Vault', '13 HP', 'Ranged only', 'Stuns on hit'],
-    tips: ['Never let it land first while the rest are closing.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Never take a shard while a Cluster is in reach of you.', 'Never let it land first while the rest are closing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1117,9 +1117,9 @@ ENEMIES.push(
     skinMaterial: 'amethyst',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Amethyst Vault', 'Tier 2 room enemy', '5 DMG melee', 'Splits x2', 'Stuns on hit'],
-    description: 'Geode fields in The Amethyst Vault and nowhere else in the game - one per room, 38 HP, 5 damage a swing. Killing it splits it into smaller copies, 2 generations deep, and it stuns on connect, which in a full wave is the same as dying. Clear the rest of The Amethyst Vault before you commit to it.',
+    description: 'The Geode stuns in melee and splits two generations deep when it finally opens. It is the only enemy in the Vault that punishes you for killing it and for not killing it at the same time.',
     traits: ['The Amethyst Vault', '38 HP', '5 DMG', 'Splits x2', 'Stuns on hit'],
-    tips: ['Pop it with room around you, or the splits land where you were standing.', 'Never let it land first while the rest are closing.', 'The fight of The Amethyst Vault; everything else in the wave is supporting cast.'],
+    tips: ['Clear the floor before you crack him. Two generations is four bodies in the space you left.', 'Pop it with room around you, or the splits land where you were standing.', 'Never let it land first while the rest are closing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1127,9 +1127,9 @@ ENEMIES.push(
     skinMaterial: 'iron',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Iron Works', 'Tier 2 room enemy', '3 DMG melee', 'Magnetic pull'],
-    description: 'Iron Man is the body count of The Iron Works: wrought iron on two legs, walking out of a magnetised works where nothing metal stays where you put it. It drags you in, so the gap you think you are holding is not the gap you have. Everything is heavy and everything is magnetic.',
+    description: 'Everything in the Works is magnetic, Iron Man included. He drags you a step at a time, so the distance you think you are keeping is never the distance you actually have.',
     traits: ['The Iron Works', '15 HP', '3 DMG', 'Magnetic pull'],
-    tips: ['Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Judge his range by where you will be in a second, not where you are.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1137,9 +1137,9 @@ ENEMIES.push(
     skinMaterial: 'iron',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Iron Works', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Armour plates', 'Magnetic pull'],
-    description: 'Anvil is what The Iron Works puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of wrought iron. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. It drags you in, so the gap you think you are holding is not the gap you have. Everything is heavy and everything is magnetic.',
+    description: 'The Anvil is the room\'s thesis: plated, unflinching, magnetic, twenty-eight health. He does not need to chase you because the Works is doing the chasing for him.',
     traits: ['The Iron Works', '28 HP', '4 DMG', 'Stagger-immune', 'Armour plates', 'Magnetic pull', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Sprint in, break plate, sprint out. Walking anywhere near him is not a decision you get to make twice.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1147,9 +1147,9 @@ ENEMIES.push(
     skinMaterial: 'iron',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Iron Works', 'Tier 2 room enemy', '3 DMG ranged', 'Reflects projectiles'],
-    description: 'Bolt Thrower works The Iron Works from the back of it, throwing 3 damage a shot while the melee walks you down. Projectiles come back off it, which makes ranged pressure actively worse than none. Everything is heavy and everything is magnetic.',
+    description: 'The Bolt Thrower shoots, and he also throws your shots back. Between him and the magnetism, the Iron Works is a room that punishes every ranged instinct you have.',
     traits: ['The Iron Works', '13 HP', 'Ranged only', 'Reflects projectiles'],
-    tips: ['Melee only. Your own shots come home.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Do not answer him with projectiles. Yours come home.', 'Melee only. Your own shots come home.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1157,9 +1157,9 @@ ENEMIES.push(
     skinMaterial: 'iron',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Iron Works', 'Tier 2 room enemy', '5 DMG melee', 'Stagger-immune', 'Magnetic pull'],
-    description: 'Loadstone fields in The Iron Works and nowhere else in the game - one per room, 38 HP, 5 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. Clear the rest of The Iron Works before you commit to it.',
+    description: 'The Loadstone is half again the size of an Anvil, unflinching, and the strongest magnet in the room. He does not walk you down; he simply makes standing away from him impossible.',
     traits: ['The Iron Works', '38 HP', '5 DMG', 'Stagger-immune', 'Magnetic pull', '1.5x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The fight of The Iron Works; everything else in the wave is supporting cast.'],
+    tips: ['Fight him at a sprint, in the open, with everything else already dead.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.5, weightMod: 0
   },
   {
@@ -1167,9 +1167,9 @@ ENEMIES.push(
     skinMaterial: 'copper',
     hp: 15, speed: 'Normal', punchDmg: 3, kickDmg: 4,
     specials: ['Native to The Copper Mine', 'Tier 2 room enemy', '3 DMG melee'],
-    description: 'Copper Man is the body count of The Copper Mine: raw copper on two legs, walking out of a mine conductive enough that the Shocker Cubes treat it as home. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Copper Man is the only thing in the Mine that does not conduct anything interesting. Fifteen health, three damage, and a green patina — a normal fight in a room that is otherwise all current.',
     traits: ['The Copper Mine', '15 HP', '3 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['The safe one. Kill him last if anything else is arcing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1177,9 +1177,9 @@ ENEMIES.push(
     skinMaterial: 'copper',
     hp: 28, speed: '62% (heavy)', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Copper Mine', 'Tier 2 room enemy', '4 DMG melee', 'Stagger-immune', 'Reflects projectiles'],
-    description: 'Ingot is what The Copper Mine puts in your way - 1.55x the size of its Man, 62% of the speed, 28 HP of raw copper. Nothing you land makes it flinch, so every exchange is one you finish second, and projectiles come back off it, which makes ranged pressure actively worse than none.',
+    description: 'The Ingot is a cast block that will not stagger and returns whatever you shoot at it. In a conductive mine, he is the wall you have to solve with your hands.',
     traits: ['The Copper Mine', '28 HP', '4 DMG', 'Stagger-immune', 'Reflects projectiles', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Hands only. The Mine is a bad room to be firing into.', 'It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1187,9 +1187,9 @@ ENEMIES.push(
     skinMaterial: 'copper',
     hp: 13, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Copper Mine', 'Tier 2 room enemy', '3 DMG ranged', 'Chain lightning'],
-    description: 'Arc Thrower works The Copper Mine from the back of it, throwing 3 damage a shot while the melee walks you down. Its bolts arc onward into whatever else is near you.',
+    description: 'The Arc Thrower\'s bolts do not stop at you. They jump onward to whatever else is nearby — which, if you have helpers, means you are the middle of the circuit.',
     traits: ['The Copper Mine', '13 HP', 'Ranged only', 'Chain lightning'],
-    tips: ['Do not bunch up with your helpers while it is firing.', '13 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Spread out. Standing next to your own helpers is what makes his shots worth three hits.', 'Do not bunch up with your helpers while it is firing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1197,9 +1197,9 @@ ENEMIES.push(
     skinMaterial: 'copper',
     hp: 38, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Only ever spawns in The Copper Mine', 'Tier 2 room enemy', '5 DMG melee', 'Stuns on hit', 'Launches on hit'],
-    description: 'Live Wire fields in The Copper Mine and nowhere else in the game - one per room, 38 HP, 5 damage a swing. It stuns on connect, which in a full wave is the same as dying, and its melee launches you outright. Clear the rest of The Copper Mine before you commit to it.',
+    description: 'Live Wire hits in melee, stuns, and launches you outright. The Copper Mine\'s exclusive does not do much damage; it puts you on the floor somewhere else, and lets the room handle the rest.',
     traits: ['The Copper Mine', '38 HP', '5 DMG', 'Stuns on hit', 'Launches on hit'],
-    tips: ['Never let it land first while the rest are closing.', 'Never fight it beside a hazard.', 'The fight of The Copper Mine; everything else in the wave is supporting cast.'],
+    tips: ['Never fight him near a hazard. The launch decides where you land, not you.', 'Never let it land first while the rest are closing.', 'Never fight it beside a hazard.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1207,9 +1207,9 @@ ENEMIES.push(
     skinMaterial: 'gold',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Gold Hall', 'Tier 3 room enemy', '4 DMG melee'],
-    description: 'Gold Man is the body count of The Gold Hall: solid gold on two legs, walking out of a hall of wealth guarded by the wealth itself. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Twenty health of solid gold, guarding gold, in a hall made of gold. Gold Man has no trick at all — he is simply the point at which tier 3 stops being generous with the numbers.',
     traits: ['The Gold Hall', '20 HP', '4 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['Twice the health of a tier-1 Man for the same effort. Check your damage here before the Hall checks it for you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1217,9 +1217,9 @@ ENEMIES.push(
     skinMaterial: 'gold',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Gold Hall', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Revives x1'],
-    description: 'Bullion is what The Gold Hall puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of solid gold. Nothing you land makes it flinch, so every exchange is one you finish second, and it gets back up at full health once, untouchable while it does.',
+    description: 'Bullion does not stagger and does not stay down. Put him on the floor and he gets back up at full health, untouchable while he does it — thirty-six health that you have to earn twice.',
     traits: ['The Gold Hall', '36 HP', '5 DMG', 'Stagger-immune', 'Revives x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Budget two kills for him, and do not be mid-swing at something else when he stands back up.', 'It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1227,9 +1227,9 @@ ENEMIES.push(
     skinMaterial: 'gold',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Gold Hall', 'Tier 3 room enemy', '3 DMG ranged', 'Fast projectile'],
-    description: 'Coin Slinger works The Gold Hall from the back of it, throwing 3 damage a shot while the melee walks you down. Its shots travel fast enough that reacting to the throw is not a plan.',
+    description: 'The Coin Slinger throws currency at speed 16, fast enough that watching for the projectile is not a plan. In the Gold Hall even the ammunition is worth something.',
     traits: ['The Gold Hall', '18 HP', 'Ranged only', 'Fast projectile'],
-    tips: ['Read the wind-up, not the projectile.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Read the throw, not the coin. By the time you see it, it has arrived.', 'Read the wind-up, not the projectile.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1237,9 +1237,9 @@ ENEMIES.push(
     skinMaterial: 'gold',
     hp: 50, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Gold Hall', 'Tier 3 room enemy', '6 DMG melee', 'Stagger-immune', 'Revives x1'],
-    description: 'Gilded Champion fields in The Gold Hall and nowhere else in the game - one per room, 50 HP, 6 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and it gets back up at full health once, untouchable while it does. Clear the rest of The Gold Hall before you commit to it.',
+    description: 'The Gilded Champion is what the Hall is guarding and what is guarding the Hall. Oversized, unflinching, and he comes back once at full health — the wealth defending itself.',
     traits: ['The Gold Hall', '50 HP', '6 DMG', 'Stagger-immune', 'Revives x1', '1.4x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.', 'The fight of The Gold Hall; everything else in the wave is supporting cast.'],
+    tips: ['Save your health for the second half. The first kill is only the first kill.', 'It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1.4, weightMod: 0
   },
   {
@@ -1247,9 +1247,9 @@ ENEMIES.push(
     skinMaterial: 'rainbow',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Prism', 'Tier 3 room enemy', '4 DMG melee', 'Stuns on hit'],
-    description: 'Prism Man is the body count of The Prism: refracted colour on two legs, walking out of every colour in the game at once, all of it hostile. It stuns on connect, which in a full wave is the same as dying.',
+    description: 'Prism Man stuns on contact, which in a room where every colour of enemy turns up at once is the most dangerous thing a twenty-health body can do.',
     traits: ['The Prism', '20 HP', '4 DMG', 'Stuns on hit'],
-    tips: ['Never let it land first while the rest are closing.', 'The baseline the rest of the room is measured against.'],
+    tips: ['The stun is his whole contribution. Do not let him open on you in a crowd.', 'Never let it land first while the rest are closing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1257,9 +1257,9 @@ ENEMIES.push(
     skinMaterial: 'rainbow',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Prism', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Reflects projectiles'],
-    description: 'Spectrum Wall is what The Prism puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of refracted colour. Nothing you land makes it flinch, so every exchange is one you finish second, and projectiles come back off it, which makes ranged pressure actively worse than none.',
+    description: 'The Spectrum Wall refracts. It will not flinch and it returns your shots down whichever lane you sent them, which in a room this busy usually means into something you did not intend to hit.',
     traits: ['The Prism', '36 HP', '5 DMG', 'Stagger-immune', 'Reflects projectiles', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Melee it. In The Prism your own projectile is somebody else\'s opportunity.', 'It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1267,9 +1267,9 @@ ENEMIES.push(
     skinMaterial: 'rainbow',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Prism', 'Tier 3 room enemy', '3 DMG ranged', 'Knockback shots', 'Growing projectile'],
-    description: 'Refractor works The Prism from the back of it, throwing 3 damage a shot while the melee walks you down. Its shots knock you back into whatever happens to be behind you, and the projectile grows the further it flies, so distance makes it harder to slip, not easier.',
+    description: 'The Refractor\'s arcs get bigger the further they travel and knock you backwards on contact. Distance does not make his shots easier to slip — it makes them wider.',
     traits: ['The Prism', '18 HP', 'Ranged only', 'Knockback shots', 'Growing projectile'],
-    tips: ['Mind what is behind you; the knockback places you, the hit does not.', 'Close the distance - the shot is smallest at the muzzle.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Close the gap. The shot is smallest at the muzzle and worst at the far wall.', 'Mind what is behind you; the knockback places you, the hit does not.', 'Close the distance - the shot is smallest at the muzzle.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1277,9 +1277,9 @@ ENEMIES.push(
     skinMaterial: 'rainbow',
     hp: 50, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Prism', 'Tier 3 room enemy', '6 DMG melee', 'Knockback shots', 'Growing projectile'],
-    description: 'Spectrum fields in The Prism and nowhere else in the game - one per room, 50 HP, 6 damage a swing. Its shots knock you back into whatever happens to be behind you, and the projectile grows the further it flies, so distance makes it harder to slip, not easier. Clear the rest of The Prism before you commit to it.',
+    description: 'Spectrum carries two attacks, which almost nothing else in the game does: a growing arc that knocks you back at range and a five-damage melee for when the knockback has done its job.',
     traits: ['The Prism', '50 HP', '6 DMG', 'Knockback shots', 'Growing projectile'],
-    tips: ['Mind what is behind you; the knockback places you, the hit does not.', 'Close the distance - the shot is smallest at the muzzle.', 'The fight of The Prism; everything else in the wave is supporting cast.'],
+    tips: ['The knockback sets up the melee. Do not let him choose the distance.', 'Mind what is behind you; the knockback places you, the hit does not.', 'Close the distance - the shot is smallest at the muzzle.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1287,9 +1287,9 @@ ENEMIES.push(
     skinMaterial: 'blue',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Cobalt Deep', 'Tier 3 room enemy', '4 DMG melee'],
-    description: 'Cobalt Man is the body count of The Cobalt Deep: cobalt ore on two legs, walking out of cold blue light and colder company. No tricks: it walks in and it swings, and it is here to make room for the things that do have tricks.',
+    description: 'Cobalt Man is plain ore in cold light. Twenty health, four damage, no ability at all — the Deep\'s way of reminding you that a room can be unfriendly without being complicated.',
     traits: ['The Cobalt Deep', '20 HP', '4 DMG', 'Room-material skin'],
-    tips: ['The baseline the rest of the room is measured against.'],
+    tips: ['The one uncomplicated fight in this room. Take it while you can.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1297,9 +1297,9 @@ ENEMIES.push(
     skinMaterial: 'blue',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Cobalt Deep', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Reflects projectiles'],
-    description: 'Cobalt Wall is what The Cobalt Deep puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of cobalt ore. Nothing you land makes it flinch, so every exchange is one you finish second, and projectiles come back off it, which makes ranged pressure actively worse than none.',
+    description: 'The Cobalt Wall is thirty-six health that neither flinches nor absorbs. Fire into it and the bolt comes back down the same cold blue line it went out on.',
     traits: ['The Cobalt Deep', '36 HP', '5 DMG', 'Stagger-immune', 'Reflects projectiles', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Hands, not bolts. This room hands everything back.', 'It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1307,9 +1307,9 @@ ENEMIES.push(
     skinMaterial: 'blue',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Cobalt Deep', 'Tier 3 room enemy', '3 DMG ranged', 'Chain lightning'],
-    description: 'Bolt Caster works The Cobalt Deep from the back of it, throwing 3 damage a shot while the melee walks you down. Its bolts arc onward into whatever else is near you.',
+    description: 'The Bolt Caster\'s shots arc onward to whatever is behind you. In a round room with nowhere to break line of sight, there is usually something behind you.',
     traits: ['The Cobalt Deep', '18 HP', 'Ranged only', 'Chain lightning'],
-    tips: ['Do not bunch up with your helpers while it is firing.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Fight him with open floor at your back, not helpers.', 'Do not bunch up with your helpers while it is firing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1317,9 +1317,9 @@ ENEMIES.push(
     skinMaterial: 'blue',
     hp: 50, speed: 'Kiting', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Cobalt Deep', 'Tier 3 room enemy', '6 DMG melee', 'Holds its distance', 'Chain lightning', 'Fast projectile'],
-    description: 'Deep Cobalt fields in The Cobalt Deep and nowhere else in the game - one per room, 50 HP, 6 damage a swing. It refuses melee entirely, backing off as fast as you close, and its bolts arc onward into whatever else is near you. Its shots travel fast enough that reacting to the throw is not a plan. Clear the rest of The Cobalt Deep before you commit to it.',
+    description: 'Deep Cobalt refuses melee entirely and fires speed-17 chaining bolts while backing away. Fifty health that never lets you spend a swing on it — the Cobalt Deep\'s exclusive is a chase you are not supposed to win by chasing.',
     traits: ['The Cobalt Deep', '50 HP', '6 DMG', 'Holds its distance', 'Chain lightning', 'Fast projectile'],
-    tips: ['Corner it against a wall or you will chase it for the whole wave.', 'Do not bunch up with your helpers while it is firing.', 'Read the wind-up, not the projectile.'],
+    tips: ['Cut him off against the wall. Following him around the room is the losing version of this fight.', 'Corner it against a wall or you will chase it for the whole wave.', 'Do not bunch up with your helpers while it is firing.', 'Read the wind-up, not the projectile.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1327,9 +1327,9 @@ ENEMIES.push(
     skinMaterial: 'blood',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Blood Room', 'Tier 3 room enemy', '4 DMG melee', 'Lifesteal'],
-    description: 'Blood Man is the body count of The Blood Room: clotted blood on two legs, walking out of the one room the vampires are comfortable in. Every hit it lands heals it, so a slow fight is one you are quietly losing.',
+    description: 'Blood Man heals off everything he lands, which turns a twenty-health enemy into an endurance problem. In a room where the vampires are at home and you are not, a long fight is a fight you are losing.',
     traits: ['The Blood Room', '20 HP', '4 DMG', 'Lifesteal'],
-    tips: ['Burst it down - let it feed and your progress resets.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Burst him. Every second you spend not killing him, he is undoing.', 'Burst it down - let it feed and your progress resets.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1337,9 +1337,9 @@ ENEMIES.push(
     skinMaterial: 'blood',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Blood Room', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Lifesteal'],
-    description: 'Clot is what The Blood Room puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of clotted blood. Nothing you land makes it flinch, so every exchange is one you finish second, and every hit it lands heals it, so a slow fight is one you are quietly losing.',
+    description: 'The Clot does not flinch and drinks. Thirty-six health, five damage a swing, and a health bar that goes up whenever yours goes down.',
     traits: ['The Blood Room', '36 HP', '5 DMG', 'Stagger-immune', 'Lifesteal', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Burst it down - let it feed and your progress resets.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['You cannot grind him. If you cannot burst him, break contact and come back with more damage.', 'It never flinches - go around it, never trade with it.', 'Burst it down - let it feed and your progress resets.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1347,9 +1347,9 @@ ENEMIES.push(
     skinMaterial: 'blood',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Blood Room', 'Tier 3 room enemy', '3 DMG ranged', 'Lifesteal'],
-    description: 'Bleeder works The Blood Room from the back of it, throwing 3 damage a shot while the melee walks you down. Every hit it lands heals it, so a slow fight is one you are quietly losing.',
+    description: 'The Bleeder feeds from range. He never has to be near you to top himself up, which makes him the only enemy in the room you cannot starve by staying away.',
     traits: ['The Blood Room', '18 HP', 'Ranged only', 'Lifesteal'],
-    tips: ['Burst it down - let it feed and your progress resets.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['He heals from across the room. Distance does not solve this one.', 'Burst it down - let it feed and your progress resets.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1357,9 +1357,9 @@ ENEMIES.push(
     skinMaterial: 'blood',
     hp: 50, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Blood Room', 'Tier 3 room enemy', '6 DMG melee', 'Lifesteal', 'Enrages when hurt'],
-    description: 'Exsanguinator fields in The Blood Room and nowhere else in the game - one per room, 50 HP, 6 damage a swing. Every hit it lands heals it, so a slow fight is one you are quietly losing, and hurt it and it speeds up, so its last third of health is its most dangerous. Clear the rest of The Blood Room before you commit to it.',
+    description: 'The Exsanguinator gets faster as he gets hurt and heals off every hit he lands — two mechanics that work directly against each other in your favour and directly with each other in his. Fifty health, and the last third of it is the worst.',
     traits: ['The Blood Room', '50 HP', '6 DMG', 'Lifesteal', 'Enrages when hurt', '1.4x size'],
-    tips: ['Burst it down - let it feed and your progress resets.', 'Do not leave it on a sliver - commit and finish it.', 'The fight of The Blood Room; everything else in the wave is supporting cast.'],
+    tips: ['There is no safe way to leave him half-dead. Commit or do not start.', 'Burst it down - let it feed and your progress resets.', 'Do not leave it on a sliver - commit and finish it.'],
     bodyScale: 1.4, weightMod: 0
   },
   {
@@ -1367,9 +1367,9 @@ ENEMIES.push(
     skinMaterial: 'darkOcean',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Dark Ocean', 'Tier 3 room enemy', '4 DMG melee', 'Phases out'],
-    description: 'Abyss Man is the body count of The Dark Ocean: black water on two legs, walking out of the Shallows drowned, where nothing is visible until it is on you. It goes intangible in bursts and swings pass straight through it.',
+    description: 'The Shallows drowned, and Abyss Man came up out of it. Barely visible, intermittently intangible, and you will usually learn where he is by being hit.',
     traits: ['The Dark Ocean', '20 HP', '4 DMG', 'Phases out'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Track him by his shadow. You will not pick him out of this water by looking.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1377,9 +1377,9 @@ ENEMIES.push(
     skinMaterial: 'darkOcean',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Dark Ocean', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Magnetic pull'],
-    description: 'Trench is what The Dark Ocean puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of black water. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have.',
+    description: 'The Trench is thirty-six health of black water that does not flinch and pulls you toward itself, in a room where you cannot see the thing that is dragging you.',
     traits: ['The Dark Ocean', '36 HP', '5 DMG', 'Stagger-immune', 'Magnetic pull', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Feel the drift, not the model. If you are moving and did not press anything, he has you.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1387,9 +1387,9 @@ ENEMIES.push(
     skinMaterial: 'darkOcean',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Dark Ocean', 'Tier 3 room enemy', '3 DMG ranged', 'Slowing shots'],
-    description: 'Deep Caster works The Dark Ocean from the back of it, throwing 3 damage a shot while the melee walks you down. Its shots slow you down, and slow in here means caught.',
+    description: 'The Deep Caster slows you to 45% for three and a half seconds — the longest, hardest slow in the game — from a range at which you cannot see him fire.',
     traits: ['The Dark Ocean', '18 HP', 'Ranged only', 'Slowing shots'],
-    tips: ['Take the slow far from the melee, never inside it.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['The one thing you must not do here is be slow near the Trench. Kill this first.', 'Take the slow far from the melee, never inside it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1397,9 +1397,9 @@ ENEMIES.push(
     skinMaterial: 'darkOcean',
     hp: 50, speed: '60% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Dark Ocean', 'Tier 3 room enemy', '6 DMG melee', 'Stagger-immune', 'Magnetic pull'],
-    description: 'Leviathan fields in The Dark Ocean and nowhere else in the game - one per room, 50 HP, 6 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. Clear the rest of The Dark Ocean before you commit to it.',
+    description: 'The Leviathan is more than twice a Man\'s size, moves at 60% speed, does not flinch, and drags. In a room where visibility is measured in a few units, the first thing you learn about him is how much of the screen he takes up.',
     traits: ['The Dark Ocean', '50 HP', '6 DMG', 'Stagger-immune', 'Magnetic pull', '2.2x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The fight of The Dark Ocean; everything else in the wave is supporting cast.'],
+    tips: ['He is slow. That is your entire advantage and it is enough — do not squander it standing still.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 2.2, weightMod: 0
   },
   {
@@ -1407,9 +1407,9 @@ ENEMIES.push(
     skinMaterial: 'night',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Long Night', 'Tier 3 room enemy', '4 DMG melee', 'Flanker'],
-    description: 'Night Man is the body count of The Long Night: night itself on two legs, walking out of permanent dark that everything living here prefers. It comes in fast and from behind rather than walking at you from the front.',
+    description: 'Night Man does not walk in from the front. Permanent dark is his room and his tactic, and twenty health is plenty when you never see the approach.',
     traits: ['The Long Night', '20 HP', '4 DMG', 'Flanker'],
-    tips: ['Fight with your back to a wall.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Back to a wall. This whole room is built around what is behind you.', 'Fight with your back to a wall.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1417,9 +1417,9 @@ ENEMIES.push(
     skinMaterial: 'night',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Long Night', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Phases out'],
-    description: 'Nightwall is what The Long Night puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of night itself. Nothing you land makes it flinch, so every exchange is one you finish second, and it goes intangible in bursts and swings pass straight through it.',
+    description: 'Nightwall is thirty-six unflinching health that also stops being solid at intervals. You can neither stagger it nor reliably hit it, which is an unusually annoying combination for something that big.',
     traits: ['The Long Night', '36 HP', '5 DMG', 'Stagger-immune', 'Phases out', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Only swing in his solid windows. Everything else is a wasted animation.', 'It never flinches - go around it, never trade with it.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1427,9 +1427,9 @@ ENEMIES.push(
     skinMaterial: 'night',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Long Night', 'Tier 3 room enemy', '3 DMG ranged', 'Sniper'],
-    description: 'Star Caster works The Long Night from the back of it, throwing 3 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot.',
+    description: 'The Star Caster fires the length of The Long Night and leads the shot. You will see the bolt before you see him, and usually only just.',
     traits: ['The Long Night', '18 HP', 'Ranged only', 'Sniper'],
-    tips: ['Never hold a straight line while it has sight of you.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Never hold a straight line. He is aiming where you are going.', 'Never hold a straight line while it has sight of you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1437,9 +1437,9 @@ ENEMIES.push(
     skinMaterial: 'night',
     hp: 50, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Long Night', 'Tier 3 room enemy', '6 DMG melee', 'Flanker', 'Goes invisible'],
-    description: 'Nightfall fields in The Long Night and nowhere else in the game - one per room, 50 HP, 6 damage a swing. It comes in fast and from behind rather than walking at you from the front, and it vanishes outright and reappears somewhere you are not looking. Clear the rest of The Long Night before you commit to it.',
+    description: 'Nightfall disappears entirely — not dimmed, gone — and comes back next to you, having flanked in the meantime. Fifty health and nine tenths of the fight spent not knowing where he is.',
     traits: ['The Long Night', '50 HP', '6 DMG', 'Flanker', 'Goes invisible'],
-    tips: ['Fight with your back to a wall.', 'When it disappears, move immediately.', 'The fight of The Long Night; everything else in the wave is supporting cast.'],
+    tips: ['When he vanishes, move immediately. Standing still is agreeing to where he reappears.', 'Fight with your back to a wall.', 'When it disappears, move immediately.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1447,9 +1447,9 @@ ENEMIES.push(
     skinMaterial: 'galaxy',
     hp: 20, speed: 'Normal', punchDmg: 4, kickDmg: 5,
     specials: ['Native to The Galaxy', 'Tier 3 room enemy', '4 DMG melee', 'Pulls you in'],
-    description: 'Galaxy Man is the body count of The Galaxy: starfield and dust on two legs, walking out of a five-sided space you stop being sure is a room. It hauls you off your feet and toward it. You are no longer sure this is a room.',
+    description: 'You stop being sure this is a room, and Galaxy Man is the first thing that treats it like open space. He pulls you off your feet from range and lets the drift do the rest.',
     traits: ['The Galaxy', '20 HP', '4 DMG', 'Pulls you in'],
-    tips: ['The moment the pull starts, break line of sight.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Break line of sight the moment the pull starts.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1457,9 +1457,9 @@ ENEMIES.push(
     skinMaterial: 'galaxy',
     hp: 36, speed: '62% (heavy)', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Galaxy', 'Tier 3 room enemy', '5 DMG melee', 'Stagger-immune', 'Magnetic pull'],
-    description: 'Nebula is what The Galaxy puts in your way - 1.55x the size of its Man, 62% of the speed, 36 HP of starfield and dust. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. You are no longer sure this is a room.',
+    description: 'The Nebula is a half-transparent mass that will not flinch and quietly drags everything toward it. It is hard to say where it ends, which matters when its reach is the question.',
     traits: ['The Galaxy', '36 HP', '5 DMG', 'Stagger-immune', 'Magnetic pull', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Give it more room than it looks like it needs. You cannot see its edges.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1467,9 +1467,9 @@ ENEMIES.push(
     skinMaterial: 'galaxy',
     hp: 18, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Galaxy', 'Tier 3 room enemy', '3 DMG ranged', 'Burning trail', 'Fast projectile'],
-    description: 'Comet works The Galaxy from the back of it, throwing 3 damage a shot while the melee walks you down. The shot leaves a burning trail behind it, and its shots travel fast enough that reacting to the throw is not a plan. You are no longer sure this is a room.',
+    description: 'Comet fires at speed 18 with a trail behind it — the fastest projectile in this tier, in a five-sided room with long clean lines for it to travel down.',
     traits: ['The Galaxy', '18 HP', 'Ranged only', 'Burning trail', 'Fast projectile'],
-    tips: ['The trail lingers; do not chase it down the lane it fired along.', 'Read the wind-up, not the projectile.', '18 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Do not fight him down a long face of the pentagon. Get to an angle.', 'The trail lingers; do not chase it down the lane it fired along.', 'Read the wind-up, not the projectile.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1477,9 +1477,9 @@ ENEMIES.push(
     skinMaterial: 'galaxy',
     hp: 50, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Only ever spawns in The Galaxy', 'Tier 3 room enemy', '6 DMG melee', 'Magnetic pull', 'Pulls you in'],
-    description: 'Singularity fields in The Galaxy and nowhere else in the game - one per room, 50 HP, 6 damage a swing. It drags you in, so the gap you think you are holding is not the gap you have, and it hauls you off your feet and toward it. Clear the rest of The Galaxy before you commit to it.',
+    description: 'The Singularity pulls with telekinesis for twice the usual duration, drags magnetically on top of that, and is over half again a Man\'s size. Fifty health of a room deciding where you stand.',
     traits: ['The Galaxy', '50 HP', '6 DMG', 'Magnetic pull', 'Pulls you in', '1.6x size'],
-    tips: ['Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The moment the pull starts, break line of sight.', 'The fight of The Galaxy; everything else in the wave is supporting cast.'],
+    tips: ['Nothing you do about positioning matters while he is up. Kill him, then reposition.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1.6, weightMod: 0
   },
   {
@@ -1487,9 +1487,9 @@ ENEMIES.push(
     skinMaterial: 'diamond',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Diamond Core', 'Tier 4 room enemy', '5 DMG melee', 'Stagger-immune'],
-    description: 'Diamond Man is the body count of The Diamond Core: flawless diamond on two legs, walking out of the hardest room of the run, in every sense of the word. Nothing you land makes it flinch, so every exchange is one you finish second.',
+    description: 'Diamond Man is the first rank-and-file enemy in the game that cannot be staggered. Twenty-seven health, five damage, and nothing you land interrupts him — the Core\'s basic soldier is what other rooms field as a Bulwark.',
     traits: ['The Diamond Core', '27 HP', '5 DMG', 'Stagger-immune'],
-    tips: ['It never flinches - go around it, never trade with it.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Treat every ordinary body in this room as unflinching. It is.', 'It never flinches - go around it, never trade with it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1497,9 +1497,9 @@ ENEMIES.push(
     skinMaterial: 'diamond',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Diamond Core', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Revives x1'],
-    description: 'Facet is what The Diamond Core puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of flawless diamond. Nothing you land makes it flinch, so every exchange is one you finish second, and it gets back up at full health once, untouchable while it does.',
+    description: 'A Facet does not flinch and does not stay dead. Forty-six health, one full-health revival, and an invincible window while it gets back up — the hardest room in the run, being hard about it.',
     traits: ['The Diamond Core', '46 HP', '6 DMG', 'Stagger-immune', 'Revives x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Two kills, and the get-up cannot be punished. Do not waste stamina on it.', 'It never flinches - go around it, never trade with it.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1507,9 +1507,9 @@ ENEMIES.push(
     skinMaterial: 'diamond',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Diamond Core', 'Tier 4 room enemy', '4 DMG ranged', 'Reflects projectiles'],
-    description: 'Prism Cutter works The Diamond Core from the back of it, throwing 4 damage a shot while the melee walks you down. Projectiles come back off it, which makes ranged pressure actively worse than none.',
+    description: 'The Prism Cutter shoots and reflects. Twenty-four health is thin for tier 4, but you cannot answer him at range, and reaching him means crossing a floor full of things that do not stagger.',
     traits: ['The Diamond Core', '24 HP', 'Ranged only', 'Reflects projectiles'],
-    tips: ['Melee only. Your own shots come home.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Melee only, and clear a path first. You cannot shortcut this one.', 'Melee only. Your own shots come home.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1517,9 +1517,9 @@ ENEMIES.push(
     skinMaterial: 'diamond',
     hp: 64, speed: 'Normal', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in The Diamond Core', 'Tier 4 room enemy', '7 DMG melee', 'Stagger-immune', 'Revives x2'],
-    description: 'Brilliant fields in The Diamond Core and nowhere else in the game - one per room, 64 HP, 7 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and it gets back up at full health 2 times, untouchable while it does. Clear the rest of The Diamond Core before you commit to it.',
+    description: 'The Brilliant revives twice. Sixty-four health, unflinching, oversized, and you have to put it down three times in total — the single longest single-target fight in the game.',
     traits: ['The Diamond Core', '64 HP', '7 DMG', 'Stagger-immune', 'Revives x2', '1.4x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Budget 2 extra kills; the get-up itself is invincible.', 'The fight of The Diamond Core; everything else in the wave is supporting cast.'],
+    tips: ['Three kills. Bring the health bar for it, not the ambition.', 'It never flinches - go around it, never trade with it.', 'Budget 2 extra kills; the get-up itself is invincible.'],
     bodyScale: 1.4, weightMod: 0
   },
   {
@@ -1527,9 +1527,9 @@ ENEMIES.push(
     skinMaterial: 'assassin',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to Assassin Country', 'Tier 4 room enemy', '5 DMG melee', 'Phases out', 'Flanker'],
-    description: 'Shadow Assassin is the body count of Assassin Country: matte shadow on two legs, walking out of a long room in which they were already behind you. It goes intangible in bursts and swings pass straight through it, and it comes in fast and from behind rather than walking at you from the front.',
+    description: 'The Shadow Assassin is barely visible, passes through swings, and comes from behind as a matter of course. In Assassin Country the ordinary enemy already does everything the scary enemies elsewhere do.',
     traits: ['Assassin Country', '27 HP', '5 DMG', 'Phases out', 'Flanker'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.'],
+    tips: ['There is no front line in this room. Fight where nothing can get behind you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1537,9 +1537,9 @@ ENEMIES.push(
     skinMaterial: 'assassin',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to Assassin Country', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Bodyblock is what Assassin Country puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of matte shadow. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health.',
+    description: 'Bodyblock is the odd one out here: a plated, unflinching wall in a room full of things that would rather you never saw them. He exists to hold your attention while they do not.',
     traits: ['Assassin Country', '46 HP', '6 DMG', 'Stagger-immune', 'Armour plates', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['He is the distraction. Do not give him your whole attention.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1547,9 +1547,9 @@ ENEMIES.push(
     skinMaterial: 'assassin',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to Assassin Country', 'Tier 4 room enemy', '4 DMG ranged', 'Sniper'],
-    description: 'Dartcaster works Assassin Country from the back of it, throwing 4 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot.',
+    description: 'The Dartcaster is a sniper you can barely see, in a long room built for shooting down. He leads his shots and he does not need to be spotted to keep firing.',
     traits: ['Assassin Country', '24 HP', 'Ranged only', 'Sniper'],
-    tips: ['Never hold a straight line while it has sight of you.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Move laterally on principle, whether or not you have seen him.', 'Never hold a straight line while it has sight of you.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1557,9 +1557,9 @@ ENEMIES.push(
     skinMaterial: 'assassin',
     hp: 64, speed: '150% (fast)', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in Assassin Country', 'Tier 4 room enemy', '7 DMG melee', 'Phases out', 'Flanker', 'Near-invisible'],
-    description: 'Nightblade fields in Assassin Country and nowhere else in the game - one per room, 64 HP, 7 damage a swing. It goes intangible in bursts and swings pass straight through it, and it comes in fast and from behind rather than walking at you from the front. It is barely visible even standing still. Clear the rest of Assassin Country before you commit to it.',
+    description: 'Nightblade moves at 1.5x speed, attacks 1.4x as fast, phases through swings and is half-transparent. Sixty-four health that flanks faster than you can turn — the Country\'s exclusive is simply better at this than you are.',
     traits: ['Assassin Country', '64 HP', '7 DMG', 'Phases out', 'Flanker', 'Near-invisible'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'Track it by its shadow and its shots, not its body.'],
+    tips: ['Do not try to out-turn him. Pick a wall, keep it behind you and let him come.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1567,9 +1567,9 @@ ENEMIES.push(
     skinMaterial: 'pitch',
     hp: 27, speed: 'Kiting', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Great Pitch', 'Tier 4 room enemy', '5 DMG melee', 'Holds its distance', 'Curving shots'],
-    description: 'Striker is the body count of The Great Pitch: pitch turf and leather on two legs, walking out of the crossover at full scale, where every shot bends. It refuses melee entirely, backing off as fast as you close, and its shots bend in flight, so the cover you are behind is not cover.',
+    description: 'A Striker never closes. He stands off and bends a shot around whatever you are hiding behind, because the crossover\'s whole idea is that cover is not cover if the ball curves.',
     traits: ['The Great Pitch', '27 HP', '5 DMG', 'Holds its distance', 'Curving shots'],
-    tips: ['Corner it against a wall or you will chase it for the whole wave.', 'Strafe across the curve, not away from it - the bend follows a straight retreat.'],
+    tips: ['Strafe across the curve, not away from it. A straight retreat is exactly the line the bend follows.', 'Corner it against a wall or you will chase it for the whole wave.', 'Strafe across the curve, not away from it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1577,9 +1577,9 @@ ENEMIES.push(
     skinMaterial: 'pitch',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Great Pitch', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Armour plates'],
-    description: 'Sweeper is what The Great Pitch puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of pitch turf and leather. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health.',
+    description: 'The Sweeper is the defensive half of the Pitch: plated, unflinching, forty-six health, and completely uninterested in the ball. His job is to be between you and the men who are.',
     traits: ['The Great Pitch', '46 HP', '6 DMG', 'Stagger-immune', 'Armour plates', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Go around him rather than through. Time spent on the Sweeper is time the Strikers get free.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1587,9 +1587,9 @@ ENEMIES.push(
     skinMaterial: 'pitch',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Great Pitch', 'Tier 4 room enemy', '4 DMG ranged', 'Curving shots'],
-    description: 'Winger works The Great Pitch from the back of it, throwing 4 damage a shot while the melee walks you down. Its shots bend in flight, so the cover you are behind is not cover.',
+    description: 'The Winger bends his shots the other way. Fight a Striker and a Winger together and the two curves come at you from opposite sides of the same piece of cover.',
     traits: ['The Great Pitch', '24 HP', 'Ranged only', 'Curving shots'],
-    tips: ['Strafe across the curve, not away from it - the bend follows a straight retreat.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['His spin is inverted. Whatever dodge worked on the Striker is the wrong one here.', 'Strafe across the curve, not away from it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1597,9 +1597,9 @@ ENEMIES.push(
     skinMaterial: 'pitch',
     hp: 64, speed: 'Kiting', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in The Great Pitch', 'Tier 4 room enemy', '7 DMG melee', 'Holds its distance', 'Curving shots'],
-    description: 'Striker Captain fields in The Great Pitch and nowhere else in the game - one per room, 64 HP, 7 damage a swing. It refuses melee entirely, backing off as fast as you close, and its shots bend in flight, so the cover you are behind is not cover. Clear the rest of The Great Pitch before you commit to it.',
+    description: 'The Striker Captain shoots 20% faster, on a cooldown 40% shorter, with 1.7 times the spin of anyone else on the Pitch. Sixty-four health and a shot that arrives somewhere you were not standing when he took it.',
     traits: ['The Great Pitch', '64 HP', '7 DMG', 'Holds its distance', 'Curving shots'],
-    tips: ['Corner it against a wall or you will chase it for the whole wave.', 'Strafe across the curve, not away from it - the bend follows a straight retreat.', 'The fight of The Great Pitch; everything else in the wave is supporting cast.'],
+    tips: ['His bend is severe enough that near cover is worse than no cover. Take the open floor.', 'Corner it against a wall or you will chase it for the whole wave.', 'Strafe across the curve, not away from it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1607,9 +1607,9 @@ ENEMIES.push(
     skinMaterial: 'platinum',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Platinum Vault', 'Tier 4 room enemy', '5 DMG melee', 'Reflects projectiles'],
-    description: 'Platinum Man is the body count of The Platinum Vault: mirror-bright platinum on two legs, walking out of a vault that hands your own shots back to you. Projectiles come back off it, which makes ranged pressure actively worse than none. Harder than iron and it knows it.',
+    description: 'Platinum Man reflects, and so does everything else in the Vault. He is the point at which you stop reaching for a ranged answer in this room and put it away for good.',
     traits: ['The Platinum Vault', '27 HP', '5 DMG', 'Reflects projectiles'],
-    tips: ['Melee only. Your own shots come home.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Holster everything. This whole room returns to sender.', 'Melee only. Your own shots come home.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1617,9 +1617,9 @@ ENEMIES.push(
     skinMaterial: 'platinum',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Platinum Vault', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Armour plates', 'Reflects projectiles'],
-    description: 'Bulkhead is what The Platinum Vault puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of mirror-bright platinum. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. Projectiles come back off it, which makes ranged pressure actively worse than none. Harder than iron and it knows it.',
+    description: 'Bulkhead is plated over mirror-bright platinum, unflinching, forty-six health, and reflective. There is no angle on him that is not a bad idea and no way to stagger him out of it.',
     traits: ['The Platinum Vault', '46 HP', '6 DMG', 'Stagger-immune', 'Armour plates', 'Reflects projectiles', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Melee only. Your own shots come home.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Hands only, and expect it to take a while.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1627,9 +1627,9 @@ ENEMIES.push(
     skinMaterial: 'platinum',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Platinum Vault', 'Tier 4 room enemy', '4 DMG ranged', 'Reflects projectiles'],
-    description: 'Deflector works The Platinum Vault from the back of it, throwing 4 damage a shot while the melee walks you down. Projectiles come back off it, which makes ranged pressure actively worse than none. Harder than iron and it knows it.',
+    description: 'The Deflector fires at you and returns what you fire at him. He is the only ranged enemy in the game that punishes you twice for the same instinct.',
     traits: ['The Platinum Vault', '24 HP', 'Ranged only', 'Reflects projectiles'],
-    tips: ['Melee only. Your own shots come home.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Never answer him in kind. Cross the floor.', 'Melee only. Your own shots come home.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1637,9 +1637,9 @@ ENEMIES.push(
     skinMaterial: 'platinum',
     hp: 64, speed: 'Normal', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in The Platinum Vault', 'Tier 4 room enemy', '7 DMG melee', 'Stagger-immune', 'Reflects projectiles'],
-    description: 'Mirrorplate fields in The Platinum Vault and nowhere else in the game - one per room, 64 HP, 7 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and projectiles come back off it, which makes ranged pressure actively worse than none. Clear the rest of The Platinum Vault before you commit to it.',
+    description: 'Mirrorplate is polished to the point of being a mirror, does not flinch, and sends every projectile in the room back where it came from. The Vault\'s exclusive is a fight your loadout cannot help with.',
     traits: ['The Platinum Vault', '64 HP', '7 DMG', 'Stagger-immune', 'Reflects projectiles', '1.3x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.', 'The fight of The Platinum Vault; everything else in the wave is supporting cast.'],
+    tips: ['Melee, patience, and nothing else. Sixty-four health the slow way.', 'It never flinches - go around it, never trade with it.', 'Melee only. Your own shots come home.'],
     bodyScale: 1.3, weightMod: 0
   },
   {
@@ -1647,9 +1647,9 @@ ENEMIES.push(
     skinMaterial: 'glass',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Glass House', 'Tier 4 room enemy', '5 DMG melee', 'Near-invisible'],
-    description: 'Glass Man is the body count of The Glass House: sheet glass on two legs, walking out of a room where everything shatters, and keeps shattering. It is barely visible even standing still.',
+    description: 'Glass Man is half-transparent and twenty-seven health, and in a room where everything shatters he is the piece that has not yet. The House does not break all at once; it breaks in stages.',
     traits: ['The Glass House', '27 HP', '5 DMG', 'Near-invisible'],
-    tips: ['Track it by its shadow and its shots, not its body.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Easy to lose against the walls. Track him by movement, not colour.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1657,9 +1657,9 @@ ENEMIES.push(
     skinMaterial: 'glass',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Glass House', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Splits x2', 'Near-invisible'],
-    description: 'Pane is what The Glass House puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of sheet glass. Nothing you land makes it flinch, so every exchange is one you finish second, and killing it splits it into smaller copies, 2 generations deep. It is barely visible even standing still.',
+    description: 'A Pane breaks into smaller Panes, and those break too — two generations of unflinching wall out of one forty-six health body.',
     traits: ['The Glass House', '46 HP', '6 DMG', 'Stagger-immune', 'Splits x2', 'Near-invisible', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Never break him in a corner. Two generations is four bodies in the space you were standing.', 'It never flinches - go around it, never trade with it.', 'Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1667,9 +1667,9 @@ ENEMIES.push(
     skinMaterial: 'glass',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Glass House', 'Tier 4 room enemy', '4 DMG ranged', 'Splits x1', 'Near-invisible'],
-    description: 'Splinter works The Glass House from the back of it, throwing 4 damage a shot while the melee walks you down. Killing it splits it into smaller copies, 1 generation deep, and it is barely visible even standing still.',
+    description: 'Splinter shoots, and when it dies it becomes two more shooters. Killing the ranged threat in The Glass House briefly doubles it.',
     traits: ['The Glass House', '24 HP', 'Ranged only', 'Splits x1', 'Near-invisible'],
-    tips: ['Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Kill him with room to back off — you have a second later to deal with immediately.', 'Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1677,9 +1677,9 @@ ENEMIES.push(
     skinMaterial: 'glass',
     hp: 64, speed: 'Normal', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in The Glass House', 'Tier 4 room enemy', '7 DMG melee', 'Splits x3', 'Near-invisible'],
-    description: 'Shatterpane fields in The Glass House and nowhere else in the game - one per room, 64 HP, 7 damage a swing. Killing it splits it into smaller copies, 3 generations deep, and it is barely visible even standing still. Clear the rest of The Glass House before you commit to it.',
+    description: 'Shatterpane goes three generations deep. One sixty-four health body becomes two, then four, then eight, and the House ends up full of the thing you killed at the start.',
     traits: ['The Glass House', '64 HP', '7 DMG', 'Splits x3', 'Near-invisible'],
-    tips: ['Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.', 'The fight of The Glass House; everything else in the wave is supporting cast.'],
+    tips: ['Fight him in the widest part of the room, and do not kill him with a wave already out.', 'Pop it with room around you, or the splits land where you were standing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1687,9 +1687,9 @@ ENEMIES.push(
     skinMaterial: 'clear',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to Clear Country', 'Tier 4 room enemy', '5 DMG melee', 'Near-invisible'],
-    description: 'Clear Man is the body count of Clear Country: almost nothing you can actually see on two legs, walking out of a whole room of the translucent variant. It is barely visible even standing still.',
+    description: 'Clear Man is 28% opaque. You are not going to see him — you are going to see the gap where the floor texture is slightly wrong and swing at that.',
     traits: ['Clear Country', '27 HP', '5 DMG', 'Near-invisible'],
-    tips: ['Track it by its shadow and its shots, not its body.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Aim at the distortion, not the body. There is no body to aim at.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1697,9 +1697,9 @@ ENEMIES.push(
     skinMaterial: 'clear',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to Clear Country', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Near-invisible'],
-    description: 'Clear Wall is what Clear Country puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of almost nothing you can actually see. Nothing you land makes it flinch, so every exchange is one you finish second, and it is barely visible even standing still.',
+    description: 'A Clear Wall is forty-six health of unflinching almost-nothing. You will find it by walking into it, which in this room is genuinely how most of the fights start.',
     traits: ['Clear Country', '46 HP', '6 DMG', 'Stagger-immune', 'Near-invisible', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Track it by its shadow and its shots, not its body.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Sweep with movement before you commit. Bumping into him is not a plan.', 'It never flinches - go around it, never trade with it.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1707,9 +1707,9 @@ ENEMIES.push(
     skinMaterial: 'clear',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to Clear Country', 'Tier 4 room enemy', '4 DMG ranged', 'Sniper', 'Near-invisible'],
-    description: 'Faint Shot works Clear Country from the back of it, throwing 4 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot, and it is barely visible even standing still.',
+    description: 'Faint Shot is a sniper at 25% opacity. He leads his shots across the room and you have essentially no way to locate him except by watching where the bolts come from.',
     traits: ['Clear Country', '24 HP', 'Ranged only', 'Sniper', 'Near-invisible'],
-    tips: ['Never hold a straight line while it has sight of you.', 'Track it by its shadow and its shots, not its body.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Trace the bolt back to its origin. That is the only targeting information this fight gives you.', 'Never hold a straight line while it has sight of you.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1717,9 +1717,9 @@ ENEMIES.push(
     skinMaterial: 'clear',
     hp: 64, speed: '125% (fast)', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in Clear Country', 'Tier 4 room enemy', '7 DMG melee', 'Phases out', 'Near-invisible'],
-    description: 'Ghostpane fields in Clear Country and nowhere else in the game - one per room, 64 HP, 7 damage a swing. It goes intangible in bursts and swings pass straight through it, and it is barely visible even standing still. Clear the rest of Clear Country before you commit to it.',
+    description: 'Ghostpane is 15% opaque, faster than a Man, and passes through your swings on top of that. Clear Country\'s exclusive is sixty-four health of something you can barely prove is there.',
     traits: ['Clear Country', '64 HP', '7 DMG', 'Phases out', 'Near-invisible'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.', 'The fight of Clear Country; everything else in the wave is supporting cast.'],
+    tips: ['Fight him against a lit wall if the room gives you one. Silhouette is all you get.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1727,9 +1727,9 @@ ENEMIES.push(
     skinMaterial: 'illusion',
     hp: 27, speed: 'Normal', punchDmg: 5, kickDmg: 6,
     specials: ['Native to The Illusion', 'Tier 4 room enemy', '5 DMG melee', 'Phases out'],
-    description: 'Mirage Man is the body count of The Illusion: borrowed light on two legs, walking out of a room where half of what you are fighting is not there. It goes intangible in bursts and swings pass straight through it. And in this room you cannot be sure the one you are swinging at is the real one.',
+    description: 'Mirage Man phases, and the room duplicates him. Half of what is walking at you is not there at all, and the half that is looks exactly the same.',
     traits: ['The Illusion', '27 HP', '5 DMG', 'Phases out'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'The baseline the rest of the room is measured against.'],
+    tips: ['One hit tells you which is which — but it costs you the swing either way.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1737,9 +1737,9 @@ ENEMIES.push(
     skinMaterial: 'illusion',
     hp: 46, speed: '62% (heavy)', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Illusion', 'Tier 4 room enemy', '6 DMG melee', 'Stagger-immune', 'Phases out', 'Splits x1'],
-    description: 'False Wall is what The Illusion puts in your way - 1.55x the size of its Man, 62% of the speed, 46 HP of borrowed light. Nothing you land makes it flinch, so every exchange is one you finish second, and it goes intangible in bursts and swings pass straight through it. Killing it splits it into smaller copies, 1 generation deep. And in this room you cannot be sure the one you are swinging at is the real one.',
+    description: 'The False Wall is forty-six health, unflinching, intermittently intangible, and splits when it dies. You cannot stagger it, cannot reliably hit it, and killing it makes two more.',
     traits: ['The Illusion', '46 HP', '6 DMG', 'Stagger-immune', 'Phases out', 'Splits x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Pop it with room around you, or the splits land where you were standing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Wait for solid, commit fully, and have somewhere to go when it splits.', 'It never flinches - go around it, never trade with it.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1747,9 +1747,9 @@ ENEMIES.push(
     skinMaterial: 'illusion',
     hp: 24, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Illusion', 'Tier 4 room enemy', '4 DMG ranged', 'Copycat'],
-    description: 'Echo works The Illusion from the back of it, throwing 4 damage a shot while the melee walks you down. It copies the last thing it watched you do, at your numbers. And in this room you cannot be sure the one you are swinging at is the real one.',
+    description: 'Echo copies the last thing it saw you do and throws it back at your own numbers. Open on it with your best attack and that is what the room shoots at you for the rest of the wave.',
     traits: ['The Illusion', '24 HP', 'Ranged only', 'Copycat'],
-    tips: ['Do not open with your best move.', '24 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Open weak. Whatever you show it first is what you have to eat.', 'Do not open with your best move.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1757,9 +1757,9 @@ ENEMIES.push(
     skinMaterial: 'illusion',
     hp: 64, speed: 'Normal', punchDmg: 7, kickDmg: 8,
     specials: ['Only ever spawns in The Illusion', 'Tier 4 room enemy', '7 DMG melee', 'Phases out', 'Copycat', 'Splits x2'],
-    description: 'Illusionist fields in The Illusion and nowhere else in the game - one per room, 64 HP, 7 damage a swing. It goes intangible in bursts and swings pass straight through it, and it copies the last thing it watched you do, at your numbers. Killing it splits it into smaller copies, 2 generations deep. And in this room you cannot be sure the one you are swinging at is the real one.',
+    description: 'The Illusionist copies your attacks, phases through your swings, and splits two generations deep on death — in the one room that also spawns duplicates of everything. There is no fight in the game with less reliable information in it.',
     traits: ['The Illusion', '64 HP', '7 DMG', 'Phases out', 'Copycat', 'Splits x2'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Do not open with your best move.', 'Pop it with room around you, or the splits land where you were standing.'],
+    tips: ['Do not chase certainty here. Pick a target, commit, and accept the wasted swings.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Do not open with your best move.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1767,9 +1767,9 @@ ENEMIES.push(
     skinMaterial: 'nightmare',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Nightmare', 'Tier 5 room enemy', '6 DMG melee', 'Stagger-immune', 'Enrages when hurt'],
-    description: 'Nightmare Man is the body count of The Nightmare: remembered material on two legs, walking out of a room you have already survived, wearing a different face. Nothing you land makes it flinch, so every exchange is one you finish second, and hurt it and it speeds up, so its last third of health is its most dangerous. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'A room you have already survived, wearing a different face, and this is what it staffs itself with: thirty-four health that will not stagger and speeds up as you hurt it. The rank and file of tier 5 opens where tier 1\'s specials closed.',
     traits: ['The Nightmare', '34 HP', '6 DMG', 'Stagger-immune', 'Enrages when hurt'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.'],
+    tips: ['Finish him in one go. Half-killed, he is faster than you are.', 'It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1777,9 +1777,9 @@ ENEMIES.push(
     skinMaterial: 'nightmare',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Nightmare', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Enrages when hurt', 'Revives x1'],
-    description: 'Dread is what The Nightmare puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of remembered material. Nothing you land makes it flinch, so every exchange is one you finish second, and hurt it and it speeds up, so its last third of health is its most dangerous. It gets back up at full health once, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Dread does not flinch, enrages when hurt, and gets back up once at full health. Fifty-eight health twice over, and the second time it is angry from the start.',
     traits: ['The Nightmare', '58 HP', '7 DMG', 'Stagger-immune', 'Enrages when hurt', 'Revives x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.', 'Budget 1 extra kill; the get-up itself is invincible.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['The revival brings back the health, not the rage threshold — the second fight is the fast one.', 'It never flinches - go around it, never trade with it.', 'Do not leave it on a sliver - commit and finish it.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1787,9 +1787,9 @@ ENEMIES.push(
     skinMaterial: 'nightmare',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Nightmare', 'Tier 5 room enemy', '5 DMG ranged', 'Sniper', 'Phases out'],
-    description: 'Whisper works The Nightmare from the back of it, throwing 5 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot, and it goes intangible in bursts and swings pass straight through it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Whisper snipes from the far end of the Nightmare and phases when you come for it. Five damage a shot, thirty health, and almost no way to make it stand still.',
     traits: ['The Nightmare', '30 HP', 'Ranged only', 'Sniper', 'Phases out'],
-    tips: ['Never hold a straight line while it has sight of you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['You will not catch it clean. Take the openings its phase gives you and nothing else.', 'Never hold a straight line while it has sight of you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1797,9 +1797,9 @@ ENEMIES.push(
     skinMaterial: 'nightmare',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Nightmare', 'Tier 5 room enemy', '9 DMG melee', 'Stagger-immune', 'Lifesteal', 'Enrages when hurt', 'Revives x1'],
-    description: 'Night Terror fields in The Nightmare and nowhere else in the game - one per room, 80 HP, 9 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and every hit it lands heals it, so a slow fight is one you are quietly losing. Hurt it and it speeds up, so its last third of health is its most dangerous, and it gets back up at full health once, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Night Terror is nearly twice a Man\'s size, unflinching, enrages, heals off you, and gets back up once. Eighty health and nine damage a swing, carrying four mechanics at the same time — nothing else in the game stacks this much on one body.',
     traits: ['The Nightmare', '80 HP', '9 DMG', 'Stagger-immune', 'Lifesteal', 'Enrages when hurt', '1.9x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Burst it down - let it feed and your progress resets.', 'Do not leave it on a sliver - commit and finish it.'],
+    tips: ['There is no clean answer. Bring full health, a clear floor, and finish both halves without pausing.', 'It never flinches - go around it, never trade with it.', 'Burst it down - let it feed and your progress resets.', 'Do not leave it on a sliver - commit and finish it.'],
     bodyScale: 1.9, weightMod: 0
   },
   {
@@ -1807,9 +1807,9 @@ ENEMIES.push(
     skinMaterial: 'pitchBlack',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to Pitch Black', 'Tier 5 room enemy', '6 DMG melee', 'Phases out', 'Flanker', 'Near-invisible'],
-    description: 'Void Man is the body count of Pitch Black: the dark itself on two legs, walking out of no light in it but the light you brought in. It goes intangible in bursts and swings pass straight through it, and it comes in fast and from behind rather than walking at you from the front. It is barely visible even standing still. In here you will hear it before your light finds it.',
+    description: 'Void Man flanks, phases and is half-transparent, in the one room where your light is the only light. He does not need to be good; he needs you to be looking somewhere else, and you always are.',
     traits: ['Pitch Black', '34 HP', '6 DMG', 'Phases out', 'Flanker', 'Near-invisible'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'Track it by its shadow and its shots, not its body.'],
+    tips: ['Keep your beam moving and your back covered. He only needs the moment you look away.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Fight with your back to a wall.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1817,9 +1817,9 @@ ENEMIES.push(
     skinMaterial: 'pitchBlack',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to Pitch Black', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Magnetic pull', 'Near-invisible'],
-    description: 'Blackout is what Pitch Black puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of the dark itself. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. It is barely visible even standing still. In here you will hear it before your light finds it.',
+    description: 'Blackout is fifty-eight health of unflinching dark that pulls you toward it. You will not see it coming and you will not be able to walk away from it once it has you.',
     traits: ['Pitch Black', '58 HP', '7 DMG', 'Stagger-immune', 'Magnetic pull', 'Near-invisible', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Track it by its shadow and its shots, not its body.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['If your movement stops matching your input, you are already in his radius.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1827,9 +1827,9 @@ ENEMIES.push(
     skinMaterial: 'pitchBlack',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to Pitch Black', 'Tier 5 room enemy', '5 DMG ranged', 'Sniper', 'Near-invisible'],
-    description: 'Nothing works Pitch Black from the back of it, throwing 5 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot, and it is barely visible even standing still. In here you will hear it before your light finds it.',
+    description: 'Nothing is a sniper at 40% opacity in a room with no light. The name is accurate: what you can see of it, and what it leaves of you at five damage a shot.',
     traits: ['Pitch Black', '30 HP', 'Ranged only', 'Sniper', 'Near-invisible'],
-    tips: ['Never hold a straight line while it has sight of you.', 'Track it by its shadow and its shots, not its body.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['The muzzle is the only thing that gives it away. Watch for the flash, not the body.', 'Never hold a straight line while it has sight of you.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1837,9 +1837,9 @@ ENEMIES.push(
     skinMaterial: 'pitchBlack',
     hp: 80, speed: '140% (fast)', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in Pitch Black', 'Tier 5 room enemy', '9 DMG melee', 'Flanker', 'Goes invisible', 'Near-invisible'],
-    description: 'The Unseen fields in Pitch Black and nowhere else in the game - one per room, 80 HP, 9 damage a swing. It comes in fast and from behind rather than walking at you from the front, and it vanishes outright and reappears somewhere you are not looking. It is barely visible even standing still. In here you will hear it before your light finds it.',
+    description: 'The Unseen is 20% opaque, 40% faster than a Man, flanks by default, and goes fully invisible on top of all that. Eighty health in a lightless room, and the fight is almost entirely about guessing.',
     traits: ['Pitch Black', '80 HP', '9 DMG', 'Flanker', 'Goes invisible', 'Near-invisible'],
-    tips: ['Fight with your back to a wall.', 'When it disappears, move immediately.', 'Track it by its shadow and its shots, not its body.'],
+    tips: ['When it goes fully invisible, move first and look second.', 'Fight with your back to a wall.', 'When it disappears, move immediately.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1847,9 +1847,9 @@ ENEMIES.push(
     skinMaterial: 'bone',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Ossuary', 'Tier 5 room enemy', '6 DMG melee', 'Revives x1'],
-    description: 'Bone Man is the body count of The Ossuary: old bone on two legs, walking out of everyone who came through before you, still here. It gets back up at full health once, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Everyone who came through here before you is still here, and Bone Man is one of them. Thirty-four health, six damage, and one full-health return before he stays down.',
     traits: ['The Ossuary', '34 HP', '6 DMG', 'Revives x1'],
-    tips: ['Budget 1 extra kill; the get-up itself is invincible.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Two kills each. Count them or the Ossuary will count them for you.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1857,9 +1857,9 @@ ENEMIES.push(
     skinMaterial: 'bone',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Ossuary', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Armour plates', 'Revives x1'],
-    description: 'Ribcage is what The Ossuary puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of old bone. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. It gets back up at full health once, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Ribcage is plated bone that will not stagger and gets back up once. Fifty-eight health behind armour, twice — the slowest single body in tier 5 to actually remove.',
     traits: ['The Ossuary', '58 HP', '7 DMG', 'Stagger-immune', 'Armour plates', 'Revives x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Budget 1 extra kill; the get-up itself is invincible.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Break the plate before the first kill, or you get to break it again after the second.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Budget 1 extra kill; the get-up itself is invincible.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1867,9 +1867,9 @@ ENEMIES.push(
     skinMaterial: 'bone',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Ossuary', 'Tier 5 room enemy', '5 DMG ranged', 'Spawner'],
-    description: 'Marrow works The Ossuary from the back of it, throwing 5 damage a shot while the melee walks you down. It keeps producing more of the room while you deal with what is already out. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Marrow does not shoot so much as restock. It keeps producing more of the Ossuary while you deal with what is already standing, and the room has no shortage of raw material.',
     traits: ['The Ossuary', '30 HP', 'Ranged only', 'Spawner'],
-    tips: ['The wave does not end until this does.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['The wave does not end until Marrow does. Nothing else you kill is progress.', 'The wave does not end until this does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1877,9 +1877,9 @@ ENEMIES.push(
     skinMaterial: 'bone',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Ossuary', 'Tier 5 room enemy', '9 DMG melee', 'Spawner', 'Revives x3'],
-    description: 'Ossuary King fields in The Ossuary and nowhere else in the game - one per room, 80 HP, 9 damage a swing. It keeps producing more of the room while you deal with what is already out, and it gets back up at full health 3 times, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Ossuary King revives three times and spawns while he does it. Eighty health, four kills, and a growing crowd between each one — this is the longest fight in the game by a distance.',
     traits: ['The Ossuary', '80 HP', '9 DMG', 'Spawner', 'Revives x3', '1.6x size'],
-    tips: ['The wave does not end until this does.', 'Budget 3 extra kills; the get-up itself is invincible.', 'The fight of The Ossuary; everything else in the wave is supporting cast.'],
+    tips: ['Four kills, and the room refills between them. Clear the spawns or you will never reach the fourth.', 'The wave does not end until this does.', 'Budget 3 extra kills; the get-up itself is invincible.'],
     bodyScale: 1.6, weightMod: 0
   },
   {
@@ -1887,9 +1887,9 @@ ENEMIES.push(
     skinMaterial: 'rust',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Rust Belt', 'Tier 5 room enemy', '6 DMG melee', 'Armour plates'],
-    description: 'Rust Man is the body count of The Rust Belt: flaking rust on two legs, walking out of the Iron Works a few centuries further along. The plating has to come off before the body under it starts losing real health. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Iron Works, a few centuries on. Rust Man still has his plate; it has just corroded into something you can get through, which is the only concession this tier makes.',
     traits: ['The Rust Belt', '34 HP', '6 DMG', 'Armour plates'],
-    tips: ['Break the plates first; until they go the health bar barely moves.', 'The baseline the rest of the room is measured against.'],
+    tips: ['The plate is thinner than the Anvil\'s was. It still has to come off first.', 'Break the plates first; until they go the health bar barely moves.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1897,9 +1897,9 @@ ENEMIES.push(
     skinMaterial: 'rust',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Rust Belt', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Armour plates', 'Lays traps'],
-    description: 'Scrapheap is what The Rust Belt puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of flaking rust. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. It leaves traps behind it, so ground you already cleared stops being cleared. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Scrapheap is plated, unflinching, and leaves traps in the ground behind it. Fifty-eight health that ruins the floor as it walks, so the ground you cleared stops being cleared.',
     traits: ['The Rust Belt', '58 HP', '7 DMG', 'Stagger-immune', 'Armour plates', 'Lays traps', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Track where it has been, not only where it is.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Track where it has been, not just where it is. Retreating over your own path is how this one gets you.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Track where it has been, not only where it is.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1907,9 +1907,9 @@ ENEMIES.push(
     skinMaterial: 'rust',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Rust Belt', 'Tier 5 room enemy', '5 DMG ranged', 'Armour plates', 'Bomber'],
-    description: 'Shrapnel works The Rust Belt from the back of it, throwing 5 damage a shot while the melee walks you down. The plating has to come off before the body under it starts losing real health, and it lobs explosives rather than bolts, so the threat is where you will be, not where you are. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Shrapnel is a plated bomber. He throws explosives and wears armour, which makes the ranged threat in the Rust Belt also the one that takes longest to remove.',
     traits: ['The Rust Belt', '30 HP', 'Ranged only', 'Armour plates', 'Bomber'],
-    tips: ['Break the plates first; until they go the health bar barely moves.', 'Keep moving through the arc - the blast is what hits you, not the throw.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['You cannot rush him down through the plate. Break the arc instead — keep moving.', 'Break the plates first; until they go the health bar barely moves.', 'Keep moving through the arc - the blast is what hits you, not the throw.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1917,9 +1917,9 @@ ENEMIES.push(
     skinMaterial: 'rust',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Rust Belt', 'Tier 5 room enemy', '9 DMG melee', 'Stagger-immune', 'Armour plates', 'Lays traps'],
-    description: 'Corroder fields in The Rust Belt and nowhere else in the game - one per room, 80 HP, 9 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. It leaves traps behind it, so ground you already cleared stops being cleared. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Corroder is one and a half times a Man\'s size, plated, unflinching, and lays traps. Eighty health of a thing that turns the whole Rust Belt into ground you cannot back onto.',
     traits: ['The Rust Belt', '80 HP', '9 DMG', 'Stagger-immune', 'Armour plates', 'Lays traps', '1.5x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Track where it has been, not only where it is.'],
+    tips: ['Fight him forward. Every metre behind you is somewhere he has already mined.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Track where it has been, not only where it is.'],
     bodyScale: 1.5, weightMod: 0
   },
   {
@@ -1927,9 +1927,9 @@ ENEMIES.push(
     skinMaterial: 'rift',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Rift', 'Tier 5 room enemy', '6 DMG melee', 'Phases out'],
-    description: 'Rift Man is the body count of The Rift: torn space on two legs, walking out of the Galaxy pulled open, with things coming through the tear. It goes intangible in bursts and swings pass straight through it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Galaxy, torn open, with things coming through the tear — Rift Man being the first of them. Half-transparent, intermittently intangible, and thirty-four health of something the room did not make.',
     traits: ['The Rift', '34 HP', '6 DMG', 'Phases out'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'The baseline the rest of the room is measured against.'],
+    tips: ['Half your swings will pass through. Budget for it.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1937,9 +1937,9 @@ ENEMIES.push(
     skinMaterial: 'rift',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Rift', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Magnetic pull', 'Phases out'],
-    description: 'Tearwall is what The Rift puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of torn space. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. It goes intangible in bursts and swings pass straight through it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Tearwall does not flinch, drags you in, and phases. Fifty-eight health of wall that pulls you toward it and then is not there when you swing at it.',
     traits: ['The Rift', '58 HP', '7 DMG', 'Stagger-immune', 'Magnetic pull', 'Phases out', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['The pull is constant; the solidity is not. Move on the pull, swing on the solid.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Wait the phase out; swinging into it burns the whole animation for nothing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1947,9 +1947,9 @@ ENEMIES.push(
     skinMaterial: 'rift',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Rift', 'Tier 5 room enemy', '5 DMG ranged', 'Pulls you in'],
-    description: 'Riftcaster works The Rift from the back of it, throwing 5 damage a shot while the melee walks you down. It hauls you off your feet and toward it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Riftcaster does not fire projectiles so much as reach through and take hold of you. Telekinesis at range, thirty health, and the pull puts you exactly where the rest of the room wants you.',
     traits: ['The Rift', '30 HP', 'Ranged only', 'Pulls you in'],
-    tips: ['The moment the pull starts, break line of sight.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Where it drags you matters more than the three damage. Watch the destination.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1957,9 +1957,9 @@ ENEMIES.push(
     skinMaterial: 'rift',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Rift', 'Tier 5 room enemy', '9 DMG melee', 'Magnetic pull', 'Spawner', 'Pulls you in'],
-    description: 'The Opening fields in The Rift and nowhere else in the game - one per room, 80 HP, 9 damage a swing. It drags you in, so the gap you think you are holding is not the gap you have, and it keeps producing more of the room while you deal with what is already out. It hauls you off your feet and toward it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Opening is not really an enemy; it is the tear itself, one and a half times over. Eighty health that spawns more of the Rift, drags magnetically, and hauls you in with doubled telekinesis on top.',
     traits: ['The Rift', '80 HP', '9 DMG', 'Magnetic pull', 'Spawner', 'Pulls you in', '1.7x size'],
-    tips: ['Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The wave does not end until this does.', 'The moment the pull starts, break line of sight.'],
+    tips: ['It keeps producing and it keeps pulling. Kill it first and clean up afterwards.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'The wave does not end until this does.', 'The moment the pull starts, break line of sight.'],
     bodyScale: 1.7, weightMod: 0
   },
   {
@@ -1967,9 +1967,9 @@ ENEMIES.push(
     skinMaterial: 'blackIce',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to Black Ice', 'Tier 5 room enemy', '6 DMG melee', 'Freezes on hit'],
-    description: 'Black Ice Man is the body count of Black Ice: black ice on two legs, walking out of the Drift after the sun went out for good. Its hits freeze you where you stand. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Drift after the sun went out for good. Black Ice Man freezes on contact for three damage — the same trick Ice Man had two tiers ago, on a body with three times the health behind it.',
     traits: ['Black Ice', '34 HP', '6 DMG', 'Freezes on hit'],
-    tips: ['Being frozen beside it is how the wave ends - never fight it inside a crowd.', 'The baseline the rest of the room is measured against.'],
+    tips: ['The freeze is unchanged; what has changed is how much is standing next to him.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1977,9 +1977,9 @@ ENEMIES.push(
     skinMaterial: 'blackIce',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to Black Ice', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Magnetic pull', 'Splits x1'],
-    description: 'Glacier is what Black Ice puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of black ice. Nothing you land makes it flinch, so every exchange is one you finish second, and it drags you in, so the gap you think you are holding is not the gap you have. Killing it splits it into smaller copies, 1 generation deep. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Glacier is fifty-eight health of unflinching ice that pulls you in and breaks into more of itself when it goes. Being dragged toward the thing that is about to split is not a good place to be standing.',
     traits: ['Black Ice', '58 HP', '7 DMG', 'Stagger-immune', 'Magnetic pull', 'Splits x1', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Pop it with room around you, or the splits land where you were standing.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Break the pull before you break the ice. Never kill him from close.', 'It never flinches - go around it, never trade with it.', 'Approach at a sprint - walking near it means arriving in melee whether you meant to or not.', 'Pop it with room around you, or the splits land where you were standing.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -1987,9 +1987,9 @@ ENEMIES.push(
     skinMaterial: 'blackIce',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to Black Ice', 'Tier 5 room enemy', '5 DMG ranged', 'Freezes on hit'],
-    description: 'Sleet works Black Ice from the back of it, throwing 5 damage a shot while the melee walks you down. Its hits freeze you where you stand. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Sleet throws the freeze rather than landing it. In a room this cold, being stopped for a second is not a status effect, it is the end of your positioning.',
     traits: ['Black Ice', '30 HP', 'Ranged only', 'Freezes on hit'],
-    tips: ['Being frozen beside it is how the wave ends - never fight it inside a crowd.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['Take the freeze somewhere nothing else can reach you in the window.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -1997,9 +1997,9 @@ ENEMIES.push(
     skinMaterial: 'blackIce',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in Black Ice', 'Tier 5 room enemy', '9 DMG melee', 'Stagger-immune', 'Freezes on hit'],
-    description: 'The Long Cold fields in Black Ice and nowhere else in the game - one per room, 80 HP, 9 damage a swing. Nothing you land makes it flinch, so every exchange is one you finish second, and its hits freeze you where you stand. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Long Cold freezes for two and a half times the normal duration, in melee, at five damage, from a body 1.7 times a Man\'s size that does not stagger. Eighty health, and one landed hit is most of the fight.',
     traits: ['Black Ice', '80 HP', '9 DMG', 'Stagger-immune', 'Freezes on hit', '1.7x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.', 'The fight of Black Ice; everything else in the wave is supporting cast.'],
+    tips: ['One connection is enough. Do not be within reach when his swing starts.', 'It never flinches - go around it, never trade with it.', 'Being frozen beside it is how the wave ends - never fight it inside a crowd.'],
     bodyScale: 1.7, weightMod: 0
   },
   {
@@ -2007,9 +2007,9 @@ ENEMIES.push(
     skinMaterial: 'furnace',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Furnace', 'Tier 5 room enemy', '6 DMG melee', 'Burn damage'],
-    description: 'Furnace Man is the body count of The Furnace: white-hot iron on two legs, walking out of the place the Magma Floor is heated from. It sets you burning, and the burn keeps ticking long after it is dead. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Where the Magma Floor gets its heat. Furnace Man hits for five and sets you burning at twice the usual rate — the rank and file of this room does more damage than most tier-3 specials.',
     traits: ['The Furnace', '34 HP', '6 DMG', 'Burn damage'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The baseline the rest of the room is measured against.'],
+    tips: ['The burn is the damage, not the punch. Kill him and get clear of everything else.', 'Kill it and walk - the burn runs whether or not it does.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -2017,9 +2017,9 @@ ENEMIES.push(
     skinMaterial: 'furnace',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Furnace', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Armour plates', 'Enrages when hurt'],
-    description: 'Firebox is what The Furnace puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of white-hot iron. Nothing you land makes it flinch, so every exchange is one you finish second, and the plating has to come off before the body under it starts losing real health. Hurt it and it speeds up, so its last third of health is its most dangerous. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Firebox is plated, unflinching, and enrages when hurt. Fifty-eight health that gets faster as it dies, in a room where nothing is not burning.',
     traits: ['The Furnace', '58 HP', '7 DMG', 'Stagger-immune', 'Armour plates', 'Enrages when hurt', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Do not leave it on a sliver - commit and finish it.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Break the plate early. You do not want to still be doing it once he is angry.', 'It never flinches - go around it, never trade with it.', 'Break the plates first; until they go the health bar barely moves.', 'Do not leave it on a sliver - commit and finish it.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -2027,9 +2027,9 @@ ENEMIES.push(
     skinMaterial: 'furnace',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Furnace', 'Tier 5 room enemy', '5 DMG ranged', 'Burn damage', 'Burning trail'],
-    description: 'Flue works The Furnace from the back of it, throwing 5 damage a shot while the melee walks you down. It sets you burning, and the burn keeps ticking long after it is dead, and the shot leaves a burning trail behind it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Flue vents. Its bolts burn at two a tick and leave a trail down the lane they travelled, so it does not need to hit you to take a piece of the room away from you.',
     traits: ['The Furnace', '30 HP', 'Ranged only', 'Burn damage', 'Burning trail'],
-    tips: ['Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['It is closing off floor, not aiming at you. Do not let it corner you with its own trails.', 'Kill it and walk - the burn runs whether or not it does.', 'The trail lingers; do not chase it down the lane it fired along.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -2037,9 +2037,9 @@ ENEMIES.push(
     skinMaterial: 'furnace',
     hp: 80, speed: 'Normal', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Furnace', 'Tier 5 room enemy', '9 DMG melee', 'Enrages when hurt', 'Burn damage', 'Growing projectile', 'Burning trail'],
-    description: 'The Bellows fields in The Furnace and nowhere else in the game - one per room, 80 HP, 9 damage a swing. Hurt it and it speeds up, so its last third of health is its most dangerous, and it sets you burning, and the burn keeps ticking long after it is dead. The projectile grows the further it flies, so distance makes it harder to slip, not easier, and the shot leaves a burning trail behind it. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'The Bellows is 1.8 times a Man\'s size, enrages, and fires burning bolts that grow as they travel and burn at three a tick. Eighty health, and the further you stand the harder its shots are to avoid.',
     traits: ['The Furnace', '80 HP', '9 DMG', 'Enrages when hurt', 'Burn damage', 'Growing projectile', '1.8x size'],
-    tips: ['Do not leave it on a sliver - commit and finish it.', 'Kill it and walk - the burn runs whether or not it does.', 'Close the distance - the shot is smallest at the muzzle.'],
+    tips: ['Close in. Distance makes its shot wider, not safer — the muzzle is the safest place to be.', 'Do not leave it on a sliver - commit and finish it.', 'Kill it and walk - the burn runs whether or not it does.', 'Close the distance - the shot is smallest at the muzzle.'],
     bodyScale: 1.8, weightMod: 0
   },
   {
@@ -2047,9 +2047,9 @@ ENEMIES.push(
     skinMaterial: 'hollow',
     hp: 34, speed: 'Normal', punchDmg: 6, kickDmg: 7,
     specials: ['Native to The Hollow', 'Tier 5 room enemy', '6 DMG melee', 'Phases out', 'Near-invisible'],
-    description: 'Hollow Man is the body count of The Hollow: very nearly nothing on two legs, walking out of an empty room, right up until it is not. It goes intangible in bursts and swings pass straight through it, and it is barely visible even standing still. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'An empty room, until it is not. Hollow Man is half-transparent and half-there, thirty-four health of something that only becomes solid enough to hit at intervals.',
     traits: ['The Hollow', '34 HP', '6 DMG', 'Phases out', 'Near-invisible'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.'],
+    tips: ['The room gives you nothing to read. Wait for solid and swing then.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -2057,9 +2057,9 @@ ENEMIES.push(
     skinMaterial: 'hollow',
     hp: 58, speed: '62% (heavy)', punchDmg: 7, kickDmg: 8,
     specials: ['Native to The Hollow', 'Tier 5 room enemy', '7 DMG melee', 'Stagger-immune', 'Revives x2'],
-    description: 'Husk is what The Hollow puts in your way - 1.55x the size of its Man, 62% of the speed, 58 HP of very nearly nothing. Nothing you land makes it flinch, so every exchange is one you finish second, and it gets back up at full health 2 times, untouchable while it does. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Husk is fifty-eight health that will not stagger and gets back up twice. Three kills for one wall, in the last room of the run, with nothing else about it — the Hollow does not need a gimmick.',
     traits: ['The Hollow', '58 HP', '7 DMG', 'Stagger-immune', 'Revives x2', '1.55x size'],
-    tips: ['It never flinches - go around it, never trade with it.', 'Budget 2 extra kills; the get-up itself is invincible.', 'Its speed is the counterplay; use the whole room and it never reaches you.'],
+    tips: ['Three kills. That is the entire fight, and it is enough.', 'It never flinches - go around it, never trade with it.', 'Budget 2 extra kills; the get-up itself is invincible.'],
     bodyScale: 1.55, weightMod: 0
   },
   {
@@ -2067,9 +2067,9 @@ ENEMIES.push(
     skinMaterial: 'hollow',
     hp: 30, speed: 'Kiting', punchDmg: 0, kickDmg: 0,
     specials: ['Native to The Hollow', 'Tier 5 room enemy', '5 DMG ranged', 'Sniper', 'Phases out', 'Near-invisible'],
-    description: 'Absence works The Hollow from the back of it, throwing 5 damage a shot while the melee walks you down. It fires from clear across the room and leads the shot, and it goes intangible in bursts and swings pass straight through it. It is barely visible even standing still. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'Absence snipes from across a room made of nothing, at 45% opacity, phasing whenever you get close. It is named for what you find when you go looking for it.',
     traits: ['The Hollow', '30 HP', 'Ranged only', 'Sniper', 'Phases out', 'Near-invisible'],
-    tips: ['Never hold a straight line while it has sight of you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.', '30 HP and no melee at all - it dies fast if you can reach it.'],
+    tips: ['You will not close on it cleanly. Punish the phase, not the position.', 'Never hold a straight line while it has sight of you.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Track it by its shadow and its shots, not its body.'],
     bodyScale: 1, weightMod: 0
   },
   {
@@ -2077,12 +2077,97 @@ ENEMIES.push(
     skinMaterial: 'hollow',
     hp: 80, speed: '120% (fast)', punchDmg: 9, kickDmg: 10,
     specials: ['Only ever spawns in The Hollow', 'Tier 5 room enemy', '9 DMG melee', 'Phases out', 'Lifesteal', 'Revives x2', 'Near-invisible'],
-    description: 'What Is Left fields in The Hollow and nowhere else in the game - one per room, 80 HP, 9 damage a swing. It goes intangible in bursts and swings pass straight through it, and every hit it lands heals it, so a slow fight is one you are quietly losing. It gets back up at full health 2 times, untouchable while it does, and it is barely visible even standing still. Tier 5: this is a room you never leave, so it only gets worse from here.',
+    description: 'What Is Left is the final enemy of the final room. Eighty health, nine damage, half again a Man\'s size, faster than one, barely visible, intangible in bursts, revives twice, and heals off everything it lands. It is every idea in tier 5 on one body, and there is nothing after it.',
     traits: ['The Hollow', '80 HP', '9 DMG', 'Phases out', 'Lifesteal', 'Revives x2', '1.5x size'],
-    tips: ['Wait the phase out; swinging into it burns the whole animation for nothing.', 'Burst it down - let it feed and your progress resets.', 'Budget 2 extra kills; the get-up itself is invincible.'],
+    tips: ['Three kills against something that heals while you do it. Bring everything; the run ends here either way.', 'Wait the phase out; swinging into it burns the whole animation for nothing.', 'Burst it down - let it feed and your progress resets.', 'Budget 2 extra kills; the get-up itself is invincible.'],
     bodyScale: 1.5, weightMod: 0
   }
 );
+
+// ── Coward + arena roster ────────────────────────────────────────────────
+ENEMIES.push(
+  {
+    id: 'coward', label: 'Coward', color: '#fff59d', tier: 'rare',
+    hp: 6, speed: '130% (fleeing)', punchDmg: 0, kickDmg: 0, specials: ['Never attacks', 'Permanently flees you (goofy run)', 'Appears from level 2'],
+    description: 'A jittery yellow stickman that wants absolutely nothing to do with you. It goofy-runs away the moment you get close and never throws a single punch. Free kill — if you can catch it.',
+    traits: ['Never attacks', 'Constant goofy-run flee', 'Low HP'],
+    tips: ['Corner it against walls or crates — in the open it outruns a walk.', 'Sprint + dash makes the catch trivial.', 'Worth chasing: same kill rewards as any basic.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'slimeBlock', label: 'Slime Block', color: '#66bb6a', tier: 'rare',
+    hp: 10, speed: 'Sliding kite', punchDmg: 0, kickDmg: 0, specials: ['Sliding cube (no skeleton)', 'Ranged green bolt', 'Splits into 2 minis when killed', 'GREEN blood', 'Appears from level 4'],
+    description: 'A bouncing green cube that slides around, pelting you with slime bolts from range. Killing it splits it into two mini-slimes (which don\'t split again), and everything it bleeds is green.',
+    traits: ['Cube body', 'Ranged only', 'Splits once on death', 'Green blood'],
+    tips: ['Budget three kills, not one — the minis come out swinging.', 'Kill the minis in one sweep with a kick.', 'No burn — unlike its lava cousin it\'s all pressure, no damage-over-time.'],
+    bodyScale: 1, isCube: true
+  },
+  {
+    id: 'weakFighter', label: 'Weak Fighter', color: '#bdbdbd', tier: 'arena',
+    hp: 3, speed: '90% normal', punchDmg: 0, kickDmg: 0, specials: ['Arena beginner room only', '3 HP, deals no damage'],
+    description: 'The Arena\'s training-wheels opponent: a grey stickman with 3 HP whose punches carry literally zero force. Exists so your first two waves teach movement and hit timing consequence-free.',
+    traits: ['Arena-exclusive', '3 HP', '0 damage'],
+    tips: ['One kick kills it.', 'Practice dodging anyway — the habits matter by wave 5.', 'They never spawn outside the Arena\'s concrete room.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandWarrior', label: 'Sand Warrior', color: '#d2b48c', tier: 'arena',
+    hp: 14, speed: '110% normal', punchDmg: 2, kickDmg: 3, specials: ['Sand pit waves', 'Fast, hits harder than basics'],
+    description: 'The sand pit\'s standard soldier — quicker and meaner than any surface basic, with a 2/3 damage kit that punishes lazy trades.',
+    traits: ['Arena sand roster', 'Fast melee', 'Above-basic damage'],
+    tips: ['Treat it like a Weapon Man with sprint.', 'They hunt in packs; never fight three at once.', 'Kicks send it into the sand — follow up while it stands.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandJuggernaut', label: 'Sand Juggernaut', color: '#c19a6b', tier: 'arena',
+    hp: 30, speed: '50% (slow)', punchDmg: 3, kickDmg: 4, specials: ['30 HP tank', 'Slow but heavy'],
+    description: 'A dune of muscle. Slow enough to walk away from, tanky enough to outlast careless players, and every connected hit genuinely hurts.',
+    traits: ['30 HP', 'Half speed', 'Heavy melee'],
+    tips: ['Kite it while clearing the Sand Warriors first.', 'It can barely turn — circle strafe and jab.', 'Never let it corner you against the ring wall.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'sandGiant', label: 'Sand Giant', color: '#b8860b', tier: 'arena',
+    hp: 40, speed: '60% (slow)', punchDmg: 4, kickDmg: 6, specials: ['1.6× size', '40 HP', 'Late sand-pit boss unit'],
+    description: 'The sand pit\'s capstone: a towering ochre giant with a 6-damage kick that ends average runs in two connects. Fought alone it\'s a dance; fought in a wave it\'s a problem.',
+    traits: ['1.6× size', '40 HP', '4/6 damage'],
+    tips: ['Its reach is longer than it looks — respect the size multiplier.', 'Burst it with crits/slam when the adds are down.', 'Two spawn on wave 16. Save a medkit.'],
+    bodyScale: 1.6
+  },
+  {
+    id: 'lavaMinion', label: 'Lava Minion', color: '#ff5722', tier: 'arena',
+    hp: 12, speed: '120% (fast)', punchDmg: 1, kickDmg: 0, specials: ['Magma Wasteland only', 'Punch applies 3s Burn'],
+    description: 'The Magma Wasteland\'s swarm unit — fast, fragile, and every punch sets you burning for 3 seconds. One is a nuisance; five are a health drain you can\'t medkit through.',
+    traits: ['Magma-exclusive', 'Burn on hit', 'Fast, low HP'],
+    tips: ['Never trade — the burn makes even 1-damage hits expensive.', 'Kick sweeps clear clusters efficiently.', 'Burns stack your timer back up; disengage and let it tick out.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaJuggernaut', label: 'Lava Juggernaut', color: '#bf360c', tier: 'arena',
+    hp: 35, speed: '50% (slow)', punchDmg: 3, kickDmg: 4, specials: ['35 HP tank', 'Punch applies 3s Burn'],
+    description: 'A slag-crusted tank that walks through your damage and sets you alight when it finally lands one. The magma waves\' anchor unit.',
+    traits: ['35 HP', 'Burn punch', 'Half speed'],
+    tips: ['Same playbook as the Sand Juggernaut, plus never eat the punch.', 'Its kick doesn\'t burn — if you must trade, trade into the kick side.', 'Leave it for last; it can\'t catch you.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaThrower', label: 'Lava Thrower', color: '#ff8a65', tier: 'arena',
+    hp: 14, speed: 'Kiting', punchDmg: 0, kickDmg: 0, specials: ['Ranged lava bolt (Burn 3s)', 'Kites at range'],
+    description: 'A ranged pyromancer that lobs trailing lava bolts from across the pentagon. Every hit burns; every burn is 3 free damage it didn\'t have to work for.',
+    traits: ['Ranged only', 'Burn projectile', 'Kites'],
+    tips: ['Close the gap in a curve — the bolts fly straight.', 'Highest priority in any magma wave.', 'Its projectile trail makes it easy to trace back to the source.'],
+    bodyScale: 1, weightMod: 0
+  },
+  {
+    id: 'lavaSplitCube', label: 'Lava Split Cube', color: '#ff8a2a', tier: 'arena',
+    hp: 10, speed: 'Sliding kite', punchDmg: 0, kickDmg: 0, specials: ['Sliding cube', 'Ranged burn bolt', 'Splits into 2 minis on death', 'Turns black when killed', 'ORANGE blood'],
+    description: 'A molten orange cube that slides around the wasteland spitting burning bolts. Kill it and it splits into two smaller cubes; kill those and their husks char black on the ground. It bleeds orange.',
+    traits: ['Cube body', 'Burn projectile', 'Splits once on death', 'Orange blood', 'Chars black when dead'],
+    tips: ['Three kills per cube — plan your stamina around it.', 'The minis inherit the burn bolts at a faster clip; don\'t stand between them.', 'Ground Slam kills the pair before they scatter.'],
+    bodyScale: 1, isCube: true
+  }
+);
+
 // ── Second wave of new rares + sandbox/magma additions ──────────────────
 ENEMIES.push(
   {
