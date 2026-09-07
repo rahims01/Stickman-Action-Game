@@ -124,6 +124,7 @@ import {
   ARMY_AGGRO_MS,
   ARMY_MAX_HEALTH,
   ARMY_SIGHT_RADIUS,
+  ARMY_MEDIC_MAX_HEALTH,
   ARMY_SPAWN_WITH_CIVILIAN_CHANCE,
   BODYGUARD_MAX_HEALTH,
   ENEMY_GUARD_ATTACH_CHANCE,
@@ -218,7 +219,7 @@ export interface SandboxActions {
   spawnDummy: () => void;
   spawnCivilian: () => void;
   spawnCivilianHelper: () => void;
-  spawnArmyMan: (kind: 'melee' | 'ranged') => void;
+  spawnArmyMan: (kind: 'melee' | 'ranged' | 'medic') => void;
   spawnBodyguard: () => void;
   spawnVip: () => void;
   spawnEnemyBodyguard: () => void;
@@ -531,7 +532,10 @@ const MinimapDriver: React.FC<MinimapDriverProps> = ({ canvasRef, playerRef, ene
       if (c.health <= 0) return;
       // Neutral-family colors: civilians white, armymen army-green,
       // bodyguards steel grey.
-      const color = c.role === 'armyMelee' || c.role === 'armyRanged' ? '#8bc34a' : c.role === 'bodyguard' ? '#90a4ae' : '#f5f0e6';
+      const color =
+        c.role === 'armyMedic' ? '#e0f2e0' :
+        c.role === 'armyMelee' || c.role === 'armyRanged' ? '#8bc34a' :
+        c.role === 'bodyguard' ? '#90a4ae' : '#f5f0e6';
       dot(c.position.x, c.position.z, color, 1.8);
     });
     flags.forEach((f) => dot(f.position[0], f.position[2], '#ffca28', 2.5));
@@ -2311,11 +2315,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     healEnemyById(attackerId, targetDied ? VAMPIRE_KILL_HEAL : Math.ceil(damageDealt * VAMPIRE_LIFESTEAL_FRACTION));
   };
 
-  const makeArmyUnit = (kind: 'melee' | 'ranged', pos: [number, number, number]): CivilianState => ({
+  // Medic Soldier patching up a comrade. Clamped to the patient's own max,
+  // and it never revives - a soldier who is already down stays down.
+  const handleMedicHeal = (targetId: string, amount: number) => {
+    setCivilians((prev) =>
+      prev.map((c) =>
+        c.id === targetId && c.health > 0 ? { ...c, health: Math.min(c.maxHealth, c.health + amount) } : c
+      )
+    );
+  };
+
+  const makeArmyUnit = (kind: 'melee' | 'ranged' | 'medic', pos: [number, number, number]): CivilianState => ({
     id: `civilian-${nextCivilianId.current++}`,
-    role: kind === 'melee' ? 'armyMelee' : 'armyRanged',
-    health: ARMY_MAX_HEALTH,
-    maxHealth: ARMY_MAX_HEALTH,
+    role: kind === 'melee' ? 'armyMelee' : kind === 'ranged' ? 'armyRanged' : 'armyMedic',
+    // The medic is softer than a rifleman - he is support, and he is meant to
+    // die quickly if you get to him.
+    health: kind === 'medic' ? ARMY_MEDIC_MAX_HEALTH : ARMY_MAX_HEALTH,
+    maxHealth: kind === 'medic' ? ARMY_MEDIC_MAX_HEALTH : ARMY_MAX_HEALTH,
     position: new THREE.Vector3(...pos),
     velocity: new THREE.Vector3(),
     statusEffects: createStatusEffects()
@@ -2330,7 +2346,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         if (c.health <= 0) return c;
         const inSight = Math.hypot(c.position.x - aroundPos.x, c.position.z - aroundPos.z) <= ARMY_SIGHT_RADIUS;
         if (!inSight) return c;
-        if (c.role === 'armyMelee' || c.role === 'armyRanged') {
+        if (c.role === 'armyMelee' || c.role === 'armyRanged' || c.role === 'armyMedic') {
           return {
             ...c,
             aggroPlayer: attacker.kind === 'player',
@@ -3419,6 +3435,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             protectCivilianId={c.protectCivilianId}
             medkits={medkits}
             onTakeMedkit={handleCivilianTakeMedkit}
+            onMedicHeal={handleMedicHeal}
             health={c.health}
             maxHealth={c.maxHealth}
             position={c.position}

@@ -12,6 +12,12 @@ import { AABB, MAP_RADIUS, MedkitDef } from '../world/worldObjects';
 import {
   ARMY_CHASE_SPEED,
   ARMY_KITE_SPEED,
+  ARMY_MEDIC_ESCORT_DISTANCE,
+  ARMY_MEDIC_FLEE_RADIUS,
+  ARMY_MEDIC_HEAL_AMOUNT,
+  ARMY_MEDIC_HEAL_COOLDOWN,
+  ARMY_MEDIC_HEAL_RADIUS,
+  ARMY_MEDIC_SEEK_RADIUS,
   ARMY_RANGED_MIN_RANGE,
   ARMY_MELEE_COOLDOWN,
   ARMY_MELEE_DAMAGE,
@@ -40,7 +46,8 @@ import {
   CIVILIAN_SEEK_ARMY_RADIUS,
   CivilianState,
   MEDKIT_PICKUP_RADIUS,
-  isArmyRole
+  isArmyRole,
+  isFightingArmyRole
 } from '../world/gameState';
 import { ProjectilesHandle } from './Projectiles';
 import {
@@ -95,6 +102,8 @@ interface CivilianActorProps {
   // Army men break off to heal when hurt; picking one up consumes it.
   medkits: MedkitDef[];
   onTakeMedkit?: (civilianId: string, medkitId: string) => void;
+  // Medic Soldier patching up a comrade.
+  onMedicHeal?: (targetCivilianId: string, amount: number) => void;
   onSunk: (id: string) => void;
 }
 
@@ -119,6 +128,9 @@ const CIVILIAN_COLORS = ['#e8d8c3', '#d7e3f4', '#e4d9ee', '#dcecd5', '#f4e3d7'];
 const ROLE_COLORS: Record<Exclude<CivilianRole, 'civilian'>, string> = {
   armyMelee: '#4b5320',
   armyRanged: '#33691e',
+  // Field white rather than fatigue green - you are meant to be able to pick
+  // him out of a squad at a glance, because he is the one worth killing first.
+  armyMedic: '#e8f1e4',
   bodyguard: '#263238',
   // The VIP reads as somebody important: pale suit, stands out in a crowd.
   vip: '#ffd54f'
@@ -160,6 +172,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   civilians,
   medkits,
   onTakeMedkit,
+  onMedicHeal,
   onSunk
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -183,6 +196,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   // Army combat: one-shot attack anim timer + pending hit application.
   const oneShotTimerRef = useRef<number | null>(null);
   const attackCooldownRef = useRef(0.5 + Math.random());
+  const healCooldownRef = useRef(Math.random());
   const pendingMeleeRef = useRef<{ impactIn: number; target: { kind: 'player' } | { kind: 'enemy'; id: string } } | null>(null);
 
   const baseFbx = useFBX(asset('/anims/stickman_base.fbx'));
@@ -464,6 +478,129 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
         }
       }
 
+      // ── Medic Soldier ──────────────────────────────────────────────────
+      // Entirely passive: no punch, no throw, no aggro of his own. Running
+      // outranks everything, then treating the worst-hurt soldier he can
+      // reach, then his own medkit, then staying with the squad. He is the
+      // reason a wounded squad stops being a wounded squad, so he is also
+      // the reason to open on the back rank instead of the front one.
+      if (role === 'armyMedic') {
+        healCooldownRef.current = Math.max(0, healCooldownRef.current - actualDelta);
+
+        // The player only counts as a threat once he has actually hit
+        // somebody; before that the medic has no reason to run from him.
+        const playerDist = Math.hypot(playerPos.x - pos.x, playerPos.z - pos.z);
+        const playerHostile = aggroValid && !!aggroPlayer && playerDist <= ARMY_MEDIC_FLEE_RADIUS;
+        const enemyClose = !!nearestEnemy && nearestEnemyDist <= ARMY_MEDIC_FLEE_RADIUS;
+
+        let goal: { x: number; z: number } | null = null;
+        let speed = CIVILIAN_WALK_SPEED;
+        let anim: CivilianAnimState = 'walk';
+
+        if (enemyClose || playerHostile) {
+          // Straight away from the average of whatever is too close, so
+          // breaking off from one man does not run him into another.
+          let ax = 0;
+          let az = 0;
+          let n = 0;
+          if (enemyClose && nearestEnemy) {
+            ax += nearestEnemy.position.x;
+            az += nearestEnemy.position.z;
+            n++;
+          }
+          if (playerHostile) {
+            ax += playerPos.x;
+            az += playerPos.z;
+            n++;
+          }
+          goal = { x: pos.x + (pos.x - ax / n), z: pos.z + (pos.z - az / n) };
+          speed = CIVILIAN_FLEE_SPEED;
+          anim = 'flee';
+        } else {
+          // Worst hurt first, with distance only as a tiebreak - he crosses
+          // the field for someone on their last legs rather than topping up
+          // whoever happens to be nearest.
+          let patient: CivilianState | undefined;
+          let bestScore = Infinity;
+          for (const c of civilians) {
+            if (c.id === id || c.health <= 0 || !isArmyRole(c.role)) continue;
+            const frac = c.maxHealth > 0 ? c.health / c.maxHealth : 1;
+            if (frac >= 1) continue;
+            const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
+            if (d > ARMY_MEDIC_SEEK_RADIUS) continue;
+            const score = frac + d / (ARMY_MEDIC_SEEK_RADIUS * 8);
+            if (score < bestScore) {
+              bestScore = score;
+              patient = c;
+            }
+          }
+
+          if (patient) {
+            const d = Math.hypot(patient.position.x - pos.x, patient.position.z - pos.z);
+            if (d <= ARMY_MEDIC_HEAL_RADIUS) {
+              anim = 'idle';
+              if (healCooldownRef.current <= 0) {
+                healCooldownRef.current = ARMY_MEDIC_HEAL_COOLDOWN;
+                onMedicHeal?.(patient.id, ARMY_MEDIC_HEAL_AMOUNT);
+                for (let i = 0; i < 6; i++) {
+                  const q = patient.position.clone();
+                  q.x += (Math.random() - 0.5) * 0.8;
+                  q.y += 0.5 + Math.random() * 1.3;
+                  q.z += (Math.random() - 0.5) * 0.8;
+                  projectilesRef?.current?.spawnAmbientParticle(q, '#8bc34a');
+                }
+              }
+            } else {
+              goal = { x: patient.position.x, z: patient.position.z };
+              speed = ARMY_CHASE_SPEED;
+            }
+          } else if (medkitGoal) {
+            // Nobody to treat and hurt himself: he uses a medkit like anyone.
+            const d = Math.hypot(medkitGoal.x - pos.x, medkitGoal.z - pos.z);
+            if (d < MEDKIT_PICKUP_RADIUS) onTakeMedkit?.(id, medkitGoal.id);
+            else {
+              goal = { x: medkitGoal.x, z: medkitGoal.z };
+              speed = CIVILIAN_FLEE_SPEED;
+              anim = 'flee';
+            }
+          } else {
+            // Idle: stay behind the nearest fighting soldier. A medic alone
+            // in the open is just a civilian in a white coat.
+            let escort: CivilianState | undefined;
+            let escortDist = Infinity;
+            for (const c of civilians) {
+              if (c.id === id || c.health <= 0 || !isFightingArmyRole(c.role)) continue;
+              const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
+              if (d < escortDist) {
+                escortDist = d;
+                escort = c;
+              }
+            }
+            if (escort && escortDist > ARMY_MEDIC_ESCORT_DISTANCE) {
+              goal = { x: escort.position.x, z: escort.position.z };
+              speed = CIVILIAN_WALK_SPEED * 1.6;
+            } else {
+              anim = 'idle';
+            }
+          }
+        }
+
+        if (goal && oneShotTimerRef.current === null) {
+          const heading = pickOpenHeading(pos, Math.atan2(goal.x - pos.x, goal.z - pos.z), colliders, HUMANOID_RADIUS);
+          rotateTowardAngle(groupRef.current, heading, 10, actualDelta);
+          transitionTo(anim, 0.2);
+          groupRef.current.translateZ(speed * slowFactor * actualDelta);
+        } else {
+          transitionTo(anim === 'flee' ? 'flee' : 'idle', 0.2);
+        }
+
+        const resolvedMedic = resolveCircleVsBoxes(prevXa, prevZa, pos.x, pos.z, HUMANOID_RADIUS, colliders);
+        pos.x = resolvedMedic.x;
+        pos.z = resolvedMedic.z;
+        position.copy(pos);
+        return;
+      }
+
       // Answering a call for help. Every soldier derives the same responder
       // ordering from the same roster, so the two nearest agree on who goes
       // without any coordination between them.
@@ -486,7 +623,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
             .filter(
               (c) =>
                 c.health > 0 &&
-                isArmyRole(c.role) &&
+                isFightingArmyRole(c.role) &&
                 c.id !== victim.id &&
                 c.health / c.maxHealth >= ARMY_SUPPORT_LOW_FRACTION
             )
@@ -691,7 +828,8 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
     if (threatened) {
       let guardDist = Infinity;
       for (const c of civilians) {
-        if (c.health <= 0 || !isArmyRole(c.role)) continue;
+        // A medic is no protection - he runs from the same thing you do.
+        if (c.health <= 0 || !isFightingArmyRole(c.role)) continue;
         const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
         if (d <= CIVILIAN_SEEK_ARMY_RADIUS && d < guardDist) {
           guardDist = d;

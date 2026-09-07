@@ -366,6 +366,23 @@ export const ARMY_CHASE_SPEED = 3.4;
 // same kiting the ranged ENEMIES have always done (GREY_MAN_MIN_DISTANCE).
 export const ARMY_RANGED_MIN_RANGE = 6.5;
 export const ARMY_KITE_SPEED = 4.6;
+
+// ── Medic Soldier ─────────────────────────────────────────────────────────
+// The one soldier who never throws a punch. He carries no weapon at all: he
+// walks to whoever is worst hurt, patches them up, and runs the moment
+// anything hostile gets near him. Killing him is how you stop a squad
+// healing itself back to full in the middle of a fight.
+export const ARMY_MEDIC_MAX_HEALTH = 12;
+/** Anything hostile inside this and he drops everything and runs. */
+export const ARMY_MEDIC_FLEE_RADIUS = 8;
+/** How far he will travel to reach a patient. */
+export const ARMY_MEDIC_SEEK_RADIUS = 30;
+/** He has to actually reach them - no healing across the map. */
+export const ARMY_MEDIC_HEAL_RADIUS = 1.9;
+export const ARMY_MEDIC_HEAL_AMOUNT = 4;
+export const ARMY_MEDIC_HEAL_COOLDOWN = 3.5;
+/** With nobody to treat, he tucks in behind the squad rather than wandering. */
+export const ARMY_MEDIC_ESCORT_DISTANCE = 6;
 export const ARMY_MAX_HEALTH = 16;
 export const BODYGUARD_MAX_HEALTH = 15;
 export const BODYGUARD_FOLLOW_DISTANCE = 2.0;
@@ -633,10 +650,14 @@ export interface EnemyState {
 
 // The civilian FAMILY: plain civilians plus the armed neutral units that
 // share their plumbing (enemy targeting, status effects, hit-tests, bars).
-export type CivilianRole = 'civilian' | 'armyMelee' | 'armyRanged' | 'bodyguard' | 'vip';
+export type CivilianRole = 'civilian' | 'armyMelee' | 'armyRanged' | 'armyMedic' | 'bodyguard' | 'vip';
 
 export const isArmyRole = (role?: CivilianRole): boolean =>
-  role === 'armyMelee' || role === 'armyRanged' || role === 'bodyguard';
+  role === 'armyMelee' || role === 'armyRanged' || role === 'armyMedic' || role === 'bodyguard';
+
+/** Army roles that will actually fight. The medic is the exception. */
+export const isFightingArmyRole = (role?: CivilianRole): boolean =>
+  isArmyRole(role) && role !== 'armyMedic';
 
 // Army men proactively engage enemies on sight rather than waiting to be
 // provoked, so these two fractions decide when self-preservation wins.

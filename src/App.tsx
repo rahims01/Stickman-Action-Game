@@ -1740,6 +1740,11 @@ export const App: React.FC = () => {
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(51,105,30,0.7)', background: 'rgba(51,105,30,0.15)', color: '#9ccc65', cursor: 'pointer', fontSize: '11px' }}>
                           🎯 Army (Ranged)
                         </button>
+                        <button onClick={() => sb(a => a.spawnArmyMan('medic'))}
+                          title="Passive medic: never attacks. Runs from anything hostile, otherwise treats the worst-hurt soldier he can reach. Kill him to stop a squad healing itself."
+                          style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(232,241,228,0.55)', background: 'rgba(232,241,228,0.12)', color: '#dcefd8', cursor: 'pointer', fontSize: '11px' }}>
+                          ⛑ Army (Medic)
+                        </button>
                         <button onClick={() => sb(a => a.spawnBodyguard())}
                           title="Not a helper: just follows you and retaliates against whatever hurts you. Dies for good."
                           style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(96,125,139,0.6)', background: 'rgba(96,125,139,0.12)', color: '#b0bec5', cursor: 'pointer', fontSize: '11px' }}>
@@ -1981,6 +1986,11 @@ export const App: React.FC = () => {
                       title="Neutral rifleman: passive until provoked, then fires from range"
                       style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(51,105,30,0.7)', background: 'rgba(51,105,30,0.18)', color: '#9ccc65', cursor: 'pointer', fontSize: '10px', whiteSpace: 'nowrap' }}>
                       🎯 Army (R)
+                    </button>
+                    <button onClick={() => sb(a => a.spawnArmyMan('medic'))}
+                      title="Passive medic: never attacks. Runs from anything hostile, otherwise treats the worst-hurt soldier he can reach. Kill him to stop a squad healing itself."
+                      style={{ padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(232,241,228,0.5)', background: 'rgba(232,241,228,0.14)', color: '#dcefd8', cursor: 'pointer', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                      ⛑ Army (Med)
                     </button>
                     <button onClick={() => sb(a => a.spawnBodyguard())}
                       title="Not a helper: follows you and retaliates against whatever hurts you"
