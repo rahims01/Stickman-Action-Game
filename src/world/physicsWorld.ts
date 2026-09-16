@@ -4,26 +4,38 @@ import { CrateDef, WALL_COLLIDERS } from './worldObjects';
 /**
  * Collision groups.
  *
- * Ragdoll bodies collide with the static WORLD and with nothing else, which
- * is the fix for two separate problems:
+ * A limb must collide with the rest of its OWN body - an arm coming to rest
+ * across the chest has to land on it, not sink through it - while the pairs
+ * that overlap BY CONSTRUCTION must not. Each box spans from its own bone to
+ * the next, so the upper-arm box and the forearm box both occupy the elbow;
+ * cannon reads that as two solids interpenetrating, shoves them apart hard,
+ * and the ConeTwist holding them together hauls them straight back. Every
+ * joint fighting itself, every frame.
  *
- *  - Adjacent limb boxes overlap BY CONSTRUCTION. Each box spans from its
- *    bone to the next, so the upper-arm box and the forearm box both occupy
- *    the elbow. cannon reads that as two solids interpenetrating, shoves them
- *    apart hard, and the ConeTwist holding them together immediately hauls
- *    them back - every joint fighting itself, every frame, forever.
- *  - Cost. Every ragdoll body otherwise pair-tests against every other body
- *    in the world on cannon's default NaiveBroadphase (all-pairs, O(n^2)). At
- *    DEAD_BODY_LIMIT corpses of 20 bodies each that is ~125k pair tests a
- *    step, nearly all of them between limbs that should never have been
- *    considered.
+ * Masks alone cannot express that, because it is a per-PAIR rule rather than
+ * a per-body one. So the mask opens ragdoll-to-ragdoll traffic and the
+ * broadphase hook below decides each pair:
  *
- * The trade-off, accepted deliberately: corpses no longer stack on each
- * other. Several bodies dying in one spot interpenetrate instead of piling.
- * They sink after CORPSE_SINK_DELAY anyway.
+ *   different corpses          -> never collide (keeps the cost down; this is
+ *                                 the "corpses do not stack" trade-off)
+ *   same corpse, jointed pair  -> never collide (the overlap-by-construction
+ *                                 case that was making joints fight)
+ *   same corpse, anything else -> collide normally (hand on chest, knee on
+ *                                 the opposite shin, and so on)
  */
 export const PHYSICS_GROUP_WORLD = 1;
 export const PHYSICS_GROUP_RAGDOLL = 2;
+
+// Which ragdoll a body belongs to, and which of its siblings it must ignore.
+// WeakMaps rather than fields on the body so cannon's types stay untouched
+// and a disposed ragdoll's entries go away on their own.
+const ragdollInstance = new WeakMap<CANNON.Body, number>();
+const ragdollIgnores = new WeakMap<CANNON.Body, Set<number>>();
+
+export const registerRagdollBody = (body: CANNON.Body, instanceId: number, ignores: Set<number>): void => {
+  ragdollInstance.set(body, instanceId);
+  ragdollIgnores.set(body, ignores);
+};
 
 export const physicsWorld = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.81, 0) });
 
@@ -54,6 +66,22 @@ WALL_COLLIDERS.forEach((wall) => {
   body.position.set((wall.minX + wall.maxX) / 2, halfY, (wall.minZ + wall.maxZ) / 2);
   physicsWorld.addBody(body);
 });
+
+// Per-pair ragdoll rules, layered on top of cannon's own group/mask check.
+// Wrapped once at module load; every ragdoll in the game shares this world.
+const baseNeedBroadphaseCollision = physicsWorld.broadphase.needBroadphaseCollision.bind(
+  physicsWorld.broadphase
+);
+physicsWorld.broadphase.needBroadphaseCollision = (bodyA: CANNON.Body, bodyB: CANNON.Body): boolean => {
+  if (!baseNeedBroadphaseCollision(bodyA, bodyB)) return false;
+  const instanceA = ragdollInstance.get(bodyA);
+  if (instanceA === undefined) return true;
+  const instanceB = ragdollInstance.get(bodyB);
+  if (instanceB === undefined) return true;
+  // Two limbs. Same corpse only, and only if they are not a jointed pair.
+  if (instanceA !== instanceB) return false;
+  return !ragdollIgnores.get(bodyA)?.has(bodyB.id);
+};
 
 const FIXED_TIME_STEP = 1 / 60;
 const MAX_SUB_STEPS = 5;
