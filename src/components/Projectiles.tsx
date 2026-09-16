@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { AttackPayload } from '../world/enemyConfig';
 import { CROSSOVER_BALL_MASS, CROSSOVER_MAGNUS_K, CivilianState, EnemyState, HUMANOID_RADIUS, HelperState } from '../world/gameState';
 import { AABB } from '../world/worldObjects';
+import { segmentHitsBox } from '../world/collision';
 
 export interface ProjectileSpawnConfig {
   from: THREE.Vector3;
@@ -189,6 +190,10 @@ export const Projectiles = forwardRef<ProjectilesHandle, ProjectilesProps>(({ pl
         );
       }
       const step = slot.speed * dt;
+      // Where the bolt was before this frame's move — the wall test below
+      // needs the segment it travelled, not just where it landed.
+      const prevX = mesh.position.x;
+      const prevZ = mesh.position.z;
       mesh.position.addScaledVector(slot.direction, step);
       slot.traveled += step;
       if (slot.growing) mesh.scale.setScalar(1 + slot.traveled * GROWTH_RATE);
@@ -203,18 +208,30 @@ export const Projectiles = forwardRef<ProjectilesHandle, ProjectilesProps>(({ pl
 
       // Destructible cover: a crate/wall tall enough to intercept the bolt's
       // flight height stops it dead (with a puff where it struck).
-      const px = mesh.position.x;
-      const pz = mesh.position.z;
+      //
+      // Tested against the SEGMENT travelled this frame rather than the point
+      // it landed on. Walls are WALL_DEPTH (0.4) thick and projectiles reach
+      // speed 18, so with dt clamped at 0.05 a single step can be 0.9 units —
+      // more than twice the wall — and the old point-in-box test simply never
+      // fired for the frames that stepped over one. Height is constant along
+      // the flight (direction.y is zeroed at spawn), so the topY gate can be
+      // checked once per box rather than per sample.
+      let hitT: number | null = null;
       for (const box of collidersRef.current) {
-        if (px >= box.minX && px <= box.maxX && pz >= box.minZ && pz <= box.maxZ && mesh.position.y <= box.topY) {
-          spawnTrailParticle(mesh.position, slot.color);
-          slot.active = false;
-          mesh.visible = false;
-          slot.payload = null;
-          break;
-        }
+        if (mesh.position.y > box.topY) continue;
+        const t = segmentHitsBox(prevX, prevZ, mesh.position.x, mesh.position.z, box);
+        if (t !== null && (hitT === null || t < hitT)) hitT = t;
       }
-      if (!slot.active) return;
+      if (hitT !== null) {
+        // Put the impact where it actually struck, not a step beyond the wall.
+        mesh.position.x = prevX + (mesh.position.x - prevX) * hitT;
+        mesh.position.z = prevZ + (mesh.position.z - prevZ) * hitT;
+        spawnTrailParticle(mesh.position, slot.color);
+        slot.active = false;
+        mesh.visible = false;
+        slot.payload = null;
+        return;
+      }
 
       const projRadius = HIT_RADIUS * (slot.growing ? 1 + slot.traveled * GROWTH_RATE : 1);
 
