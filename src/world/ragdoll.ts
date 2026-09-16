@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import { PHYSICS_GROUP_RAGDOLL, PHYSICS_GROUP_WORLD } from './physicsWorld';
 
 const DEG = Math.PI / 180;
 
@@ -108,6 +109,12 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
         shape,
         position: new CANNON.Vec3(centerPos.x, centerPos.y, centerPos.z),
         quaternion: new CANNON.Quaternion(bodyQuat.x, bodyQuat.y, bodyQuat.z, bodyQuat.w),
+        // Collide with the static world only - never with another limb, and
+        // never with another corpse. See PHYSICS_GROUP_* in physicsWorld.ts
+        // for why; the short version is that neighbouring limb boxes overlap
+        // by construction and cannon spends every frame trying to fix it.
+        collisionFilterGroup: PHYSICS_GROUP_RAGDOLL,
+        collisionFilterMask: PHYSICS_GROUP_WORLD,
         linearDamping: 0.4,
         angularDamping: 0.6,
         allowSleep: true,
@@ -142,7 +149,14 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
         axisA: new CANNON.Vec3(0, 1, 0),
         axisB: new CANNON.Vec3(0, 1, 0),
         angle: spec.swingAngle,
-        twistAngle: spec.twistAngle
+        twistAngle: spec.twistAngle,
+        // Belt and braces under the group mask above. cannon defaults this to
+        // TRUE, which is what has any constrained pair colliding in the first
+        // place. The mask should already prevent it, but this independently
+        // removes exactly the parent/child pairs that overlap by construction
+        // - so if the grouping is ever misconfigured or a body is created
+        // outside createRagdoll, the worst offenders still cannot fight.
+        collideConnected: false
       });
       world.addConstraint(constraint);
       constraints.push(constraint);
