@@ -93,9 +93,20 @@ export interface RagdollHandle {
  */
 const SETTLE_LINEAR_SPEED = 0.15;
 const SETTLE_ANGULAR_SPEED = 2;
-/** A third of a second of quiet, or three seconds regardless. */
-const SETTLE_QUIET_FRAMES = 20;
-const SETTLE_FRAME_LIMIT = 180;
+/**
+ * Both counted in cannon SUBSTEPS, not in frames and not in wall-clock
+ * seconds - 20 substeps is a third of a simulated second, 180 is three.
+ *
+ * Frames were wrong in a way that pointed the wrong direction: the retirement
+ * delay scaled INVERSELY with framerate, so at 10fps a corpse took 18
+ * wall-clock seconds to retire instead of 3 - slowest exactly when retiring
+ * it is most urgent. world.time is no better, because cannon advances it by
+ * the wall-clock delta handed in, not by the amount it managed to simulate,
+ * and discards the accumulator it could not catch up on. world.stepnumber
+ * increments once per internalStep and is the only honest simulated clock.
+ */
+const SETTLE_QUIET_STEPS = 20;
+const SETTLE_STEP_LIMIT = 180;
 
 // Distinguishes one corpse's limbs from another's, so the broadphase hook in
 // physicsWorld can let a limb hit its own chest without every corpse in the
@@ -144,8 +155,9 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
   let settled = false;
   const settledPose: { bone: THREE.Object3D; position: THREE.Vector3; quaternion: THREE.Quaternion }[] = [];
   let hipsBone: THREE.Object3D | null = null;
-  let framesSimulated = 0;
-  let quietFrames = 0;
+  let activatedAtStep = 0;
+  /** stepnumber at which the current run of quiet began; -1 when not quiet. */
+  let quietSinceStep = -1;
 
   const activate = (impulse?: THREE.Vector3) => {
     if (active) return;
@@ -154,8 +166,8 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
 
     const instanceId = nextRagdollInstanceId++;
     hipsBone = model.getObjectByName('mixamorigHips') ?? null;
-    framesSimulated = 0;
-    quietFrames = 0;
+    activatedAtStep = world.stepnumber;
+    quietSinceStep = -1;
     const forwardWorld = deriveForward(model);
     const bodiesByName = new Map<string, CANNON.Body>();
     const boneWorldPos = new THREE.Vector3();
@@ -377,7 +389,6 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
     // Asleep in cannon's own judgement, or simply out of patience: a limb
     // balanced on an edge can jitter below the sleep threshold indefinitely,
     // and an unbounded cost is worse than a corpse that stops twitching.
-    framesSimulated++;
     let maxLinear = 0;
     let maxAngular = 0;
     for (const { body } of runtimes) {
@@ -387,8 +398,11 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
     const quiet =
       maxLinear < SETTLE_LINEAR_SPEED * SETTLE_LINEAR_SPEED &&
       maxAngular < SETTLE_ANGULAR_SPEED * SETTLE_ANGULAR_SPEED;
-    quietFrames = quiet ? quietFrames + 1 : 0;
-    if (runtimes.length > 0 && (quietFrames >= SETTLE_QUIET_FRAMES || framesSimulated > SETTLE_FRAME_LIMIT)) settle();
+    if (!quiet) quietSinceStep = -1;
+    else if (quietSinceStep < 0) quietSinceStep = world.stepnumber;
+    const quietSteps = quietSinceStep < 0 ? 0 : world.stepnumber - quietSinceStep;
+    const stepsAlive = world.stepnumber - activatedAtStep;
+    if (runtimes.length > 0 && (quietSteps >= SETTLE_QUIET_STEPS || stepsAlive > SETTLE_STEP_LIMIT)) settle();
   };
 
   const applyImpulseToHips = (impulse: THREE.Vector3) => {
