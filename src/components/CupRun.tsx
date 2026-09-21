@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
+import { ClipSource, useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { useInputs } from '../hooks/useInputs';
@@ -87,11 +88,11 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   // Repair the >4-influence weights three silently truncates on load;
   // shared geometry means this runs once no matter how many actors mount.
   normalizeSkinWeights(baseFbx);
-  const idleFbx = useFBX(asset('/anims/fighting-idle.fbx'));
-  const walkFbx = useFBX(asset('/anims/walk.fbx'));
-  const punchFbx = useFBX(asset('/anims/punch.fbx'));
-  const kickFbx = useFBX(asset('/anims/kick.fbx'));
-  const hitFbx = useFBX(asset('/anims/hit-to-body.fbx'));
+  const idleFbx = useAnimation(asset('/anims/fighting-idle.fbx'));
+  const walkFbx = useAnimation(asset('/anims/walk.fbx'));
+  const punchFbx = useAnimation(asset('/anims/punch.fbx'));
+  const kickFbx = useAnimation(asset('/anims/kick.fbx'));
+  const hitFbx = useAnimation(asset('/anims/hit-to-body.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
@@ -118,7 +119,7 @@ const DuelActor: React.FC<DuelActorProps> = ({ fighter, self, foe, isPlayer, liv
   useEffect(() => {
     const mixer = new THREE.AnimationMixer(model);
     mixerRef.current = mixer;
-    const bind = (name: DuelAnim, fbx: THREE.Group, loop: boolean) => {
+    const bind = (name: DuelAnim, fbx: ClipSource, loop: boolean) => {
       const clip = fbx.animations[0];
       if (!clip) return;
       const cloned = clip.clone();

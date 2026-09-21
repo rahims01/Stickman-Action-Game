@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
+import { ClipSource, useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { useInputs } from '../hooks/useInputs';
@@ -154,15 +155,15 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
   // Repair the >4-influence weights three silently truncates on load;
   // shared geometry means this runs once no matter how many actors mount.
   normalizeSkinWeights(baseFbx);
-  const idleFbx = useFBX(asset('/anims/idle.fbx'));
-  const walkFbx = useFBX(asset('/anims/walk.fbx'));
-  const runFbx = useFBX(asset('/anims/run.fbx'));
+  const idleFbx = useAnimation(asset('/anims/idle.fbx'));
+  const walkFbx = useAnimation(asset('/anims/walk.fbx'));
+  const runFbx = useAnimation(asset('/anims/run.fbx'));
   // Real football animations from Ultimate Soccer, on the same stock Mixamo
   // rig, so they bind directly. They are NOT exported in-place — root motion
   // is stripped below or players slide across the pitch on every strike.
-  const shootFbx = useFBX(asset('/anims/shoot.fbx'));
-  const passFbx = useFBX(asset('/anims/pass.fbx'));
-  const tackleFbx = useFBX(asset('/anims/slide-tackle.fbx'));
+  const shootFbx = useAnimation(asset('/anims/shoot.fbx'));
+  const passFbx = useAnimation(asset('/anims/pass.fbx'));
+  const tackleFbx = useAnimation(asset('/anims/slide-tackle.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 
@@ -186,7 +187,7 @@ const PitchActor: React.FC<ActorProps> = ({ state, all, ball, onKick, onTackle, 
   useEffect(() => {
     const mixer = new THREE.AnimationMixer(model);
     mixerRef.current = mixer;
-    const bind = (name: PitchAnim, fbx: THREE.Group, loop: boolean) => {
+    const bind = (name: PitchAnim, fbx: ClipSource, loop: boolean) => {
       const clip = fbx.animations[0];
       if (!clip) return;
       const cloned = clip.clone();

@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
+import { useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { createRagdoll, RagdollHandle } from '../world/ragdoll';
@@ -60,10 +61,10 @@ export const DummyActor: React.FC<DummyActorProps> = ({ position, velocity, heal
   // Repair the >4-influence weights three silently truncates on load;
   // shared geometry means this runs once no matter how many actors mount.
   normalizeSkinWeights(baseFbx);
-  const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
-  const hitAnim = useFBX(asset('/anims/hit-to-body.fbx'));
-  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
-  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
+  const idleAnim = useAnimation(asset('/anims/fighting-idle.fbx'));
+  const hitAnim = useAnimation(asset('/anims/hit-to-body.fbx'));
+  const kidneyHitAnim = useAnimation(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useAnimation(asset('/anims/stomach-hit.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 

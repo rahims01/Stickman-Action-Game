@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
+import { ClipSource, useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { useInputs } from '../hooks/useInputs';
 import { AnimationState, CROUCH_HOLD_VARIANTS, IDLE_VARIANTS, ViewMode } from '../types/game.types';
@@ -355,37 +356,37 @@ export const Player: React.FC<PlayerProps> = ({
   // fixed AnimationState-driven `anims` map below since they aren't their
   // own distinct states - one is picked at random each time hit/bigHit
   // triggers instead of always playing the exact same flinch.
-  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
-  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
-  const bigHitToHeadAnim = useFBX(asset('/anims/big-hit-to-head.fbx'));
-  const bigKidneyHitAnim = useFBX(asset('/anims/big-kidney-hit.fbx'));
-  const bigSideHitAnim = useFBX(asset('/anims/big-side-hit.fbx'));
-  const bigStomachHitAnim = useFBX(asset('/anims/big-stomach-hit.fbx'));
+  const kidneyHitAnim = useAnimation(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useAnimation(asset('/anims/stomach-hit.fbx'));
+  const bigHitToHeadAnim = useAnimation(asset('/anims/big-hit-to-head.fbx'));
+  const bigKidneyHitAnim = useAnimation(asset('/anims/big-kidney-hit.fbx'));
+  const bigSideHitAnim = useAnimation(asset('/anims/big-side-hit.fbx'));
+  const bigStomachHitAnim = useAnimation(asset('/anims/big-stomach-hit.fbx'));
   const anims = {
-    idle: useFBX(ANIM_FILES.idle),
-    idle2: useFBX(ANIM_FILES.idle2),
-    idle3: useFBX(ANIM_FILES.idle3),
-    idle4: useFBX(ANIM_FILES.idle4),
-    idle5: useFBX(ANIM_FILES.idle5),
-    walk: useFBX(ANIM_FILES.walk),
-    run: useFBX(ANIM_FILES.run),
-    runToStop: useFBX(ANIM_FILES.runToStop),
-    jump: useFBX(ANIM_FILES.jump),
-    fallingIdle: useFBX(ANIM_FILES.fallingIdle),
-    hardLanding: useFBX(ANIM_FILES.hardLanding),
-    fallingToRoll: useFBX(ANIM_FILES.fallingToRoll),
-    crouchEnter: useFBX(ANIM_FILES.crouchEnter),
-    crouchEnter2: useFBX(ANIM_FILES.crouchEnter2),
-    crouchExit: useFBX(ANIM_FILES.crouchExit),
-    crouchExitMoving: useFBX(ANIM_FILES.crouchExitMoving),
-    crouchSneakLeft: useFBX(ANIM_FILES.crouchSneakLeft),
-    crouchSneakRight: useFBX(ANIM_FILES.crouchSneakRight),
-    coverSneakLeft: useFBX(ANIM_FILES.coverSneakLeft),
-    coverSneakRight: useFBX(ANIM_FILES.coverSneakRight),
-    punch: useFBX(ANIM_FILES.punch),
-    kick: useFBX(ANIM_FILES.kick),
-    hit: useFBX(ANIM_FILES.hit),
-    bigHit: useFBX(ANIM_FILES.bigHit)
+    idle: useAnimation(ANIM_FILES.idle),
+    idle2: useAnimation(ANIM_FILES.idle2),
+    idle3: useAnimation(ANIM_FILES.idle3),
+    idle4: useAnimation(ANIM_FILES.idle4),
+    idle5: useAnimation(ANIM_FILES.idle5),
+    walk: useAnimation(ANIM_FILES.walk),
+    run: useAnimation(ANIM_FILES.run),
+    runToStop: useAnimation(ANIM_FILES.runToStop),
+    jump: useAnimation(ANIM_FILES.jump),
+    fallingIdle: useAnimation(ANIM_FILES.fallingIdle),
+    hardLanding: useAnimation(ANIM_FILES.hardLanding),
+    fallingToRoll: useAnimation(ANIM_FILES.fallingToRoll),
+    crouchEnter: useAnimation(ANIM_FILES.crouchEnter),
+    crouchEnter2: useAnimation(ANIM_FILES.crouchEnter2),
+    crouchExit: useAnimation(ANIM_FILES.crouchExit),
+    crouchExitMoving: useAnimation(ANIM_FILES.crouchExitMoving),
+    crouchSneakLeft: useAnimation(ANIM_FILES.crouchSneakLeft),
+    crouchSneakRight: useAnimation(ANIM_FILES.crouchSneakRight),
+    coverSneakLeft: useAnimation(ANIM_FILES.coverSneakLeft),
+    coverSneakRight: useAnimation(ANIM_FILES.coverSneakRight),
+    punch: useAnimation(ANIM_FILES.punch),
+    kick: useAnimation(ANIM_FILES.kick),
+    hit: useAnimation(ANIM_FILES.hit),
+    bigHit: useAnimation(ANIM_FILES.bigHit)
   };
 
   useEffect(() => {
@@ -425,7 +426,7 @@ export const Player: React.FC<PlayerProps> = ({
     });
     actionsRef.current = nextActions;
 
-    const makeVariantAction = (fbx: ReturnType<typeof useFBX>): THREE.AnimationAction | null => {
+    const makeVariantAction = (fbx: ClipSource): THREE.AnimationAction | null => {
       const clip = fbx.animations[0];
       if (!clip) return null;
       stripRootMotion(clip);

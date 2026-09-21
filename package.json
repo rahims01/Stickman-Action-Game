@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pretest": "node scripts/build-tests.cjs",
+    "test": "node --test \"tests/*.test.cjs\"",
+    "build:anims": "node scripts/build-anim-clips.cjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.88.0",

@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useFBX, Html } from '@react-three/drei';
+import { useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { createRagdoll, RagdollHandle } from '../world/ragdoll';
@@ -275,33 +276,33 @@ export const EnemyActor: React.FC<EnemyActorProps> = ({
   // Repair the >4-influence weights three silently truncates on load;
   // shared geometry means this runs once no matter how many actors mount.
   normalizeSkinWeights(baseFbx);
-  const idleAnim = useFBX(asset('/anims/fighting-idle.fbx'));
-  const walkAnim = useFBX(asset('/anims/walk.fbx'));
+  const idleAnim = useAnimation(asset('/anims/fighting-idle.fbx'));
+  const walkAnim = useAnimation(asset('/anims/walk.fbx'));
   // Cowards flee with the goofy-run clip instead of the normal walk.
-  const goofyRunAnim = useFBX(asset('/anims/goofy-running.fbx'));
-  const punchAnim = useFBX(asset('/anims/punch.fbx'));
-  const kickAnim = useFBX(asset('/anims/kick.fbx'));
+  const goofyRunAnim = useAnimation(asset('/anims/goofy-running.fbx'));
+  const punchAnim = useAnimation(asset('/anims/punch.fbx'));
+  const kickAnim = useAnimation(asset('/anims/kick.fbx'));
   // A small variety pool per reaction tier - one is picked at random each
   // time a hit/bigHit reaction triggers, instead of always playing the
   // exact same flinch.
-  const hitAnim = useFBX(asset('/anims/hit-to-body.fbx'));
-  const kidneyHitAnim = useFBX(asset('/anims/kidney-hit.fbx'));
-  const stomachHitAnim = useFBX(asset('/anims/stomach-hit.fbx'));
+  const hitAnim = useAnimation(asset('/anims/hit-to-body.fbx'));
+  const kidneyHitAnim = useAnimation(asset('/anims/kidney-hit.fbx'));
+  const stomachHitAnim = useAnimation(asset('/anims/stomach-hit.fbx'));
   // Reused purely as dramatic, non-lethal staggers at critically low health
   // - never played on an actual kill, which still skips straight to the
   // ragdoll corpse per the project's no-death-clips rule. "falling-back-death"
   // is just a leftover filename from its source library.
-  const bigHitAnim = useFBX(asset('/anims/falling-back-death.fbx'));
-  const bigHitToHeadAnim = useFBX(asset('/anims/big-hit-to-head.fbx'));
-  const bigKidneyHitAnim = useFBX(asset('/anims/big-kidney-hit.fbx'));
-  const bigSideHitAnim = useFBX(asset('/anims/big-side-hit.fbx'));
-  const bigStomachHitAnim = useFBX(asset('/anims/big-stomach-hit.fbx'));
+  const bigHitAnim = useAnimation(asset('/anims/falling-back-death.fbx'));
+  const bigHitToHeadAnim = useAnimation(asset('/anims/big-hit-to-head.fbx'));
+  const bigKidneyHitAnim = useAnimation(asset('/anims/big-kidney-hit.fbx'));
+  const bigSideHitAnim = useAnimation(asset('/anims/big-side-hit.fbx'));
+  const bigStomachHitAnim = useAnimation(asset('/anims/big-stomach-hit.fbx'));
   // Windup for ranged specials (greyMan, lavaMan, purpleMan, etc.) - a
   // throwing motion reads far better than reusing the melee punch clip.
-  const throwAnim = useFBX(asset('/anims/throw.fbx'));
+  const throwAnim = useAnimation(asset('/anims/throw.fbx'));
   // Ultimate Soccer crossover: a real planted-foot instep drive, on the same
   // stock Mixamo rig, so it binds directly with no retargeting.
-  const shootAnim = useFBX(asset('/anims/shoot.fbx'));
+  const shootAnim = useAnimation(asset('/anims/shoot.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
 

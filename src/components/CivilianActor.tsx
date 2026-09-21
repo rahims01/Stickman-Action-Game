@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useFBX } from '@react-three/drei';
+import { useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { createRagdoll, RagdollHandle } from '../world/ragdoll';
@@ -219,12 +220,12 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
   // Repair the >4-influence weights three silently truncates on load;
   // shared geometry means this runs once no matter how many actors mount.
   normalizeSkinWeights(baseFbx);
-  const idleAnim = useFBX(asset('/anims/idle.fbx'));
-  const terrifiedAnim = useFBX(asset('/anims/terrified.fbx'));
-  const walkAnim = useFBX(asset('/anims/walk.fbx'));
-  const goofyRunAnim = useFBX(asset('/anims/goofy-running.fbx'));
-  const punchAnim = useFBX(asset('/anims/punch.fbx'));
-  const throwAnim = useFBX(asset('/anims/throw.fbx'));
+  const idleAnim = useAnimation(asset('/anims/idle.fbx'));
+  const terrifiedAnim = useAnimation(asset('/anims/terrified.fbx'));
+  const walkAnim = useAnimation(asset('/anims/walk.fbx'));
+  const goofyRunAnim = useAnimation(asset('/anims/goofy-running.fbx'));
+  const punchAnim = useAnimation(asset('/anims/punch.fbx'));
+  const throwAnim = useAnimation(asset('/anims/throw.fbx'));
 
   const model = useMemo(() => SkeletonUtils.clone(baseFbx) as THREE.Group, [baseFbx]);
   const tint = useMemo(

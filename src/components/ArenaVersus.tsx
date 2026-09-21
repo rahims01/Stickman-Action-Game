@@ -3,6 +3,7 @@ import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useFBX } from '@react-three/drei';
+import { ClipSource, useAnimation } from '../world/animations';
 import * as THREE from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { useInputs } from '../hooks/useInputs';
@@ -71,10 +72,10 @@ type VAnim = 'idle' | 'walk' | 'punch' | 'kick';
  */
 const useRig = () => {
   const base = useFBX(asset('/anims/stickman_base.fbx'));
-  const idle = useFBX(asset('/anims/fighting-idle.fbx'));
-  const walk = useFBX(asset('/anims/run.fbx'));
-  const punch = useFBX(asset('/anims/punch.fbx'));
-  const kick = useFBX(asset('/anims/kick.fbx'));
+  const idle = useAnimation(asset('/anims/fighting-idle.fbx'));
+  const walk = useAnimation(asset('/anims/run.fbx'));
+  const punch = useAnimation(asset('/anims/punch.fbx'));
+  const kick = useAnimation(asset('/anims/kick.fbx'));
   normalizeSkinWeights(base);
   return useMemo(() => ({ base, idle, walk, punch, kick }), [base, idle, walk, punch, kick]);
 };
@@ -124,7 +125,7 @@ const useStickman = (
   useEffect(() => {
     const mx = new THREE.AnimationMixer(model);
     mixer.current = mx;
-    const bind = (name: VAnim, src: THREE.Group, loop: boolean) => {
+    const bind = (name: VAnim, src: ClipSource, loop: boolean) => {
       const clip = src.animations[0];
       if (!clip) return;
       const c = clip.clone();
