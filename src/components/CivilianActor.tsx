@@ -12,21 +12,15 @@ import { circleCollidesWithBox, resolveCircleVsBoxes } from '../world/collision'
 import { AABB, MAP_RADIUS, MedkitDef } from '../world/worldObjects';
 import {
   ARMY_CHASE_SPEED,
-  ARMY_FOCUS_DISTANCE_WEIGHT,
   ARMY_RADIO_COOLDOWN,
   ARMY_RADIO_SCAN_RADIUS,
-  ARMY_SERGEANT_ATTACK_SPEED_BONUS,
-  ARMY_SERGEANT_AURA_RADIUS,
-  ARMY_SERGEANT_DAMAGE_BONUS,
   ARMY_KITE_SPEED,
   ARMY_MEDIC_ESCORT_DISTANCE,
   ARMY_MEDIC_FLEE_RADIUS,
   ARMY_MEDIC_HEAL_AMOUNT,
   ARMY_MEDIC_HEAL_COOLDOWN,
   ARMY_MEDIC_HEAL_RADIUS,
-  ARMY_MEDIC_SEEK_RADIUS,
   ARMY_RANGED_MIN_RANGE,
-  ARMY_SIGHT_RADIUS,
   BODYGUARD_FOLLOW_DISTANCE,
   CIVILIAN_FLEE_SPEED,
   CIVILIAN_FOLLOW_DISTANCE,
@@ -40,19 +34,27 @@ import {
   ENEMY_RANGED_ATTACK_RANGE,
   EnemyState,
   HUMANOID_RADIUS,
-  ARMY_MEDKIT_SEEK_FRACTION,
-  ARMY_MEDKIT_URGENT_FRACTION,
-  ARMY_SUPPORT_LOW_FRACTION,
-  ARMY_SUPPORT_RADIUS,
-  ARMY_SUPPORT_RESPONDERS,
   BODYGUARD_PROTECT_DISTANCE,
   CIVILIAN_SEEK_ARMY_RADIUS,
   CivilianState,
   MEDKIT_PICKUP_RADIUS,
   armyLoadoutFor,
-  isArmyRole,
-  isFightingArmyRole
 } from '../world/gameState';
+import {
+  findComradeInTrouble,
+  fleeHeadingFrom,
+  findGuardian,
+  hasSergeantNearby,
+  medicEscort,
+  medicIntent,
+  nearestEnemy as nearestLivingEnemy,
+  pickFocusTarget,
+  pickMedicPatient,
+  sergeantBonus,
+  shouldCallReinforcements,
+  supportResponders,
+  wantsMedkit as soldierWantsMedkit
+} from '../world/armyAi';
 import { ProjectilesHandle } from './Projectiles';
 import {
   StatusEffects,
@@ -465,61 +467,22 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       const healthFrac = maxHealth > 0 ? health / maxHealth : 1;
       const loadout = armyLoadoutFor(role);
 
-      // A sergeant in earshot is worth more than any single upgrade: the men
-      // around him hit harder, swing faster, and stop breaking off to look
-      // for a medkit while there is still shooting.
-      let sergeantNear = false;
-      if (role !== 'armySergeant') {
-        for (const c of civilians) {
-          if (c.health <= 0 || c.role !== 'armySergeant') continue;
-          if (Math.hypot(c.position.x - pos.x, c.position.z - pos.z) <= ARMY_SERGEANT_AURA_RADIUS) {
-            sergeantNear = true;
-            break;
-          }
-        }
-      }
-      const meleeDamage = loadout.meleeDamage * (sergeantNear ? 1 + ARMY_SERGEANT_DAMAGE_BONUS : 1);
-      const rangedDamage = loadout.rangedDamage * (sergeantNear ? 1 + ARMY_SERGEANT_DAMAGE_BONUS : 1);
-      const cooldownScale = sergeantNear ? 1 / (1 + ARMY_SERGEANT_ATTACK_SPEED_BONUS) : 1;
+      // See armyAi.ts for what each of these rules is for; they are pure
+      // functions of the roster, which is what makes them testable.
+      const sergeantNear = hasSergeantNearby({ id, role, x: pos.x, z: pos.z }, civilians);
+      const bonus = sergeantBonus(sergeantNear);
+      const meleeDamage = loadout.meleeDamage * bonus.damageMultiplier;
+      const rangedDamage = loadout.rangedDamage * bonus.damageMultiplier;
+      const cooldownScale = bonus.cooldownScale;
 
-      let nearestEnemy: EnemyState | undefined;
-      let nearestEnemyDist = Infinity;
-      for (const e of enemies) {
-        if (e.health <= 0) continue;
-        const d = Math.hypot(e.position.x - pos.x, e.position.z - pos.z);
-        if (d < nearestEnemyDist) {
-          nearestEnemyDist = d;
-          nearestEnemy = e;
-        }
-      }
-      // Focus fire. Not "the nearest one" - the one the squad should be
-      // finishing. Every soldier scores the same way from the same roster, so
-      // they converge on the same target without any coordination between
-      // them, and wounded enemies actually die instead of five men each
-      // chipping a different full-health body.
-      let sightedEnemy: EnemyState | undefined;
-      {
-        let bestScore = Infinity;
-        for (const e of enemies) {
-          if (e.health <= 0) continue;
-          const d = Math.hypot(e.position.x - pos.x, e.position.z - pos.z);
-          if (d > ARMY_SIGHT_RADIUS) continue;
-          const score = e.health + d * ARMY_FOCUS_DISTANCE_WEIGHT;
-          if (score < bestScore) {
-            bestScore = score;
-            sightedEnemy = e;
-          }
-        }
-      }
+      const nearest = nearestLivingEnemy(pos, enemies);
+      const nearestEnemy = nearest.enemy;
+      const nearestEnemyDist = nearest.distance;
+      const sightedEnemy = pickFocusTarget(pos, enemies);
 
       // Self-preservation. Critically hurt, he breaks off mid-fight to heal;
       // merely hurt, he waits until the shooting stops.
-      const wantsMedkit =
-        medkits.length > 0 &&
-        (healthFrac < ARMY_MEDKIT_URGENT_FRACTION ||
-          // With a sergeant on the field nobody wanders off mid-firefight to
-          // look for a medkit; you go when the shooting stops.
-          (healthFrac < ARMY_MEDKIT_SEEK_FRACTION && !sightedEnemy && !sergeantNear));
+      const wantsMedkit = soldierWantsMedkit(healthFrac, medkits.length, !!sightedEnemy, sergeantNear);
 
       let medkitGoal: { id: string; x: number; z: number } | undefined;
       if (wantsMedkit) {
@@ -541,17 +504,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       if (role === 'armyRadio') {
         radioCooldownRef.current = Math.max(0, radioCooldownRef.current - actualDelta);
         if (radioCooldownRef.current <= 0 && sightedEnemy) {
-          let hostiles = 0;
-          for (const e of enemies) {
-            if (e.health <= 0) continue;
-            if (Math.hypot(e.position.x - pos.x, e.position.z - pos.z) <= ARMY_RADIO_SCAN_RADIUS) hostiles++;
-          }
-          let friends = 0;
-          for (const c of civilians) {
-            if (c.health <= 0 || !isFightingArmyRole(c.role)) continue;
-            if (Math.hypot(c.position.x - pos.x, c.position.z - pos.z) <= ARMY_RADIO_SCAN_RADIUS) friends++;
-          }
-          if (hostiles > friends) {
+          if (shouldCallReinforcements(pos, enemies, civilians, ARMY_RADIO_SCAN_RADIUS)) {
             radioCooldownRef.current = ARMY_RADIO_COOLDOWN;
             onCallReinforcements?.(pos.clone());
             for (let i = 0; i < 10; i++) {
@@ -579,50 +532,38 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
         const playerDist = Math.hypot(playerPos.x - pos.x, playerPos.z - pos.z);
         const playerHostile = aggroValid && !!aggroPlayer && playerDist <= ARMY_MEDIC_FLEE_RADIUS;
         const enemyClose = !!nearestEnemy && nearestEnemyDist <= ARMY_MEDIC_FLEE_RADIUS;
+        const patient = pickMedicPatient({ id, x: pos.x, z: pos.z }, civilians);
+        const escort = medicEscort({ id, x: pos.x, z: pos.z }, civilians);
+
+        // The priority order itself lives in armyAi so it can be tested.
+        const intent = medicIntent({
+          healthFraction: healthFrac,
+          nearestEnemyDistance: nearestEnemyDist,
+          playerHostile: aggroValid && !!aggroPlayer,
+          playerDistance: playerDist,
+          hasPatient: !!patient,
+          hasMedkit: !!medkitGoal,
+          hasEscort: !!escort
+        });
 
         let goal: { x: number; z: number } | null = null;
         let speed = CIVILIAN_WALK_SPEED;
         let anim: CivilianAnimState = 'walk';
 
-        if (enemyClose || playerHostile) {
-          // Straight away from the average of whatever is too close, so
-          // breaking off from one man does not run him into another.
-          let ax = 0;
-          let az = 0;
-          let n = 0;
-          if (enemyClose && nearestEnemy) {
-            ax += nearestEnemy.position.x;
-            az += nearestEnemy.position.z;
-            n++;
+        if (intent === 'flee') {
+          // Away from the AVERAGE of whatever is too close, so breaking off
+          // from one man does not run him straight into another.
+          const threats: { x: number; z: number }[] = [];
+          if (enemyClose && nearestEnemy) threats.push({ x: nearestEnemy.position.x, z: nearestEnemy.position.z });
+          if (playerHostile) threats.push({ x: playerPos.x, z: playerPos.z });
+          const heading = fleeHeadingFrom(pos, threats);
+          if (heading !== null) {
+            goal = { x: pos.x + Math.sin(heading), z: pos.z + Math.cos(heading) };
+            speed = CIVILIAN_FLEE_SPEED;
+            anim = 'flee';
           }
-          if (playerHostile) {
-            ax += playerPos.x;
-            az += playerPos.z;
-            n++;
-          }
-          goal = { x: pos.x + (pos.x - ax / n), z: pos.z + (pos.z - az / n) };
-          speed = CIVILIAN_FLEE_SPEED;
-          anim = 'flee';
         } else {
-          // Worst hurt first, with distance only as a tiebreak - he crosses
-          // the field for someone on their last legs rather than topping up
-          // whoever happens to be nearest.
-          let patient: CivilianState | undefined;
-          let bestScore = Infinity;
-          for (const c of civilians) {
-            if (c.id === id || c.health <= 0 || !isArmyRole(c.role)) continue;
-            const frac = c.maxHealth > 0 ? c.health / c.maxHealth : 1;
-            if (frac >= 1) continue;
-            const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
-            if (d > ARMY_MEDIC_SEEK_RADIUS) continue;
-            const score = frac + d / (ARMY_MEDIC_SEEK_RADIUS * 8);
-            if (score < bestScore) {
-              bestScore = score;
-              patient = c;
-            }
-          }
-
-          if (patient) {
+          if (intent === 'treat' && patient) {
             const d = Math.hypot(patient.position.x - pos.x, patient.position.z - pos.z);
             if (d <= ARMY_MEDIC_HEAL_RADIUS) {
               anim = 'idle';
@@ -641,7 +582,7 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
               goal = { x: patient.position.x, z: patient.position.z };
               speed = ARMY_CHASE_SPEED;
             }
-          } else if (medkitGoal) {
+          } else if (intent === 'selfHeal' && medkitGoal) {
             // Nobody to treat and hurt himself: he uses a medkit like anyone.
             const d = Math.hypot(medkitGoal.x - pos.x, medkitGoal.z - pos.z);
             if (d < MEDKIT_PICKUP_RADIUS) onTakeMedkit?.(id, medkitGoal.id);
@@ -653,16 +594,9 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
           } else {
             // Idle: stay behind the nearest fighting soldier. A medic alone
             // in the open is just a civilian in a white coat.
-            let escort: CivilianState | undefined;
-            let escortDist = Infinity;
-            for (const c of civilians) {
-              if (c.id === id || c.health <= 0 || !isFightingArmyRole(c.role)) continue;
-              const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
-              if (d < escortDist) {
-                escortDist = d;
-                escort = c;
-              }
-            }
+            const escortDist = escort
+              ? Math.hypot(escort.position.x - pos.x, escort.position.z - pos.z)
+              : Infinity;
             if (escort && escortDist > ARMY_MEDIC_ESCORT_DISTANCE) {
               goal = { x: escort.position.x, z: escort.position.z };
               speed = CIVILIAN_WALK_SPEED * 1.6;
@@ -693,34 +627,9 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
       // without any coordination between them.
       let supportGoal: THREE.Vector3 | undefined;
       if (!sightedEnemy && !medkitGoal) {
-        let inTrouble: CivilianState | undefined;
-        let troubleDist = Infinity;
-        for (const c of civilians) {
-          if (c.id === id || c.health <= 0 || !isArmyRole(c.role)) continue;
-          if (c.health / c.maxHealth >= ARMY_SUPPORT_LOW_FRACTION) continue;
-          const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
-          if (d <= ARMY_SUPPORT_RADIUS && d < troubleDist) {
-            troubleDist = d;
-            inTrouble = c;
-          }
-        }
-        if (inTrouble) {
-          const victim = inTrouble;
-          const responders = civilians
-            .filter(
-              (c) =>
-                c.health > 0 &&
-                isFightingArmyRole(c.role) &&
-                c.id !== victim.id &&
-                c.health / c.maxHealth >= ARMY_SUPPORT_LOW_FRACTION
-            )
-            .sort(
-              (a, b) =>
-                Math.hypot(a.position.x - victim.position.x, a.position.z - victim.position.z) -
-                Math.hypot(b.position.x - victim.position.x, b.position.z - victim.position.z)
-            )
-            .slice(0, ARMY_SUPPORT_RESPONDERS);
-          if (responders.some((r) => r.id === id)) supportGoal = victim.position;
+        const victim = findComradeInTrouble({ id, x: pos.x, z: pos.z }, civilians);
+        if (victim && supportResponders(victim, civilians).some((r) => r.id === id)) {
+          supportGoal = victim.position;
         }
       }
 
@@ -915,21 +824,11 @@ export const CivilianActor: React.FC<CivilianActorProps> = ({
     // If there's a soldier within sight, head for him instead of blindly
     // fleeing — which also drags the pursuer into the soldier's line of fire,
     // and army men engage on sight, so the rescue happens on its own.
-    let guardian: CivilianState | undefined;
-    if (threatened) {
-      let guardDist = Infinity;
-      for (const c of civilians) {
-        // A medic is no protection - he runs from the same thing you do.
-        if (c.health <= 0 || !isFightingArmyRole(c.role)) continue;
-        const d = Math.hypot(c.position.x - pos.x, c.position.z - pos.z);
-        if (d <= CIVILIAN_SEEK_ARMY_RADIUS && d < guardDist) {
-          guardDist = d;
-          guardian = c;
-        }
-      }
-      // Already tucked in behind him — stop running and stand your ground.
-      if (guardian && guardDist < CIVILIAN_FOLLOW_DISTANCE) guardian = undefined;
-    }
+    // A medic is no protection - he runs from the same thing you do - and
+    // once you are tucked in behind a soldier you stop running.
+    const guardian = threatened
+      ? findGuardian(pos, civilians, CIVILIAN_SEEK_ARMY_RADIUS, CIVILIAN_FOLLOW_DISTANCE)
+      : undefined;
 
     const prevX = pos.x;
     const prevZ = pos.z;

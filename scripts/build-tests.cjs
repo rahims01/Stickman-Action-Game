@@ -30,7 +30,7 @@ try {
       'src/world/collision.ts src/world/gameState.ts src/world/arenaRooms.ts ' +
       'src/world/enemyConfig.ts src/world/arenaVersus.ts src/world/pitchBrawl.ts ' +
       'src/world/cupRun.ts src/world/statusEffects.ts src/world/worldObjects.ts ' +
-      'src/world/ragdoll.ts src/world/physicsWorld.ts src/world/characterMorph.ts ' +
+      'src/world/ragdoll.ts src/world/physicsWorld.ts src/world/characterMorph.ts src/world/armyAi.ts ' +
       'src/world/skinWeights.ts',
     { cwd: ROOT, stdio: 'pipe' }
   );
@@ -55,7 +55,7 @@ const required = [
   'world/collision.js', 'world/gameState.js', 'world/arenaRooms.js',
   'world/enemyConfig.js', 'world/arenaVersus.js', 'world/pitchBrawl.js',
   'world/cupRun.js', 'world/statusEffects.js', 'world/worldObjects.js',
-  'world/ragdoll.js', 'world/physicsWorld.js', 'world/characterMorph.js'
+  'world/ragdoll.js', 'world/physicsWorld.js', 'world/characterMorph.js', 'world/armyAi.js'
 ];
 const missing = required.filter((f) => !fs.existsSync(path.join(OUT, f)));
 if (missing.length) {
