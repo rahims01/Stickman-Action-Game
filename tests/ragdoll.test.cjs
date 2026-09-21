@@ -327,3 +327,66 @@ test('the shared world is configured as the ragdolls expect', () => {
   assert.ok(statics.length > 0, 'ground and walls');
   for (const b of statics) assert.strictEqual(b.collisionFilterGroup, PHYSICS_GROUP_WORLD);
 });
+
+test('elbows and knees hold under a shove straight against the bend', () => {
+  // The brutal case: a sustained 0.6 impulse per step on each extremity,
+  // aimed the wrong way. The one-way cone alone lost knees to ~100 degrees
+  // here, because a cone is soft and its jacobian collapses once the bend
+  // passes (180 - aperture). The post-step clamp is the hard backstop.
+  const r = spawn();
+  const q = new THREE.Quaternion();
+  const quatOf = (b) => q.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
+  const fwd = new THREE.Vector3(0, 0, 1);      // toes point +Z on this rig
+
+  const hinges = [
+    { parent: 'LeftArm', child: 'LeftForeArm', tip: 'LeftHand', knee: false },
+    { parent: 'RightArm', child: 'RightForeArm', tip: 'RightHand', knee: false },
+    { parent: 'LeftUpLeg', child: 'LeftLeg', tip: 'LeftFoot', knee: true },
+    { parent: 'RightUpLeg', child: 'RightLeg', tip: 'RightFoot', knee: true }
+  ];
+  for (const h of hinges) {
+    const f = fwd.clone();
+    if (h.knee) f.negate();
+    // Captured in the PARENT's frame, so a tumbling corpse does not turn
+    // natural flexion into apparent hyperextension.
+    h.flexLocal = f.applyQuaternion(quatOf(r.bodies[idx(h.parent)]).invert()).normalize();
+    h.worst = 0;
+    h.maxFlex = 0;
+  }
+
+  const u = new THREE.Vector3();
+  const v = new THREE.Vector3();
+  const perp = new THREE.Vector3();
+  const flexNow = new THREE.Vector3();
+  for (let step = 0; step < 150; step++) {
+    for (const h of hinges) {
+      flexNow.copy(h.flexLocal).applyQuaternion(quatOf(r.bodies[idx(h.parent)]));
+      r.bodies[idx(h.tip)].applyImpulse(
+        new CANNON.Vec3(-flexNow.x * 0.6, -flexNow.y * 0.6, -flexNow.z * 0.6)
+      );
+    }
+    stepPhysicsWorld(1 / 60);
+    r.ragdoll.update();
+    if (!physicsWorld.bodies.includes(r.bodies[0])) break;   // retired
+    for (const h of hinges) {
+      const parent = r.bodies[idx(h.parent)];
+      u.set(0, 1, 0).applyQuaternion(quatOf(parent));
+      v.set(0, 1, 0).applyQuaternion(quatOf(r.bodies[idx(h.child)]));
+      const cos = Math.max(-1, Math.min(1, u.dot(v)));
+      const bend = Math.acos(cos) * 180 / Math.PI;
+      perp.copy(v).addScaledVector(u, -cos);
+      flexNow.copy(h.flexLocal).applyQuaternion(quatOf(parent));
+      if (perp.dot(flexNow) < 0) h.worst = Math.max(h.worst, bend);
+      else h.maxFlex = Math.max(h.maxFlex, bend);
+    }
+  }
+
+  for (const h of hinges) {
+    assert.ok(h.worst < 15,
+      h.child + ' bent ' + h.worst.toFixed(1) + ' degrees BACKWARDS');
+  }
+  // And it must still be a joint, not a weld.
+  assert.ok(hinges.some((h) => h.maxFlex > 20),
+    'nothing flexed naturally: ' + hinges.map((h) => h.maxFlex.toFixed(0)).join('/'));
+  r.dispose();
+});

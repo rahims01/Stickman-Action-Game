@@ -62,6 +62,23 @@ const RAGDOLL_BONES: RagdollBoneSpec[] = [
   { name: 'mixamorigRightFoot', parent: 'mixamorigRightLeg', orientRef: 'mixamorigRightToeBase', mass: 1, halfExtents: [0.05, 0.04, 0.1], swingAngle: 35 * DEG, twistAngle: 20 * DEG }
 ];
 
+/**
+ * A hinge the solver is allowed to get wrong, and the post-step clamp fixes.
+ *
+ * The one-way cone stops hyperextension under ordinary loads, but a cone is
+ * a soft constraint: a hard enough shove drives the joint past it in a single
+ * step, and once the bend passes (180 - aperture) the cone's own jacobian -
+ * cross(axisA, axisB) - collapses toward zero and it can no longer push back
+ * at all. That is the failure mode where a knee ends up folded the wrong way
+ * and stays there. The clamp is the hard backstop underneath the soft one.
+ */
+interface HingeRuntime {
+  parent: CANNON.Body;
+  child: CANNON.Body;
+  /** Flexion direction in the PARENT body's frame, captured at activation. */
+  flexLocal: THREE.Vector3;
+}
+
 interface BoneRuntime {
   bone: THREE.Object3D;
   body: CANNON.Body;
@@ -105,6 +122,13 @@ const SETTLE_ANGULAR_SPEED = 2;
  * and discards the accumulator it could not catch up on. world.stepnumber
  * increments once per internalStep and is the only honest simulated clock.
  */
+/**
+ * How far past straight an elbow or knee may sit before the clamp acts. A few
+ * degrees of give keeps it from firing continuously at exactly straight,
+ * which would read as a joint that buzzes.
+ */
+const HINGE_BACKWARD_TOLERANCE = 6 * DEG;
+
 const SETTLE_QUIET_STEPS = 20;
 const SETTLE_STEP_LIMIT = 180;
 
@@ -155,6 +179,7 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
   let settled = false;
   const settledPose: { bone: THREE.Object3D; position: THREE.Vector3; quaternion: THREE.Quaternion }[] = [];
   let hipsBone: THREE.Object3D | null = null;
+  let hinges: HingeRuntime[] = [];
   let activatedAtStep = 0;
   /** stepnumber at which the current run of quiet began; -1 when not quiet. */
   let quietSinceStep = -1;
@@ -317,6 +342,7 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
       });
       world.addConstraint(hyperLimit);
       constraints.push(hyperLimit);
+      hinges.push({ parent: parentBody, child: childBody, flexLocal: flexLocal.clone() });
     });
 
     if (impulse) {
@@ -351,7 +377,66 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
     runtimes.forEach(({ body }) => world.removeBody(body));
     constraints = [];
     runtimes = [];
+    hinges = [];
     settled = true;
+  };
+
+  // Scratch for the hinge clamp; this runs per hinge per frame.
+  const hingeUp = new THREE.Vector3();
+  const hingeDown = new THREE.Vector3();
+  const hingePerp = new THREE.Vector3();
+  const hingeFlex = new THREE.Vector3();
+  const hingeAxis = new THREE.Vector3();
+  const hingeQuat = new THREE.Quaternion();
+  const hingeCorrection = new THREE.Quaternion();
+  const hingeSpin = new THREE.Vector3();
+
+  /**
+   * Hard backstop for elbows and knees.
+   *
+   * Measures each hinge's bend against the flexion direction it was built
+   * with, and if the joint has been driven backwards past the tolerance,
+   * rotates the child body back to the tolerance and removes the angular
+   * velocity that was pushing it there. Dissipative - it only ever takes
+   * energy out - so it cannot make the ragdoll livelier.
+   *
+   * Everything is measured in the PARENT's frame, so a corpse lying on its
+   * back is judged exactly like one standing up.
+   */
+  const clampHinges = () => {
+    for (const hinge of hinges) {
+      hingeQuat.set(hinge.parent.quaternion.x, hinge.parent.quaternion.y, hinge.parent.quaternion.z, hinge.parent.quaternion.w);
+      hingeUp.set(0, 1, 0).applyQuaternion(hingeQuat);
+      hingeFlex.copy(hinge.flexLocal).applyQuaternion(hingeQuat);
+
+      hingeQuat.set(hinge.child.quaternion.x, hinge.child.quaternion.y, hinge.child.quaternion.z, hinge.child.quaternion.w);
+      hingeDown.set(0, 1, 0).applyQuaternion(hingeQuat);
+
+      const cos = Math.max(-1, Math.min(1, hingeUp.dot(hingeDown)));
+      const bend = Math.acos(cos);
+      if (bend <= HINGE_BACKWARD_TOLERANCE) continue;
+
+      // Which side of straight is it on? Only the wrong side is policed.
+      hingePerp.copy(hingeDown).addScaledVector(hingeUp, -cos);
+      if (hingePerp.dot(hingeFlex) >= 0) continue;
+
+      // Rotate the child back toward straight, leaving it at the tolerance.
+      hingeAxis.crossVectors(hingeDown, hingeUp);
+      if (hingeAxis.lengthSq() < 1e-12) continue;
+      hingeAxis.normalize();
+      hingeCorrection.setFromAxisAngle(hingeAxis, bend - HINGE_BACKWARD_TOLERANCE);
+      hingeQuat.premultiply(hingeCorrection);
+      hinge.child.quaternion.set(hingeQuat.x, hingeQuat.y, hingeQuat.z, hingeQuat.w);
+
+      // And take out the spin that drove it there, so it does not simply
+      // come straight back next step.
+      hingeSpin.set(hinge.child.angularVelocity.x, hinge.child.angularVelocity.y, hinge.child.angularVelocity.z);
+      const along = hingeSpin.dot(hingeAxis);
+      if (along < 0) {
+        hingeSpin.addScaledVector(hingeAxis, -along);
+        hinge.child.angularVelocity.set(hingeSpin.x, hingeSpin.y, hingeSpin.z);
+      }
+    }
   };
 
   const update = () => {
@@ -369,6 +454,7 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
     }
 
     clampVelocities();
+    clampHinges();
     runtimes.forEach(({ bone, body, offsetPos, offsetQuat }) => {
       bodyQuatThree.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w);
 
@@ -433,6 +519,7 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
     runtimes.forEach(({ body }) => world.removeBody(body));
     constraints = [];
     runtimes = [];
+    hinges = [];
     settledPose.length = 0;
     settled = false;
     hipsBone = null;
