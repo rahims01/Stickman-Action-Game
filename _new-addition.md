@@ -51,7 +51,7 @@ Two squad-wide changes matter as much as the roles do:
 `🪖 FULL SQUAD` spawns all seven in formation — shield up front, sergeant and two troopers on the line, rifleman off the shoulder, medic and radio behind.
 
 **Still to build for this faction:**
-- **Army in normal mode** — the whole neutral faction (civilians, army, VIP, bodyguards) currently only exists via the four sandbox spawn actions; `civilians` starts as `[]` in every mode. Wiring civilians into world generation with a chance of an army escort would put all of this AI in front of players who never open the sandbox. The single highest-value item on this list.
+*(The faction is deliberately SANDBOX-ONLY. `civilians` starts as `[]` in every mode and only the sandbox spawn actions populate it. Confirmed by the user 2026-09-21 — do not propose wiring it into normal-mode world generation.)*
 - **Flag Bearer** — plants a destructible standard; soldiers near it heal slowly and never flee. A sergeant you can shoot.
 - **Army Sniper** — very long range, slow fire, always kites; targets the *highest-health* enemy rather than the nearest, so the squad's focus fire and his priorities deliberately disagree.
 - **Grenadier** — `isBomber` AOE that hurts his own side too, so he refuses to throw into a melee his squad is already in.

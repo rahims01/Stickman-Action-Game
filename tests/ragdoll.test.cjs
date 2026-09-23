@@ -7,6 +7,7 @@
  * retirement clock that scaled inversely with framerate.
  */
 const test = require('node:test');
+const { beforeEach } = require('node:test');
 const assert = require('node:assert');
 const THREE = require('three');
 const CANNON = require('cannon-es');
@@ -21,6 +22,15 @@ const BONE_ORDER = [
   'LeftUpLeg', 'LeftLeg', 'LeftFoot', 'RightUpLeg', 'RightLeg', 'RightFoot'
 ];
 const idx = (n) => BONE_ORDER.indexOf(n);
+
+// Leave the shared world exactly as it was found, whatever a test did to it.
+const WORLD_BASELINE = physicsWorld.bodies.length;
+beforeEach(() => {
+  while (physicsWorld.constraints.length) physicsWorld.removeConstraint(physicsWorld.constraints[0]);
+  while (physicsWorld.bodies.length > WORLD_BASELINE) {
+    physicsWorld.removeBody(physicsWorld.bodies[physicsWorld.bodies.length - 1]);
+  }
+});
 
 /** A structurally real mixamo rig at the game's 0.012 root scale. */
 const buildRig = () => {
@@ -102,35 +112,51 @@ test('activate is idempotent and dispose is clean', () => {
   r.dispose();                    // double dispose must not throw
 });
 
-test('limb collision: jointed pairs never, everything else on the body yes', () => {
+test('neighbouring geometry never collides; distant limbs do', () => {
   const r = spawn();
   const bp = physicsWorld.broadphase;
-  const jointed = new Set();
-  r.constraints.forEach((c) => {
-    jointed.add(c.bodyA.id + ':' + c.bodyB.id);
-    jointed.add(c.bodyB.id + ':' + c.bodyA.id);
-  });
+  const collides = (a, b) => bp.needBroadphaseCollision(r.bodies[idx(a)], r.bodies[idx(b)]);
 
+  // Jointed pairs share a joint and overlap there by construction.
   let jointedColliding = 0;
-  let others = 0;
-  let othersColliding = 0;
+  for (const c of r.constraints) if (bp.needBroadphaseCollision(c.bodyA, c.bodyB)) jointedColliding++;
+  assert.strictEqual(jointedColliding, 0, 'a jointed pair must never generate contacts');
+
+  // Within two joints is neighbouring geometry, not a collision. Every one
+  // of these was measured pressing continuously before it was excluded -
+  // Spine1/Shoulder alone shoved the shoulders out of the torso every step.
+  for (const [a, b] of [
+    ['Spine1', 'LeftShoulder'], ['Spine1', 'RightShoulder'],
+    ['Spine', 'LeftUpLeg'], ['Spine', 'RightUpLeg'],
+    ['LeftShoulder', 'Neck'], ['RightShoulder', 'Neck'],
+    ['LeftUpLeg', 'RightUpLeg'], ['Spine', 'Spine2'],
+    ['Hips', 'Spine1'], ['LeftArm', 'Spine2']
+  ]) {
+    assert.ok(!collides(a, b), a + ' and ' + b + ' are neighbours and must not collide');
+  }
+
+  // Far enough apart to be a genuine limb landing on the body. This is the
+  // whole point of the feature: an arm across the chest has to land on it.
+  for (const [a, b] of [
+    ['LeftHand', 'Spine2'], ['LeftHand', 'Spine1'], ['LeftHand', 'Hips'],
+    ['LeftForeArm', 'Spine1'], ['RightHand', 'RightUpLeg'],
+    ['LeftHand', 'RightHand'], ['LeftFoot', 'RightFoot'], ['Head', 'LeftHand']
+  ]) {
+    assert.ok(collides(a, b), a + ' must be able to land on ' + b);
+  }
+
+  // And the exclusions must stay a minority - if most of the body stopped
+  // colliding we would be back to limbs sinking through each other.
+  let pairs = 0;
+  let colliding = 0;
   for (let i = 0; i < r.bodies.length; i++) {
     for (let j = i + 1; j < r.bodies.length; j++) {
-      const a = r.bodies[i];
-      const b = r.bodies[j];
-      const collides = bp.needBroadphaseCollision(a, b);
-      if (jointed.has(a.id + ':' + b.id)) { if (collides) jointedColliding++; }
-      else { others++; if (collides) othersColliding++; }
+      pairs++;
+      if (bp.needBroadphaseCollision(r.bodies[i], r.bodies[j])) colliding++;
     }
   }
-  assert.strictEqual(jointedColliding, 0, 'jointed boxes overlap by construction and must not fight');
-  assert.strictEqual(othersColliding, others, 'an arm must be able to rest ON the chest');
-  assert.strictEqual(others, 171);
-
-  // Named cases, because "171 of 171" hides which ones matter.
-  assert.ok(bp.needBroadphaseCollision(r.bodies[idx('LeftHand')], r.bodies[idx('Spine2')]), 'hand vs chest');
-  assert.ok(bp.needBroadphaseCollision(r.bodies[idx('LeftForeArm')], r.bodies[idx('Spine1')]), 'forearm vs torso');
-  assert.ok(bp.needBroadphaseCollision(r.bodies[idx('RightHand')], r.bodies[idx('RightUpLeg')]), 'hand vs own thigh');
+  assert.ok(colliding / pairs > 0.6,
+    'only ' + colliding + ' of ' + pairs + ' limb pairs can collide');
   r.dispose();
 });
 
@@ -238,7 +264,9 @@ test('a settled corpse hands its physics back', () => {
   const frozen = bone.quaternion.clone();
   bone.quaternion.set(0, 0, 0, 1);          // pretend the mixer ran
   r.ragdoll.update();
-  assert.ok(bone.quaternion.angleTo(frozen) < 1e-9, 'retired pose was not re-applied');
+  // 1e-5 rad is 0.0006 degrees - far below visible, and well above the
+  // 1e-8 round-trip noise of composing and decomposing a quaternion.
+  assert.ok(bone.quaternion.angleTo(frozen) < 1e-5, 'retired pose was not re-applied');
   r.dispose();
 });
 

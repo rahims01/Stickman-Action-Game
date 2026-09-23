@@ -1,4 +1,6 @@
 import { asset } from '../world/assetPath';
+// Crit is rolled once per landed hit, independent of target type.
+import { rollCritDamage } from '../world/damage';
 import { normalizeSkinWeights } from '../world/skinWeights';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -13,7 +15,6 @@ const PLATFORM_COLLIDERS = INITIAL_PLATFORM_DEFS.map(getPlatformCollider);
 import {
   BIG_HIT_REACTION_LOCK_DURATION,
   CivilianState,
-  CRIT_DAMAGE_MULTIPLIER,
   DASH_COOLDOWN,
   DASH_DURATION,
   DASH_SPEED,
@@ -202,14 +203,6 @@ const ONE_SHOT_STATES: AnimationState[] = [
   'hit',
   'bigHit'
 ];
-
-// Crit is rolled once per landed hit, independent of target type (crate,
-// dummy, or enemy) - rounded to 1 decimal place so the floating damage
-// number never shows an ugly long fraction.
-const rollCritDamage = (baseDamage: number, critChance: number): number => {
-  if (Math.random() >= critChance) return baseDamage;
-  return Math.round(baseDamage * CRIT_DAMAGE_MULTIPLIER * 10) / 10;
-};
 
 const ROOT_BONE_NAME = 'mixamorigHips';
 

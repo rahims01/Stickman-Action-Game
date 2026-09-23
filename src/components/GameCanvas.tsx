@@ -1,3 +1,4 @@
+import { resolveHitDamage, roundDamage } from '../world/damage';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -1050,12 +1051,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     return st;
   };
 
-  // Round damage to nearest integer, but keep exact .5 values (e.g. 1.5, 2.5).
-  const roundDamage = (v: number): number => {
-    const frac = v - Math.floor(v);
-    return frac === 0.5 ? v : Math.round(v);
-  };
-
   // Settings-gated wrappers - every blood burst / floating damage number in
   // the game routes through these so the accessibility toggles apply globally.
   const spawnBlood = (position: THREE.Vector3, damageScale?: number, color?: string) => {
@@ -2103,18 +2098,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
-    // Shield bearers block frontal punch attacks - kicks bypass the shield.
-    let effectiveDamage = roundDamage(rawDamage);
-    if (ENEMY_CONFIGS[target.type as EnemyType]?.hasShield && attackKind === 'punch') {
-      effectiveDamage = Math.round(rawDamage * 0.2);
-    }
-    // A landed hit never reads as 0. The arena starts you on a blank stat
-    // sheet, so a bare punch is PUNCH_DAMAGE (1) - and 1 x 0.2 rounds to
-    // nothing, which showed up in play as "my damage turned to 0". Chip
-    // damage is the intent of a shield, not immunity.
-    if (rawDamage > 0 && effectiveDamage < 1) effectiveDamage = 1;
-    // One-Hit modifier: any real hit is lethal, shields included.
-    if (modifiers.oneHit && rawDamage > 0) effectiveDamage = target.health;
+    // Shield reduction, rounding, the never-zero floor and the One-Hit
+    // modifier all live in resolveHitDamage - see damage.ts for why the
+    // floor matters.
+    const effectiveDamage = resolveHitDamage({
+      rawDamage,
+      hasShield: ENEMY_CONFIGS[target.type as EnemyType]?.hasShield,
+      attackKind,
+      oneHit: modifiers.oneHit,
+      targetHealth: target.health
+    });
 
     const hitPos = new THREE.Vector3(target.position.x, target.position.y + 1.3, target.position.z);
     spawnDamageNumber(hitPos, effectiveDamage, playerTint);

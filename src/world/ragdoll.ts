@@ -129,6 +129,14 @@ const SETTLE_ANGULAR_SPEED = 2;
  */
 const HINGE_BACKWARD_TOLERANCE = 6 * DEG;
 
+/**
+ * How far apart two bones must be in the skeleton before their boxes are
+ * allowed to collide. Two hops covers parent/child, siblings and
+ * grandparent/grandchild - all of them neighbouring geometry rather than a
+ * limb genuinely landing on another.
+ */
+const HINGE_IGNORE_HOPS = 2;
+
 const SETTLE_QUIET_STEPS = 20;
 const SETTLE_STEP_LIMIT = 180;
 
@@ -252,19 +260,73 @@ export const createRagdoll = (model: THREE.Object3D, world: CANNON.World): Ragdo
       runtimes.push({ bone, body, offsetPos, offsetQuat });
     });
 
-    // Jointed pairs overlap by construction and must never generate contacts.
-    // Everything else on this body is free to collide with everything else on
-    // it, which is what lets an arm come to rest ON the chest.
+    // Which limb pairs must never generate contacts.
+    //
+    // Being JOINTED is the obvious case, and assuming it was the ONLY case
+    // left a real bug in. A shoulder's parent is Spine2, so Spine1/Shoulder
+    // is not a jointed pair - yet those two boxes sit inside each other in
+    // every pose, and left colliding they shoved the shoulders out of the
+    // torso on every step. The same goes for the two thighs, for a thigh
+    // against the spine, and for a shoulder against the neck: all of them
+    // anatomically adjacent, none of them directly jointed, and between them
+    // they accounted for most of 1183 limb-vs-limb contact frames in a
+    // single fall.
+    //
+    // Two rules, both about boxes that were never meant to touch:
+    //
+    //  - GRAPH DISTANCE. Anything within two joints of each other in the
+    //    skeleton is neighbouring geometry, not a collision. That covers
+    //    parent/child, siblings, and grandparent/grandchild.
+    //  - OVERLAP AT BIRTH. Anything already interpenetrating in the pose the
+    //    ragdoll was built from, whatever the graph says.
+    //
+    // Everything further apart stays free to collide, which is what lets an
+    // arm come to rest ON the chest - a hand is four joints from the torso.
     const ignores = new Map<CANNON.Body, Set<number>>();
     runtimes.forEach(({ body }) => ignores.set(body, new Set<number>()));
+    const excludePair = (a: CANNON.Body, b: CANNON.Body) => {
+      ignores.get(a)?.add(b.id);
+      ignores.get(b)?.add(a.id);
+    };
+
+    // Adjacency over the bones that actually have bodies.
+    const neighbours = new Map<string, string[]>();
     RAGDOLL_BONES.forEach((spec) => {
-      if (!spec.parent) return;
-      const childBody = bodiesByName.get(spec.name);
-      const parentBody = bodiesByName.get(spec.parent);
-      if (!childBody || !parentBody) return;
-      ignores.get(childBody)?.add(parentBody.id);
-      ignores.get(parentBody)?.add(childBody.id);
+      if (!spec.parent || !bodiesByName.has(spec.name) || !bodiesByName.has(spec.parent)) return;
+      if (!neighbours.has(spec.name)) neighbours.set(spec.name, []);
+      if (!neighbours.has(spec.parent)) neighbours.set(spec.parent, []);
+      neighbours.get(spec.name)!.push(spec.parent);
+      neighbours.get(spec.parent)!.push(spec.name);
     });
+    RAGDOLL_BONES.forEach((spec) => {
+      const from = bodiesByName.get(spec.name);
+      if (!from) return;
+      // Breadth-first to depth 2; anything reached is neighbouring geometry.
+      let frontier = [spec.name];
+      const seen = new Set([spec.name]);
+      for (let hop = 0; hop < HINGE_IGNORE_HOPS; hop++) {
+        const next: string[] = [];
+        for (const name of frontier) {
+          for (const adjacent of neighbours.get(name) ?? []) {
+            if (seen.has(adjacent)) continue;
+            seen.add(adjacent);
+            next.push(adjacent);
+            const other = bodiesByName.get(adjacent);
+            if (other) excludePair(from, other);
+          }
+        }
+        frontier = next;
+      }
+    });
+
+    runtimes.forEach(({ body }) => body.updateAABB());
+    for (let i = 0; i < runtimes.length; i++) {
+      for (let j = i + 1; j < runtimes.length; j++) {
+        const a = runtimes[i].body;
+        const b = runtimes[j].body;
+        if (a.aabb.overlaps(b.aabb)) excludePair(a, b);
+      }
+    }
     runtimes.forEach(({ body }) => registerRagdollBody(body, instanceId, ignores.get(body) ?? new Set()));
 
     const upAxisLocal = new THREE.Vector3(0, 1, 0);
