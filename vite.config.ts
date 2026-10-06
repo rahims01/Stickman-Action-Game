@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Cloudflare Pages serves the build at the root of its domain
-// (<project>.pages.dev, or a custom domain), so base is '/' everywhere and
-// dev and production agree for the first time.
+// Cloudflare Workers Static Assets serves the build at the root of its domain
+// (<name>.<subdomain>.workers.dev, or a custom domain), so base is '/'
+// everywhere and dev and production agree for the first time.
 //
 // This used to be '/Stickman-Action-Game/' for GitHub Pages, which is why
 // src/world/assetPath.ts exists: Vite rewrites asset URLs in HTML and CSS but

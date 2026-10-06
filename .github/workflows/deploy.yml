@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -6,17 +6,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Cloudflare's own Git integration can build this repo without any
-    # secrets, in which case this job has nothing to do. It only runs when
-    # the two secrets are present, so a repo without them is not nagged by a
-    # red cross on every push.
-    if: ${{ github.repository_owner != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,25 +24,32 @@ jobs:
       - run: npm ci
 
       # tsc is the real correctness gate for this project - there is no
-      # eslint - so a type error must fail the deploy, not ship.
+      # working eslint - so a type error must fail the deploy, not ship.
       - run: npm run build
 
       - run: npm test
 
       - name: Check for Cloudflare credentials
         id: creds
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No Cloudflare secrets set - skipping deploy. Either add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, or let Cloudflare's Git integration build the repo instead."
+            echo "::notice::No Cloudflare secrets set - skipping deploy. Either add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, or let Cloudflare's Git integration deploy the repo instead."
           fi
 
-      - name: Deploy to Cloudflare Pages
+      # `deploy`, not `pages deploy`: wrangler.toml is a Workers Static Assets
+      # config. The two are not interchangeable - see the notes in that file.
+      # wrangler.toml's own [build] hook re-runs the build here, which is
+      # cheap and guarantees the uploaded dist matches this commit.
+      - name: Deploy to Cloudflare Workers
         if: steps.creds.outputs.present == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=stickman-action-game --branch=${{ github.ref_name }}
+          command: deploy

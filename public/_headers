@@ -1,4 +1,9 @@
-# Cloudflare Pages reads this from the root of the build output.
+# Cloudflare reads this from the root of the build output (dist/).
+#
+# Workers Static Assets honours the same _headers format Pages used, and
+# wrangler keeps the file out of the upload - it sits in wrangler's default
+# ignore list alongside _redirects and .assetsignore - so it configures the
+# edge without ever being servable at /_headers.
 #
 # Two different caching stories, because the project has two kinds of asset:
 

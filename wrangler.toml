@@ -1,8 +1,35 @@
-# Cloudflare Pages project config.
+# Cloudflare config for a static site with no server code.
 #
-# pages_build_output_dir is all a Pages project needs from wrangler: it tells
-# both `wrangler pages deploy` and the dashboard's Git integration where the
-# built site lands. The build itself is `npm run build` (tsc, then vite).
+# This is a Workers Static Assets project, NOT a Pages project. The two are
+# easy to confuse - they share the _headers/_redirects format and both end up
+# serving a folder - but they are deployed by different commands:
+#
+#   wrangler deploy        -> Workers (this file)
+#   wrangler pages deploy  -> Pages   (wants pages_build_output_dir instead)
+#
+# Pointing `wrangler deploy` at a Pages-shaped config is what produced
+# "Missing entry-point to Worker script or to assets directory": wrangler
+# looks for `main` or `[assets]`, and `pages_build_output_dir` means nothing
+# to it, so it concludes there is nothing to deploy. Cloudflare's dashboard
+# now steers new static sites to Workers, so Workers is also the direction of
+# travel - new Pages projects are discouraged.
 name = "stickman-action-game"
-pages_build_output_dir = "dist"
 compatibility_date = "2026-10-06"
+
+# Deliberately no `main`. With assets and no Worker script, Cloudflare serves
+# the directory straight from its edge cache and no Worker is ever invoked -
+# no CPU time, no per-request cost.
+
+# Cloudflare's Git integration runs `npx wrangler deploy`, and this hook runs
+# first, so the deploy is self-contained: no build command has to be set in
+# the dashboard, and dist can never be stale or missing at upload time.
+[build]
+command = "npm run build"
+
+[assets]
+directory = "./dist"
+# "none" is the honest answer for this app: there is no client-side router, so
+# a path that does not exist really is missing. Single-page-application mode
+# would answer /anims/typo.json with index.html, turning a clean 404 into a
+# confusing JSON parse error inside the game.
+not_found_handling = "none"

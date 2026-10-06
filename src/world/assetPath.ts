@@ -3,8 +3,8 @@
 // textures) has to be prefixed by hand or it 404s wherever the app isn't
 // served from the domain root.
 //
-// Cloudflare Pages serves this project at the root of its domain, so base is
-// '/' and this is currently a no-op. It is kept because the cost is one string
+// Cloudflare serves this project at the root of its domain, so base is '/'
+// and this is currently a no-op. It is kept because the cost is one string
 // concat and the alternative is finding all 80-odd call sites again the next
 // time the app moves somewhere with a path prefix — which is exactly what
 // happened under GitHub Pages, where base was '/Stickman-Action-Game/'.
