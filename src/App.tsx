@@ -924,7 +924,7 @@ export const App: React.FC = () => {
               Soccer, and their game carries the reciprocal link back here. */}
           <button
             className="menu-btn"
-            onClick={() => window.open('https://rahims01.github.io/Ultimate-Soccer/', '_blank', 'noopener')}
+            onClick={() => window.open('https://ultimate-soccer.godzillaeditzyay.workers.dev/', '_blank', 'noopener')}
             title="Our crossover partner — the Striker and the footballs in this game come from theirs"
             style={{ padding: '10px 26px', fontSize: '14px', fontWeight: 600, borderRadius: '10px', border: '1px solid rgba(0,200,120,0.45)', background: 'rgba(0,200,120,0.08)', color: '#5ce6a8', cursor: 'pointer', letterSpacing: '2px' }}
           >
