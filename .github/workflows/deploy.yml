@@ -1,41 +1,53 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    # Cloudflare's own Git integration can build this repo without any
+    # secrets, in which case this job has nothing to do. It only runs when
+    # the two secrets are present, so a repo without them is not nagged by a
+    # red cross on every push.
+    if: ${{ github.repository_owner != '' }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Vite 8 wants a modern Node; 22 is the current LTS.
+          node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - run: npm ci
+
+      # tsc is the real correctness gate for this project - there is no
+      # eslint - so a type error must fail the deploy, not ship.
+      - run: npm run build
+
+      - run: npm test
+
+      - name: Check for Cloudflare credentials
+        id: creds
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No Cloudflare secrets set - skipping deploy. Either add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, or let Cloudflare's Git integration build the repo instead."
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.creds.outputs.present == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=stickman-action-game --branch=${{ github.ref_name }}

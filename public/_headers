@@ -1,0 +1,21 @@
+# Cloudflare Pages reads this from the root of the build output.
+#
+# Two different caching stories, because the project has two kinds of asset:
+
+# Vite's own output is content-hashed, so it can never go stale.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The animation clips and the rig are NOT hashed - they keep stable names and
+# scripts/build-anim-clips.cjs can rewrite them - so they revalidate rather
+# than being pinned for a year. A day of browser cache with a long shared
+# cache behind it keeps repeat visits cheap without risking a stale clip.
+/anims/*
+  Cache-Control: public, max-age=86400, s-maxage=604800, must-revalidate
+
+/textures/*
+  Cache-Control: public, max-age=86400, s-maxage=604800, must-revalidate
+
+# The encyclopedia is a hand-maintained page; let it revalidate every time.
+/encyclopedia/*
+  Cache-Control: public, max-age=0, must-revalidate

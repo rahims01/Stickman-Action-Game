@@ -1,0 +1,8 @@
+# Cloudflare Pages project config.
+#
+# pages_build_output_dir is all a Pages project needs from wrangler: it tells
+# both `wrangler pages deploy` and the dashboard's Git integration where the
+# built site lands. The build itself is `npm run build` (tsc, then vite).
+name = "stickman-action-game"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-06"
